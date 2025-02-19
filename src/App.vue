@@ -13,31 +13,37 @@ function returnEmptyTree() {
   const emptyTree = new Tree(0, {
     attr: "trigger",
     isActive: true,
-    title: "點擊設定事件",
+    title: "點擊設定事件1",
     data: {}, //自訂的節點的資料
     depth: 1, //節點深度(必要)
   });
   emptyTree.insert(0, 1, {
     attr: "response",
-    title: "點擊設定事件",
+    title: "點擊設定事件2",
     data: {},
     depth: 2,
   });
   emptyTree.insert(0, 2, {
     attr: "response",
-    title: "點擊設定事件",
+    title: "點擊設定事件3",
     data: {},
     depth: 2,
   });
+  // emptyTree.insert(0, 3, {
+  //   attr: "response",
+  //   title: "點擊設定事件3",
+  //   data: {},
+  //   depth: 2,
+  // });
   emptyTree.insert(1, 3, {
-    attr: "response",
-    title: "點擊設定事件",
+    attr: "action",
+    title: "action",
     data: {},
     depth: 3,
   });
   emptyTree.insert(1, 4, {
     attr: "response",
-    title: "點擊設定事件",
+    title: "點擊設定事件5",
     data: {},
     depth: 3,
   });

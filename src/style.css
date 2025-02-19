@@ -20,6 +20,12 @@
   /* treechart相關變數 */
   --color-parent-node:#ffbc40;
   --color-parent-node-active:#52034e;
+  --color-node-disabled:#c4c4c4;
+  --color-node-line:#9fbaca;
+  --tree-line-height: 50px; /* 樹狀圖 連結線的高度 */
+
+  --icon-url-add-more-block:"assets/icons/add-icon.svg"
+  /* treechart相關變數 */
 }
 
 a {

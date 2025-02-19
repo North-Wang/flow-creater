@@ -1,6 +1,5 @@
 <template>
   <table
-    class="script-table"
     :class="[
       props.currentKey > 1 ? 'active_bg' : '',
       props.preview ? 'preview' : '',
@@ -9,10 +8,10 @@
   >
     <!--主要父元素-->
     <slot name="parent-node">
-      <tr class="" :class="[isConnectLineTransForm ? 'transform' : '']">
+      <tr class="" :class="[isConnectLineTransForm ? '' : '']">
         <td
           colspan="8"
-          class="parent-node"
+          class="parent-node parent"
           :class="[
             props.data?.value?.disabledConnect ? 'hidden-line' : '',
             child_counts === 1 || !child_counts ? 'one-line' : 'two-line',
@@ -37,9 +36,7 @@
             <!--方塊顯示圖片-->
             <div
               :class="[
-                !hasTitleData
-                  ? 'default-block'
-                  : `${hasTitleData}-icon event-icon`,
+                !hasTitleData ? 'no-icon' : `${hasTitleData}-icon event-icon`,
               ]"
               v-if="isNotTemplateOrWetherBlock"
             ></div>
@@ -115,15 +112,16 @@
     <!--子節點-->
     <slot name="child-node">
       <tr
-        class="script-child-row"
+        class="wrapper-child-node"
         v-if="props.data?.children"
-        :class="[isConnectLineTransForm ? 'transform' : '']"
+        :class="[isConnectLineTransForm ? '' : '']"
       >
         <td
-          class="child card script-child-col relative flex justify-center"
+          class="card child-node"
+          style="position: relative"
           v-for="item in props.data?.children"
           :key="item.key"
-          :class="[props.data?.children?.length === 1 ? 'one-child' : 'child']"
+          :class="[props.data?.children?.length === 1 ? 'one-child' : '']"
         >
           <tree-chart
             :data="item"
@@ -145,12 +143,13 @@
 </template>
 
 <script setup>
-import { ref, computed, defineProps } from "vue";
+import { ref, computed, defineProps, defineEmits } from "vue";
 // import treeChart from "@/TreeChart.vue";
 import SvgEye from "./icon/SvgEye.vue";
 import SvgTrash from "./icon/SvgTrash.vue";
 import SvgPen from "./icon/SvgPen.vue";
 
+const emits = defineEmits(["getCurrentKey"]);
 const props = defineProps({
   /**
    * 樹狀圖資料.
@@ -198,6 +197,12 @@ const props = defineProps({
     default: false,
   },
 });
+
+// 劇本樹狀圖root id
+const root_id = ref("");
+function getCurrentKeyEmit(id, block_type) {
+  emits("getCurrentKey", id, block_type);
+}
 const plusButtonLists = computed(() => {
   if (props.data?.value?.data?.plusButtonList) {
     return props.data?.value?.data?.plusButtonList.map((item, index) => {
@@ -233,11 +238,21 @@ const showTemplateHover = ref(false);
 const showToolBarHover = ref(false);
 
 /**
- * 顯示劇本節點資料
+ * 顯示劇本節點資料 (需要更改)
  * @return {string}  劇本節點資料字串
  */
 const hasTitleData = computed(() => {
-  return true;
+  /**
+   * @const {string} template_name 模板名稱
+   * @const {string} action_name 觸發事件觸發時間
+   * @const {string} event_name 回應事件觸發時間
+   * @const {string} is_yes 是否節點文字
+   * */
+  const template_name = props.data?.value?.data?.template?.template_name || "";
+  const action_name = props.data?.value?.data?.action || "";
+  const event_name = props.data?.value?.data?.event?.split("-")?.[0] || "";
+  const is_yes = props.data?.value?.data?.is_ye;
+  return template_name || action_name || event_name || is_yes;
 });
 
 // 判斷是否為樣板方塊/是否方塊 (需要更改)
@@ -248,6 +263,7 @@ const isNotTemplateOrWetherBlock = computed(() => {
 
 // 是否顯示+號按鈕
 const isShowPlusButton = computed(() => {
+  return true;
   const hasTemplateButtonList = templatePlusButtonList.value?.length > 0;
   console.log(
     "plus按鈕資訊",
@@ -285,21 +301,46 @@ function handleShowToolBar(blockData) {
    */
   console.log("blockData", blockData);
   if (!blockData.data) {
-    console.warn("沒有");
+    console.warn("沒有父節點的資料");
+    showToolBarHover.value = false;
     return;
   }
-  // const hasSettingData = blockData.data.event || blockData.data.action;
-  // if (hasSettingData) {
-  //   showToolBarHover.value = true;
-  // }
+  const hasSettingData = blockData.data.event || blockData.data.action;
+  if (hasSettingData) {
+    showToolBarHover.value = true;
+  }
 }
 </script>
 
 <style scoped lang="scss">
+table {
+  width: 100%;
+  caption-side: bottom;
+  border-collapse: collapse;
+}
+.preview > * {
+  pointer-events: none;
+}
 .parent-node {
-  display: flex;
-  justify-content: center;
+  place-items: center;
+  display: block;
   position: relative;
+  .no-icon {
+    width: 50px;
+    height: 50px;
+    border: 2px dashed white;
+    margin: auto;
+    border-radius: 5px;
+  }
+  .event-icon {
+    width: 50px;
+    height: 40px;
+    margin-top: 5px;
+    background-repeat: no-repeat;
+    background-size: contain;
+    background-position: center;
+    align-self: center;
+  }
   &.one-line {
     &::before {
       content: "";
@@ -307,31 +348,122 @@ function handleShowToolBar(blockData) {
       left: 50%;
       bottom: -30px;
       height: 30px;
-      border-left: 2px solid rgb(159, 186, 202);
+      border-left: 2px solid var(--color-node-line);
       transform: translate3d(-1px, 0, 0);
     }
   }
   &.two-line {
+    //右側的垂直線
     &::before {
       content: "";
       position: absolute;
-      left: 55%;
+      left: 51%;
       bottom: -48px;
-      height: 50px;
-      border-left: 2px solid rgb(159, 186, 202);
+      height: var(--tree-line-height);
+      border-left: 2px solid var(--color-node-line);
       transform: translate3d(-1px, 0, 0);
+      border-radius: 0 0 0 5px;
+      width: 5px;
     }
+    //左側的垂直線
     &::after {
       content: "";
       position: absolute;
-      left: 45%;
+      right: 51%;
       bottom: -48px;
-      height: 50px;
-      border-left: 2px solid rgb(159, 186, 202);
+      height: var(--tree-line-height);
+      border-right: 2px solid var(--color-node-line);
       transform: translate3d(-1px, 0, 0);
+      border-radius: 0 0 5px 0;
+      width: 5px;
     }
   }
 }
+.wrapper-child-node {
+  display: flex;
+  margin-top: 32px;
+  .child-node {
+    width: 50%;
+    place-items: center center;
+    position: relative;
+    // 共有的垂直線
+    &::before {
+      content: "";
+      position: absolute;
+      left: 50%;
+      bottom: 100%;
+      height: 15px;
+      border-left: 2px solid var(--color-node-line);
+      transform: translate3d(-1px, 0, 0);
+    }
+
+    // 共有的水平線
+    &::after {
+      content: "";
+      position: absolute;
+      left: 0;
+      right: 0;
+      top: 15px;
+      border-top: 2px solid var(--color-node-line);
+    }
+
+    // 隱藏第一個與最後一個節點的垂直線
+    &:first-child::before,
+    &:last-child::before {
+      display: none;
+    }
+
+    &.one-child {
+      width: 100%;
+
+      &::before {
+        content: "";
+        position: absolute;
+        left: 50%;
+        bottom: 100%;
+        height: 15px;
+        border-left: 2px solid var(--color-node-line);
+        transform: translate3d(-1px, 0, 0);
+      }
+
+      // &::after {
+      //   border-color: transparent var(--color-node-line) transparent transparent;
+      //   border-radius: 0;
+      //   height: 55px;
+      //   left: 10%;
+      //   right: 50%;
+      //   top: -30%;
+      //   transform: translate3d(0.9px, -5px, 0);
+      // }
+    }
+
+    //左側 連接父節點的水平線
+    &:first-child::after {
+      // left: 54%;
+      left: 57.5%;
+      height: 30px;
+      border: 2px solid;
+      border-color: var(--color-node-line) transparent transparent
+        var(--color-node-line);
+      border-radius: 6px 0 0 0;
+      transform: translate3d(1px, 0, 0);
+      width: 40%;
+    }
+
+    //右側 連接父節點的水平線
+    &:last-child::after {
+      left: 2%;
+      height: 30px;
+      border: 2px solid;
+      border-color: var(--color-node-line) var(--color-node-line) transparent
+        transparent;
+      border-radius: 0 6px 0 0;
+      transform: translate3d(1px, 0, 0);
+      width: 40%;
+    }
+  }
+}
+
 // 末端節點去除連接線
 .hidden-line {
   &::after,
@@ -346,7 +478,7 @@ function handleShowToolBar(blockData) {
   z-index: 5;
 }
 
-//節點
+//節點(父、子)
 .card {
   width: 120px;
   height: 120px;
@@ -360,10 +492,120 @@ function handleShowToolBar(blockData) {
   justify-content: center;
   align-items: center;
   border-radius: 10px;
-  // background-color: transparent;
+  background-color: transparent;
   &.block-disable {
     opacity: 0.5;
     pointer-events: none;
+    background-color: var(--color-node-disabled);
   }
 }
+// Email / SMS模板
+.template-title {
+  width: 100%;
+  height: 30px;
+  padding: 10px;
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+  position: relative;
+  top: -10px;
+}
+.tool-bar {
+  position: absolute;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-start;
+  align-items: center;
+  width: 40%;
+  height: 100%;
+  top: 0;
+  right: -35%;
+  z-index: 2;
+  > * {
+    all: unset;
+    margin-bottom: 5px;
+    opacity: 0.5;
+    &:hover {
+      opacity: 1;
+    }
+  }
+}
+// 「+」號
+.add-more-block-btn {
+  width: 200px;
+  height: 50px;
+  all: unset;
+  position: absolute;
+  bottom: -72%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  z-index: 5;
+  &::after {
+    content: url("");
+    width: 18px;
+    height: 18px;
+    border-radius: 50px;
+    background-color: white;
+    background-image: var(--icon-url-add-more-block);
+    display: inline-flex;
+    top: 2px;
+  }
+  .template-name {
+    width: 100%;
+    padding: 4px 8px;
+    font-size: 14px;
+    overflow: hidden;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+    &:hover {
+      background-color: #71afb6;
+      color: white;
+      border-radius: 4px;
+    }
+  }
+}
+
+/* 事件方塊顏色 (需去除) */
+.trigger {
+  background-color: #baabe7;
+}
+.response {
+  background-color: #96c5d7;
+}
+.action {
+  background-color: #f9c357;
+}
+.preview-btn,
+.edit-btn,
+.delete-btn {
+  width: 24px;
+  height: 24px;
+  border-radius: 47px;
+  margin-bottom: 5px;
+}
+@mixin vertical-line($left, $bottom, $height) {
+  content: "";
+  position: absolute;
+  left: $left;
+  bottom: $bottom;
+  height: $height;
+  border-left: 2px solid #9fbaca;
+  transform: translate3d(-1px, 0, 0);
+}
+// .parent {
+//   &.two-line {
+//     &::after {
+//       @include vertical-line(45%, -48px, 50px);
+//     }
+//     &::before {
+//       @include vertical-line(55%, -48px, 50px);
+//     }
+//   }
+
+//   &.one-line {
+//     &::before {
+//       @include vertical-line(50%, -30px, 30px);
+//     }
+//   }
+// }
 </style>
