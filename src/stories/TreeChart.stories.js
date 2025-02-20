@@ -51,7 +51,7 @@ export default {
   tags: ['autodocs'],
   argTypes: {
     data:{control:{type:Object},  description: "樹狀圖資料", },
-    currentKey:{control:{type:Number},default:0}
+    // currentKey:{control:{type:Number},default:0}
   },
   // Use `fn` to spy on the onClick arg, which will appear in the actions panel once invoked: https://storybook.js.org/docs/essentials/actions#action-args
   args: {  },

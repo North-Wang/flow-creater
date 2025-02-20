@@ -19,7 +19,7 @@
       >
         <!--父節點的內容-->
         <div
-          class="card"
+          class=""
           @click="(event) => getCurrentKey(event)"
           @mouseenter="handleShowToolBar(props.data?.value)"
           @mouseleave="showToolBarHover = false"
@@ -30,8 +30,11 @@
             props.currentKey === props.data?.key ? 'focus-animate' : '',
             activeLayer >= depth ? '' : 'block-disable',
             props.data?.value?.disActive ? 'block-disable' : '',
+            isRectangleNode ? 'node-template' : 'card',
           ]"
-          :style="{ backgroundColor: interfaceNodeColor(parentNodeType) }"
+          :style="{
+            backgroundColor: returnInterfaceNodeColor(parentNodeType),
+          }"
         >
           <slot name="root-node">
             <!--方塊顯示圖片-->
@@ -39,12 +42,9 @@
               :class="[
                 !hasTitleData ? 'no-icon' : `${hasTitleData}-icon event-icon`,
               ]"
-              v-if="isNotTemplateOrWetherBlock"
             ></div>
             <!--方塊顯示文字title-->
-            <div
-              :class="[parentNodeType === 'template' ? 'template-title' : '']"
-            >
+            <div>
               {{ hasTitleData || props.data?.value?.title }}
             </div>
           </slot>
@@ -65,11 +65,17 @@
           </div>
         </div>
         <!--方塊顯示樣板名稱hover和新增plus按鈕-->
+
         <button
           class="add-more-block-btn"
           v-if="isShowPlusButton"
           @mouseenter="showTemplateHover = true"
           @mouseleave="showTemplateHover = false"
+          @click="
+            (parentNodeType) => {
+              emits('addNode', parentNodeType);
+            }
+          "
         >
           <img :src="iconAdd" alt="icon-add" />
           <!--樣板hover資訊-->
@@ -130,6 +136,7 @@
             :currentKey="props.currentKey"
             :activeLayer="activeLayer"
             :isShowToolbar="props.isShowToolbar"
+            :returnInterfaceNodeColor="returnInterfaceNodeColor"
             v-if="item.value"
             @clickNode="(id, block_type) => getCurrentKeyEmit(id, block_type)"
           />
@@ -143,7 +150,14 @@
 </template>
 
 <script setup>
-import { ref, computed, defineProps, defineEmits, defineExpose } from "vue";
+import {
+  ref,
+  computed,
+  defineProps,
+  defineEmits,
+  defineExpose,
+  watch,
+} from "vue";
 // import treeChart from "@/TreeChart.vue";
 import SvgEye from "./icon/SvgEye.vue";
 import SvgTrash from "./icon/SvgTrash.vue";
@@ -152,7 +166,7 @@ import { Tree } from "../utility/Tree.js";
 
 import iconAdd from "../assets/icons/add-icon.svg";
 
-const emits = defineEmits(["clickNode"]);
+const emits = defineEmits(["clickNode", "addNode"]);
 const props = defineProps({
   /**
    * 樹狀圖資料.
@@ -198,19 +212,40 @@ const props = defineProps({
     default: false,
   },
   /**
-   * 節點的種類與對應的背景色
+   * 根據節點種類，回傳對應的背景色
    */
-  interfaceNodeColor: {
+  returnInterfaceNodeColor: {
     type: Function,
     default: (type) => {
-      switch (type) {
-        case "trigger":
-          return "#BAABE7";
-        default:
-          return "#F9c357";
-      }
+      // switch (type) {
+      //   case "trigger":
+      //     return "#BAABE7";
+      //   case "action":
+      //     return "#A0DA8B";
+      //   default:
+      //     return "#F9c357";
+      // }
     },
   },
+  //規則：那些節點的attr是長方形節點
+  ruleRectangleNode: {
+    type: Array,
+    default: () => ["template", "wether_yes", "wether_no"],
+  },
+  //規則：那些節點的attr可以再新增節點
+  ruleHasAddNode: {
+    type: Array,
+    default: () => [],
+  },
+  //規則：那些節點的attr要顯示icon
+  ruleHasNodeIcon: {
+    type: Array,
+    default: () => [],
+  },
+});
+
+const isRectangleNode = computed(() => {
+  return props.ruleRectangleNode.includes(parentNodeType.value) || false;
 });
 
 // 劇本樹狀圖root id
@@ -269,7 +304,7 @@ const isConnectLineTransForm = computed(() => {
  * @const {number} child_counts 子節點數目
  */
 const child_counts = computed(() => props.data?.children?.length || 0);
-const showTemplateHover = ref(false);
+const showTemplateHover = ref(true);
 
 //顯示父節點側邊的工具列
 const showToolBarHover = ref(false);
@@ -292,15 +327,9 @@ const hasTitleData = computed(() => {
   return template_name || action_name || event_name || is_yes;
 });
 
-// 判斷是否為樣板方塊/是否方塊 (需要更改)
-const isNotTemplateOrWetherBlock = computed(() => {
-  const includeBlockAttr = ["template", "wether_no", "wether_yes"];
-  return !includeBlockAttr.includes(props.data?.value?.attr);
-});
-
 // 是否顯示+號按鈕
 const isShowPlusButton = computed(() => {
-  return true;
+  return props.ruleHasAddNode.includes(parentNodeType.value);
   const hasTemplateButtonList = templatePlusButtonList.value?.length > 0;
   console.log(
     "plus按鈕資訊",
@@ -574,16 +603,24 @@ table {
     background-color: var(--color-node-disabled);
   }
 }
-// Email / SMS模板
-.template-title {
-  width: 100%;
-  height: 30px;
-  padding: 10px;
-  overflow: hidden;
-  white-space: nowrap;
-  text-overflow: ellipsis;
-  position: relative;
-  top: -10px;
+// 模板類型的設定 Email / SMS模板
+.node-template {
+  color: #71afb6;
+  width: var(--width-card);
+  height: 40px;
+  line-height: 0px;
+  padding: 18px 7px;
+  border-radius: 10px;
+  .title {
+    width: 100%;
+    height: 30px;
+    padding: 10px;
+    overflow: hidden;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+    position: relative;
+    top: -10px;
+  }
 }
 .tool-bar {
   position: absolute;
@@ -638,33 +675,5 @@ table {
       border-radius: 4px;
     }
   }
-}
-
-/* 事件方塊顏色 (需去除) */
-.trigger {
-  background-color: #baabe7;
-}
-.response {
-  background-color: #96c5d7;
-}
-.action {
-  background-color: #f9c357;
-}
-.preview-btn,
-.edit-btn,
-.delete-btn {
-  width: 24px;
-  height: 24px;
-  border-radius: 47px;
-  margin-bottom: 5px;
-}
-@mixin vertical-line($left, $bottom, $height) {
-  content: "";
-  position: absolute;
-  left: $left;
-  bottom: $bottom;
-  height: $height;
-  border-left: 2px solid #9fbaca;
-  transform: translate3d(-1px, 0, 0);
 }
 </style>

@@ -23,7 +23,7 @@
   --color-node-disabled:#c4c4c4;
   --color-node-line:#9fbaca;
   --tree-line-height: 50px; /* 樹狀圖 連結線的高度 */
-  --width-card:120px;
+  --width-card:120px; /* 所有節點的寬度 */
 
   --icon-url-add-more-block:"../assets/icons/add-icon.svg"
   /* treechart相關變數 */

@@ -7,6 +7,7 @@
     @dragover="(e) => e.preventDefault()"
   >
     工具列
+    <slot name="content"></slot>
   </aside>
 </template>
 

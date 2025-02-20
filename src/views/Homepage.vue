@@ -57,6 +57,9 @@ function handleClickNode(id, block_type) {
   mainTreeActiveStep.value = Number(id);
   console.log("外層偵測到click 節點, 類型是:" + block_type);
 }
+function handleAddNode(data) {
+  console.log("想要新增節點", data);
+}
 
 onMounted(() => {
   emptyTree.value = returnEmptyTree();
@@ -79,10 +82,11 @@ provide("mainTreeStep", mainTreeActiveStep);
         class=""
         :data="emptyTree?.root"
         :currentKey="mainTreeActiveStep"
-        :interfaceNodeColor="interfaceNodeColor"
+        :returnInterfaceNodeColor="interfaceNodeColor"
         :activeLayer="activeLayer"
         :preview="isPreviewTree"
         @clickNode="(id, block_type) => handleClickNode(id, block_type)"
+        @addNode="(node) => handleAddNode(node)"
       />
     </div>
   </div>
