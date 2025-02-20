@@ -7,32 +7,33 @@
     v-if="data && Object.keys(data).length !== 0"
   >
     <!--主要父元素-->
-    <slot name="parent-node">
-      <tr class="" :class="[isConnectLineTransForm ? '' : '']">
-        <td
-          colspan="8"
-          class="parent-node parent"
+
+    <tr class="" :class="[isConnectLineTransForm ? '' : '']">
+      <td
+        colspan="8"
+        class="parent-node"
+        :class="[
+          props.data?.value?.disabledConnect ? 'hidden-line' : '',
+          child_counts === 1 || !child_counts ? 'one-line' : 'two-line',
+        ]"
+      >
+        <!--父節點的內容-->
+        <div
+          class="card"
+          @click="(event) => getCurrentKey(event)"
+          @mouseenter="handleShowToolBar(props.data?.value)"
+          @mouseleave="showToolBarHover = false"
+          :data-id="props.data?.key"
+          :data-attr="parentNodeType"
+          :data-disable="props.data?.value?.disableFocus"
           :class="[
-            props.data?.value?.disabledConnect ? 'hidden-line' : '',
-            child_counts === 1 || !child_counts ? 'one-line' : 'two-line',
+            props.currentKey === props.data?.key ? 'focus-animate' : '',
+            activeLayer >= depth ? '' : 'block-disable',
+            props.data?.value?.disActive ? 'block-disable' : '',
           ]"
+          :style="{ backgroundColor: interfaceNodeColor(parentNodeType) }"
         >
-          <!--劇本步驟方塊-->
-          <div
-            class="card"
-            @click="(event) => getCurrentKey(event)"
-            @mouseenter="handleShowToolBar(props.data?.value)"
-            @mouseleave="showToolBarHover = false"
-            :data-id="props.data?.key"
-            :data-attr="parentNodeType"
-            :data-disable="props.data?.value?.disableFocus"
-            :class="[
-              parentNodeType,
-              props.currentKey === props.data?.key ? 'focus-animate' : '',
-              props.activeLayer >= depth ? '' : 'block-disable',
-              props.data?.value?.disActive ? 'block-disable' : '',
-            ]"
-          >
+          <slot name="root-node">
             <!--方塊顯示圖片-->
             <div
               :class="[
@@ -46,68 +47,67 @@
             >
               {{ hasTitleData || props.data?.value?.title }}
             </div>
-            <!-- 父節點側邊的tool工具列-->
+          </slot>
+
+          <!-- 父節點側邊的tool工具列-->
+          <div class="tool-bar" v-if="props.isShowToolbar && showToolBarHover">
+            <slot name="parent-node-toolbar" :node="node">
+              <SvgEye
+                :color="toolBarIconColor"
+                @click="seeBlockPreview(props.data?.key)"
+              ></SvgEye>
+              <SvgPen :color="toolBarIconColor"></SvgPen>
+              <SvgTrash
+                :color="toolBarIconColor"
+                @click="deleteBlock(props.data?.key)"
+              ></SvgTrash>
+            </slot>
+          </div>
+        </div>
+        <!--方塊顯示樣板名稱hover和新增plus按鈕-->
+        <button
+          class="add-more-block-btn"
+          v-if="isShowPlusButton"
+          @mouseenter="showTemplateHover = true"
+          @mouseleave="showTemplateHover = false"
+        >
+          <img :src="iconAdd" alt="icon-add" />
+          <!--樣板hover資訊-->
+          <div
+            class="template-infos"
+            :class="[templatePlusButtonList?.length < 2 ? 'translate' : '']"
+            v-show="showTemplateHover"
+          >
             <div
-              class="tool-bar"
-              v-if="props.isShowToolbar && showToolBarHover"
+              class="template-name"
+              v-if="templatePlusButtonList?.[0]?.template_name"
+              @click="
+                onClickCreateNewNode(
+                  props.data.key,
+                  templatePlusButtonList?.[0],
+                  templatePlusButtonList?.[0]?.side
+                )
+              "
             >
-              <slot name="parent-node-toolbar">
-                <SvgEye
-                  :color="toolBarIconColor"
-                  @click="seeBlockPreview(props.data?.key)"
-                ></SvgEye>
-                <SvgPen :color="toolBarIconColor"></SvgPen>
-                <SvgTrash
-                  :color="toolBarIconColor"
-                  @click="deleteBlock(props.data?.key)"
-                ></SvgTrash>
-              </slot>
+              {{ templatePlusButtonList?.[0]?.template_name }}
+            </div>
+            <div
+              class="template-name"
+              v-if="templatePlusButtonList?.[1]?.template_name"
+              @click="
+                onClickCreateNewNode(
+                  props.data.key,
+                  templatePlusButtonList?.[1],
+                  templatePlusButtonList?.[1]?.side
+                )
+              "
+            >
+              {{ templatePlusButtonList?.[1]?.template_name }}
             </div>
           </div>
-          <!--方塊顯示樣板名稱hover和新增plus按鈕-->
-          <button
-            class="add-more-block-btn"
-            v-if="isShowPlusButton"
-            @mouseenter="showTemplateHover = true"
-            @mouseleave="showTemplateHover = false"
-          >
-            <!--樣板hover資訊-->
-            <div
-              class="template-infos"
-              :class="[templatePlusButtonList?.length < 2 ? 'translate' : '']"
-              v-show="showTemplateHover"
-            >
-              <div
-                class="template-name"
-                v-if="templatePlusButtonList?.[0]?.template_name"
-                @click="
-                  onClickCreateNewNode(
-                    props.data.key,
-                    templatePlusButtonList?.[0],
-                    templatePlusButtonList?.[0]?.side
-                  )
-                "
-              >
-                {{ templatePlusButtonList?.[0]?.template_name }}
-              </div>
-              <div
-                class="template-name"
-                v-if="templatePlusButtonList?.[1]?.template_name"
-                @click="
-                  onClickCreateNewNode(
-                    props.data.key,
-                    templatePlusButtonList?.[1],
-                    templatePlusButtonList?.[1]?.side
-                  )
-                "
-              >
-                {{ templatePlusButtonList?.[1]?.template_name }}
-              </div>
-            </div>
-          </button>
-        </td>
-      </tr>
-    </slot>
+        </button>
+      </td>
+    </tr>
 
     <!--子節點-->
     <slot name="child-node">
@@ -121,17 +121,17 @@
           style="position: relative"
           v-for="item in props.data?.children"
           :key="item.key"
-          :class="[props.data?.children?.length === 1 ? 'one-child' : '']"
+          :class="[
+            props.data?.children?.length === 1 ? 'one-child' : 'two-child',
+          ]"
         >
           <tree-chart
             :data="item"
             :currentKey="props.currentKey"
-            :activeLayer="props.activeLayer"
+            :activeLayer="activeLayer"
             :isShowToolbar="props.isShowToolbar"
             v-if="item.value"
-            @getCurrentKey="
-              (id, block_type) => getCurrentKeyEmit(id, block_type)
-            "
+            @clickNode="(id, block_type) => getCurrentKeyEmit(id, block_type)"
           />
         </td>
       </tr>
@@ -143,13 +143,16 @@
 </template>
 
 <script setup>
-import { ref, computed, defineProps, defineEmits } from "vue";
+import { ref, computed, defineProps, defineEmits, defineExpose } from "vue";
 // import treeChart from "@/TreeChart.vue";
 import SvgEye from "./icon/SvgEye.vue";
 import SvgTrash from "./icon/SvgTrash.vue";
 import SvgPen from "./icon/SvgPen.vue";
+import { Tree } from "../utility/Tree.js";
 
-const emits = defineEmits(["getCurrentKey"]);
+import iconAdd from "../assets/icons/add-icon.svg";
+
+const emits = defineEmits(["clickNode"]);
 const props = defineProps({
   /**
    * 樹狀圖資料.
@@ -159,9 +162,15 @@ const props = defineProps({
     type: Object,
     default: () => ({
       children: [],
-      key: 1,
-      parent: {},
-      value: {},
+      key: 0,
+      parent: null,
+      value: {
+        attr: "response",
+        isActive: true,
+        title: "點擊設定事件",
+        data: {},
+        depth: 1,
+      },
     }),
   },
   /**
@@ -169,14 +178,6 @@ const props = defineProps({
    * @const {number}
    * */
   currentKey: {
-    type: Number,
-    default: 1,
-  },
-  /**
-   * 可以顯示操作tree table的劇本層數.
-   * @const {number}
-   * */
-  activeLayer: {
     type: Number,
     default: 1,
   },
@@ -196,12 +197,48 @@ const props = defineProps({
     type: Boolean,
     default: false,
   },
+  /**
+   * 節點的種類與對應的背景色
+   */
+  interfaceNodeColor: {
+    type: Function,
+    default: (type) => {
+      switch (type) {
+        case "trigger":
+          return "#BAABE7";
+        default:
+          return "#F9c357";
+      }
+    },
+  },
 });
 
 // 劇本樹狀圖root id
 const root_id = ref("");
+// 可以顯示操作tree table的劇本層數
+const activeLayer = ref(2);
 function getCurrentKeyEmit(id, block_type) {
-  emits("getCurrentKey", id, block_type);
+  emits("clickNode", id, block_type);
+}
+
+function openNextLayer() {
+  activeLayer.value++;
+}
+// 點擊任何的節點
+function getCurrentKey(e) {
+  console.log("點擊任何的節點");
+  const target = e.target.classList.contains("card")
+    ? e.target
+    : e.target.parentNode;
+  const id = target.dataset.id;
+  const block_type = target.dataset?.attr;
+  const disableFocus = target.dataset?.disable; // 回應事件前兩個節點不能動作
+  // wether是否節點不能focus
+  const excluded_block_attr = ["wether-yes", "wether-no"];
+  if (!excluded_block_attr.includes(block_type) && !disableFocus) {
+    target.classList.add("focus-animate");
+    emits("clickNode", id, block_type);
+  }
 }
 const plusButtonLists = computed(() => {
   if (props.data?.value?.data?.plusButtonList) {
@@ -310,6 +347,31 @@ function handleShowToolBar(blockData) {
     showToolBarHover.value = true;
   }
 }
+// 點擊+號創建新節點
+function onClickCreateNewNode(id, templateData, side = "left") {
+  showTemplateHover.value = false;
+  // 產生新的空事件節點
+  const newNodeData = new Tree(0, {
+    attr: "response",
+    isActive: true,
+    title: "點擊設定事件1",
+    data: {}, //自訂的節點的資料
+    depth: 1, //節點深度(必要)
+  });
+
+  // 移除buttonList該樣板選項
+  templatePlusButtonList.value = templatePlusButtonList.value?.filter(
+    (item) => {
+      console.log("filter plus按鈕", item, "templateData", templateData);
+      return item.template_id !== templateData?.template_id;
+    }
+  );
+  createNewNode(id, newNodeData, side, templateData);
+}
+
+defineExpose({
+  openNextLayer,
+});
 </script>
 
 <style scoped lang="scss">
@@ -318,6 +380,7 @@ table {
   caption-side: bottom;
   border-collapse: collapse;
 }
+//預覽樹狀圖的時，click任何元素都不能觸發事件
 .preview > * {
   pointer-events: none;
 }
@@ -328,6 +391,7 @@ table {
   .no-icon {
     width: 50px;
     height: 50px;
+    aspect-ratio: 1;
     border: 2px dashed white;
     margin: auto;
     border-radius: 5px;
@@ -412,54 +476,65 @@ table {
     &:last-child::before {
       display: none;
     }
+    //控制<tree-chart>下一層的table
+    table {
+      position: absolute;
+      top: 43px;
+    }
+    //控制<tree-chart>下一層的table 左側
+    &:first-child {
+      > table {
+        left: 8%;
+      }
+    }
+    //控制<tree-chart>下一層的table 右側
+    &:last-child {
+      > table {
+        right: 8%;
+      }
+    }
 
+    //aaa 只有一個子節點
     &.one-child {
       width: 100%;
-
-      &::before {
+      &::after {
         content: "";
-        position: absolute;
-        left: 50%;
-        bottom: 100%;
-        height: 15px;
-        border-left: 2px solid var(--color-node-line);
-        transform: translate3d(-1px, 0, 0);
+        display: none;
+      }
+      //因為只有一個子節點，所以子節點要修正為水平置中
+      > table {
+        top: 0;
+        right: 0;
+        left: 0;
+      }
+    }
+    //aaa 有兩個子節點
+    &.two-child {
+      width: 100%;
+      //左側 連接父節點的水平線
+      &:first-child::after {
+        // left: 54%;
+        left: 57.5%;
+        height: 30px;
+        border: 2px solid;
+        border-color: var(--color-node-line) transparent transparent
+          var(--color-node-line);
+        border-radius: 6px 0 0 0;
+        transform: translate3d(1px, 0, 0);
+        width: 40%;
       }
 
-      // &::after {
-      //   border-color: transparent var(--color-node-line) transparent transparent;
-      //   border-radius: 0;
-      //   height: 55px;
-      //   left: 10%;
-      //   right: 50%;
-      //   top: -30%;
-      //   transform: translate3d(0.9px, -5px, 0);
-      // }
-    }
-
-    //左側 連接父節點的水平線
-    &:first-child::after {
-      // left: 54%;
-      left: 57.5%;
-      height: 30px;
-      border: 2px solid;
-      border-color: var(--color-node-line) transparent transparent
-        var(--color-node-line);
-      border-radius: 6px 0 0 0;
-      transform: translate3d(1px, 0, 0);
-      width: 40%;
-    }
-
-    //右側 連接父節點的水平線
-    &:last-child::after {
-      left: 2%;
-      height: 30px;
-      border: 2px solid;
-      border-color: var(--color-node-line) var(--color-node-line) transparent
-        transparent;
-      border-radius: 0 6px 0 0;
-      transform: translate3d(1px, 0, 0);
-      width: 40%;
+      //右側 連接父節點的水平線
+      &:last-child::after {
+        left: 2%;
+        height: 30px;
+        border: 2px solid;
+        border-color: var(--color-node-line) var(--color-node-line) transparent
+          transparent;
+        border-radius: 0 6px 0 0;
+        transform: translate3d(1px, 0, 0);
+        width: 40%;
+      }
     }
   }
 }
@@ -480,8 +555,8 @@ table {
 
 //節點(父、子)
 .card {
-  width: 120px;
-  height: 120px;
+  width: var(--width-card);
+  height: var(--width-card);
   padding: 10px;
   // color: #ffffff;
   background-color: var(--color-parent-node);
@@ -545,7 +620,7 @@ table {
     width: 18px;
     height: 18px;
     border-radius: 50px;
-    background-color: white;
+    // background-color: white;
     background-image: var(--icon-url-add-more-block);
     display: inline-flex;
     top: 2px;
@@ -592,20 +667,4 @@ table {
   border-left: 2px solid #9fbaca;
   transform: translate3d(-1px, 0, 0);
 }
-// .parent {
-//   &.two-line {
-//     &::after {
-//       @include vertical-line(45%, -48px, 50px);
-//     }
-//     &::before {
-//       @include vertical-line(55%, -48px, 50px);
-//     }
-//   }
-
-//   &.one-line {
-//     &::before {
-//       @include vertical-line(50%, -30px, 30px);
-//     }
-//   }
-// }
 </style>
