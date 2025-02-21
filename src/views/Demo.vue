@@ -132,8 +132,6 @@ function openModalWithType(params) {}
 onMounted(() => {
   emptyTree.value = returnEmptyTree();
 });
-
-provide("mainTreeStep", mainTreeActiveStep);
 </script>
 
 <style scoped lang="scss">

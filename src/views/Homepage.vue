@@ -2,12 +2,13 @@
 import { ref, onMounted, provide } from "vue";
 import TreeChart from "../components/TreeChart.vue";
 import { Tree } from "../utility/Tree.js";
+import { responseNodeSchema } from "../composables/HomePage/nodeSchema.js";
 import interfaceNodeColor from "../utility/interfaceNodeColor.js";
 import SideToolbar from "../components/SideToolbar.vue";
 
 const emptyTree = ref({});
 // 目前主劇本進度資料
-const mainTreeActiveStep = ref(0);
+const currentKey = ref(0);
 
 //是否預覽樹狀圖
 const isPreviewTree = ref(false);
@@ -57,39 +58,77 @@ function returnEmptyTree() {
     attr: "template",
     title: "插入模板",
     data: {},
-    depth: 3,
-    disabledConnect: true,
+    depth: 4,
+    disabledConnect: false,
   });
   emptyTree.insert(4, 6, {
     attr: "template",
     title: "插入模板",
     data: {},
-    depth: 3,
-    disabledConnect: true,
+    depth: 4,
+    disabledConnect: false,
   });
+  // emptyTree.insert(5, 7, {
+  //   attr: "response",
+  //   title: "點擊設定事件",
+  //   data: {},
+  //   depth: 5,
+  //   disabledConnect: true,
+  // });
+  // emptyTree.insert(6, 8, {
+  //   attr: "response",
+  //   title: "點擊設定事件",
+  //   data: {},
+  //   depth: 5,
+  //   disabledConnect: true,
+  // });
+  // emptyTree.insert(6, 9, {
+  //   attr: "response",
+  //   title: "點擊設定事件",
+  //   data: {},
+  //   depth: 5,
+  //   disabledConnect: true,
+  // });
   return emptyTree;
 }
 
 // 點選到主劇本方塊id、block type資料
 function handleClickNode(id, block_type) {
-  mainTreeActiveStep.value = Number(id);
+  currentKey.value = Number(id);
   console.log("外層偵測到click 節點, 類型是:" + block_type);
 }
-function handleAddNode(data) {
-  console.log("想要新增節點", data);
+/**
+ * 根據節點種類，插入對應的下一層節點
+ * @param nodeType
+ */
+function handleAddNode(id, nodeType) {
+  console.log("想要新增id:" + id + "節點, 類型：" + nodeType);
+  switch (nodeType) {
+    case "template":
+      emptyTree.value.insert(id, 9, {
+        attr: "response",
+        title: "點擊設定事件",
+        data: {},
+        depth: 5,
+        disabledConnect: true,
+      });
+      break;
+
+    default:
+      console.warn("未定義的節點種類", nodeType);
+      break;
+  }
 }
 
 onMounted(() => {
   emptyTree.value = returnEmptyTree();
 });
-
-provide("mainTreeStep", mainTreeActiveStep);
 </script>
 
 <template>
   <div class="wrapper" style="">
     <ul class="flex flex-col align-left justify-left">
-      <li>目前的key{{ mainTreeActiveStep }}</li>
+      <li>目前的key{{ currentKey }}</li>
     </ul>
     <div class="w-full flex mt-4 relative">
       <SideToolbar
@@ -98,11 +137,11 @@ provide("mainTreeStep", mainTreeActiveStep);
       <TreeChart
         class=""
         :data="emptyTree?.root"
-        :currentKey="mainTreeActiveStep"
+        :currentKey="currentKey"
         :returnInterfaceNodeColor="interfaceNodeColor"
         :preview="isPreviewTree"
         @clickNode="(id, block_type) => handleClickNode(id, block_type)"
-        @addNode="(node) => handleAddNode(node)"
+        @addNode="handleAddNode"
       />
     </div>
   </div>

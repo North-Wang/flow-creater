@@ -43,6 +43,7 @@ class Tree {
   */
   constructor(key=0, value = key) {
     this.root = new TreeNode(key, value);
+    this.lastNodeId = 0 //紀錄最後一個節點的id
   }
 
   /**
@@ -74,17 +75,19 @@ class Tree {
 
    /**
     * 樹狀圖新增節點
-    * @param {number} parentNodeKey 現在節點id(key)  
+    * @param {number} parentNodeKey 要在哪一個節點id底下新增節點
     * @param {number} key 新增節點id(key)
     * @param {Object} value 新增節點資料
     * @return {Boolean}
     */
-  insert(parentNodeKey, key, value = key) {
+  insert(parentNodeKey, key, value = {}) {
+    this.lastNodeId +=1 
+    const newNodeId = this.lastNodeId 
     for (let node of this.preOrderTraversal()) {
       
       //根據id找到目標的節點，在其children陣列新增節點
       if (node.key === parentNodeKey) {
-        node.children.push(new TreeNode(key, value, node));
+        node.children.push(new TreeNode(newNodeId, value, node));
         return true;
       }
     }
@@ -124,16 +127,16 @@ class Tree {
     * @param {number} key 點擊互動節點id(key)
     * @return {Boolean}
     */
-  activeNodeFocus(key) {
-    for(const node of this.preOrderTraversal()) {
-      if (node.key === Number(key)) {
-         node.value.isActive = true
-      }
-      else {
-        node.value.isActive = false
-      }
-    }
-  }
+  // activeNodeFocus(key) {
+  //   for(const node of this.preOrderTraversal()) {
+  //     if (node.key === Number(key)) {
+  //        node.value.isActive = true
+  //     }
+  //     else {
+  //       node.value.isActive = false
+  //     }
+  //   }
+  // }
    /**
     * 移除樹狀圖最後結點末端連接線
     * @return {Boolean}

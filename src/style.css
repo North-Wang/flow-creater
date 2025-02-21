@@ -17,18 +17,22 @@
   -moz-osx-font-smoothing: grayscale;
   -webkit-text-size-adjust: 100%;
 
-  /* treechart相關變數 */
+  /*  相關變數 */
   --color-parent-node:#ffbc40;
-  --color-parent-node-active:#52034e;
+  --color-node-active:#71afb6;
   --color-node-disabled:#c4c4c4;
   --color-node-line:#9fbaca;
   --color-node-text:white; /* 一般節點的文字顏色 */
   --color-template-node-text:#71AFB6; /* 【模板】類型的節點的文字色 */  
+  --color-toolbar-icon-trigger:#8265DA; /* 觸發事件的toolbar icon色 */  
+  --color-toolbar-icon-response:#96C5D7; /* 觸發事件的toolbar icon色 */  
+  --color-toolbar-icon-action:#F9C357; /* 觸發事件的toolbar icon色 */  
+  --color-toolbar-icon-default:#65da96; /* 觸發事件的toolbar icon色 */  
   --tree-line-height: 50px; /* 樹狀圖 連結線的高度 */
   --width-card:120px; /* 所有節點的寬度 */
 
   --icon-url-add-more-block:"../assets/icons/add-icon.svg"
-  /* treechart相關變數 */
+  /* tree chart相關變數 */
 }
 
 a {
