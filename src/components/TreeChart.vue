@@ -19,33 +19,36 @@
       >
         <!--父節點的內容-->
         <div
-          class=""
           @click="(event) => getCurrentKey(event)"
           @mouseenter="handleShowToolBar(props.data?.value)"
           @mouseleave="showToolBarHover = false"
           :data-id="props.data?.key"
           :data-attr="parentNodeType"
           :data-disable="props.data?.value?.disableFocus"
+          :data-clickable="ruleNotClick.includes(parentNodeType)"
           :class="[
             props.currentKey === props.data?.key ? 'focus-animate' : '',
             activeLayer >= depth ? '' : 'block-disable',
             props.data?.value?.disActive ? 'block-disable' : '',
-            isRectangleNode ? 'node-template' : 'card',
+            isRectangleNode ? 'rectangle-node' : 'card',
           ]"
           :style="{
             backgroundColor: returnInterfaceNodeColor(parentNodeType),
+            color:
+              parentNodeType === 'template'
+                ? 'var(--color-template-node-text)'
+                : 'var(--color-node-text)',
           }"
         >
           <slot name="root-node">
             <!--方塊顯示圖片-->
             <div
-              :class="[
-                !hasTitleData ? 'no-icon' : `${hasTitleData}-icon event-icon`,
-              ]"
+              class="node-icon"
+              v-if="ruleHasIcon.includes(parentNodeType)"
             ></div>
             <!--方塊顯示文字title-->
             <div>
-              {{ hasTitleData || props.data?.value?.title }}
+              {{ props.data?.value?.title }}
             </div>
           </slot>
 
@@ -138,7 +141,7 @@
             :isShowToolbar="props.isShowToolbar"
             :returnInterfaceNodeColor="returnInterfaceNodeColor"
             v-if="item.value"
-            @clickNode="(id, block_type) => getCurrentKeyEmit(id, block_type)"
+            @clickNode="(id, block_type) => emits('clickNode', id, block_type)"
           />
         </td>
       </tr>
@@ -238,9 +241,14 @@ const props = defineProps({
     default: () => [],
   },
   //規則：那些節點的attr要顯示icon
-  ruleHasNodeIcon: {
+  ruleHasIcon: {
     type: Array,
-    default: () => [],
+    default: () => ["trigger", "response", "action"],
+  },
+  //規則：那些節點的attr，不需觸發click事件
+  ruleNotClick: {
+    type: Array,
+    default: () => ["wether_yes", "wether_no"],
   },
 });
 
@@ -251,28 +259,43 @@ const isRectangleNode = computed(() => {
 // 劇本樹狀圖root id
 const root_id = ref("");
 // 可以顯示操作tree table的劇本層數
-const activeLayer = ref(2);
-function getCurrentKeyEmit(id, block_type) {
-  emits("clickNode", id, block_type);
-}
+const activeLayer = ref(4);
+// 目前被focus的節點
+const focusNode = ref(null);
 
 function openNextLayer() {
   activeLayer.value++;
 }
-// 點擊任何的節點
+/**
+ * 點擊任何的節點
+ * @description 根據節點種類，判斷是否觸發clickNode事件
+ * @description 外層收到clickNode事件後，能打開彈窗，設定此節點的資料
+ */
 function getCurrentKey(e) {
-  console.log("點擊任何的節點");
-  const target = e.target.classList.contains("card")
-    ? e.target
-    : e.target.parentNode;
-  const id = target.dataset.id;
-  const block_type = target.dataset?.attr;
-  const disableFocus = target.dataset?.disable; // 回應事件前兩個節點不能動作
-  // wether是否節點不能focus
-  const excluded_block_attr = ["wether-yes", "wether-no"];
-  if (!excluded_block_attr.includes(block_type) && !disableFocus) {
-    target.classList.add("focus-animate");
-    emits("clickNode", id, block_type);
+  try {
+    /**
+     * @type {HTMLElement} 會被加上focus外框的元素
+     */
+    let target = null;
+    if (e.target?.dataset?.clickable) {
+      target = e.target;
+    } else {
+      //往父層找正方形節點or長方形節點
+      target = e.target.closest("[data-clickable]") || null;
+    }
+    if (!target) throw Error("沒抓到要focus的目標元素");
+
+    //判斷此節點是否可觸發click事件
+    const id = target.dataset.id;
+    const block_type = target.dataset?.attr;
+    const isDisableFocus = target.dataset?.disable; //是否元素被添加disable屬性
+
+    if (!props.ruleNotClick.includes(block_type) && !isDisableFocus) {
+      focusNode.value = target.classList.add("focus-animate");
+      emits("clickNode", id, block_type);
+    }
+  } catch (error) {
+    console.warn("click 節點 有誤", error);
   }
 }
 const plusButtonLists = computed(() => {
@@ -419,15 +442,15 @@ table {
   position: relative;
   .no-icon {
     width: 50px;
-    height: 50px;
     aspect-ratio: 1;
     border: 2px dashed white;
     margin: auto;
     border-radius: 5px;
   }
-  .event-icon {
+  .node-icon {
     width: 50px;
-    height: 40px;
+    aspect-ratio: 1;
+    background-color: #fff;
     margin-top: 5px;
     background-repeat: no-repeat;
     background-size: contain;
@@ -523,7 +546,7 @@ table {
       }
     }
 
-    //aaa 只有一個子節點
+    //只有一個子節點
     &.one-child {
       width: 100%;
       &::after {
@@ -537,7 +560,7 @@ table {
         left: 0;
       }
     }
-    //aaa 有兩個子節點
+    //有兩個子節點
     &.two-child {
       width: 100%;
       //左側 連接父節點的水平線
@@ -587,15 +610,17 @@ table {
   width: var(--width-card);
   height: var(--width-card);
   padding: 10px;
-  // color: #ffffff;
   background-color: var(--color-parent-node);
   font-size: 14px;
   cursor: pointer;
-  position: relative; /*點擊事件等Email SMS提示*/
-  display: flex;
+  position: relative;
+  display: grid;
+  grid-template-columns: 1fr;
   justify-content: center;
+  justify-items: center;
   align-items: center;
   border-radius: 10px;
+
   background-color: transparent;
   &.block-disable {
     opacity: 0.5;
@@ -603,24 +628,16 @@ table {
     background-color: var(--color-node-disabled);
   }
 }
-// 模板類型的設定 Email / SMS模板
-.node-template {
-  color: #71afb6;
+//長方形的模板 Email / SMS模板
+.rectangle-node {
+  color: var(--color-node-text);
   width: var(--width-card);
   height: 40px;
   line-height: 0px;
-  padding: 18px 7px;
+  padding: 20px 4px;
   border-radius: 10px;
-  .title {
-    width: 100%;
-    height: 30px;
-    padding: 10px;
-    overflow: hidden;
-    white-space: nowrap;
-    text-overflow: ellipsis;
-    position: relative;
-    top: -10px;
-  }
+  font-size: 14px;
+  font-weight: 400;
 }
 .tool-bar {
   position: absolute;

@@ -8,8 +8,7 @@ import SideToolbar from "../components/SideToolbar.vue";
 const emptyTree = ref({});
 // 目前主劇本進度資料
 const mainTreeActiveStep = ref(0);
-// 目前在編輯第幾層?
-const activeLayer = ref(2);
+
 //是否預覽樹狀圖
 const isPreviewTree = ref(false);
 
@@ -19,36 +18,55 @@ const isPreviewTree = ref(false);
  */
 function returnEmptyTree() {
   const emptyTree = new Tree(0, {
-    attr: "response",
+    attr: "trigger",
     isActive: true,
-    title: "點擊設定事件1",
+    title: "點擊設定事件",
     data: {}, //自訂的節點的資料
     depth: 1, //節點深度(必要)
+    disabledConnect: false,
   });
   emptyTree.insert(0, 1, {
-    attr: "trigger",
-    title: "點擊設定事件2",
+    attr: "wether_yes",
+    title: "是",
     data: {},
     depth: 2,
+    disabledConnect: false,
   });
   emptyTree.insert(0, 2, {
-    attr: "response",
-    title: "點擊設定事件3",
+    attr: "wether_no",
+    title: "否",
     data: {},
     depth: 2,
+    disabledConnect: false,
   });
   emptyTree.insert(1, 3, {
     attr: "action",
-    title: "action",
+    title: "點擊設定動作",
     data: {},
     depth: 3,
+    disabledConnect: false,
   });
-  // emptyTree.insert(1, 4, {
-  //   attr: "response",
-  //   title: "點擊設定事件5",
-  //   data: {},
-  //   depth: 3,
-  // });
+  emptyTree.insert(2, 4, {
+    attr: "action",
+    title: "點擊設定動作",
+    data: {},
+    depth: 3,
+    disabledConnect: false,
+  });
+  emptyTree.insert(3, 5, {
+    attr: "template",
+    title: "插入模板",
+    data: {},
+    depth: 3,
+    disabledConnect: true,
+  });
+  emptyTree.insert(4, 6, {
+    attr: "template",
+    title: "插入模板",
+    data: {},
+    depth: 3,
+    disabledConnect: true,
+  });
   return emptyTree;
 }
 
@@ -72,7 +90,6 @@ provide("mainTreeStep", mainTreeActiveStep);
   <div class="wrapper" style="">
     <ul class="flex flex-col align-left justify-left">
       <li>目前的key{{ mainTreeActiveStep }}</li>
-      <li class="text-nowrap">目前在編輯第{{ activeLayer }}層</li>
     </ul>
     <div class="w-full flex mt-4 relative">
       <SideToolbar
@@ -83,7 +100,6 @@ provide("mainTreeStep", mainTreeActiveStep);
         :data="emptyTree?.root"
         :currentKey="mainTreeActiveStep"
         :returnInterfaceNodeColor="interfaceNodeColor"
-        :activeLayer="activeLayer"
         :preview="isPreviewTree"
         @clickNode="(id, block_type) => handleClickNode(id, block_type)"
         @addNode="(node) => handleAddNode(node)"

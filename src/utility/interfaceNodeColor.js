@@ -4,15 +4,23 @@
  * @returns {String} 背景色
  */
 export default function interfaceNodeColor(type){
-  switch (type) {
-    case "trigger":      
-       return "#eba759";
-    case "response":
-       return "#baabe7";
-    case "action":
-        return "#96c5d7";
-    default:
-       return "#eaf3f4";
-  }
+   if(!type) return ""
+   switch (type) {
+      case "trigger":      
+         return "#BAABE7";
+      case "response":
+         return "#96C5D7";
+      case "action":
+         return "#F9C357";
+      case "wether_yes":
+         return "#8BC19B";
+      case "wether_no":
+         return "#FF8B8B";
+      case "template":
+         return "#EAF3F4";
+      default:
+         console.warn("未定義的節點種類", type)
+         return "gray";
+   }
  
 }

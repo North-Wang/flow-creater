@@ -22,6 +22,8 @@
   --color-parent-node-active:#52034e;
   --color-node-disabled:#c4c4c4;
   --color-node-line:#9fbaca;
+  --color-node-text:white; /* 一般節點的文字顏色 */
+  --color-template-node-text:#71AFB6; /* 【模板】類型的節點的文字色 */  
   --tree-line-height: 50px; /* 樹狀圖 連結線的高度 */
   --width-card:120px; /* 所有節點的寬度 */
 
