@@ -144,10 +144,10 @@ class Tree {
   finalLeafConnectLine() {
     for(const node of this.preOrderTraversal()) {
       if (node.isLeaf) {
-         node.value.disabledConnect = true
+         node.value.showConnectLine = true
       }
       else {
-        node.value.disabledConnect = false
+        node.value.showConnectLine = false
       }
     }
   }

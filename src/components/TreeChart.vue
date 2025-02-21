@@ -13,7 +13,7 @@
           colspan="8"
           class="parent-node"
           :class="[
-            props.data?.value?.disabledConnect ? 'hidden-line' : '',
+            props.data?.value?.showConnectLine ? 'vertical-connect-line' : '',
             child_counts === 1 || !child_counts ? 'one-line' : 'two-line',
           ]"
         >
@@ -250,10 +250,11 @@ const templatePlusButtonList = computed(() => {
  * @param {String} nodeData 目前節點的id
  */
 function handleClickAddNode(nodeData, parentNodeType) {
-  console.log("aaa nodeData", nodeData);
   const isLimit = nodeData?.children.length >= 1;
   const id = nodeData?.key;
   if (!isLimit) {
+    //準備新增節點，要讓垂直的連接線顯示 aaa
+    nodeData.value.showConnectLine = true;
     emits("addNode", id, parentNodeType);
   } else {
     console.warn("已達到新增節點的上限");
@@ -595,8 +596,8 @@ table {
   }
 }
 
-// 末端節點去除連接線
-.hidden-line {
+//顯示垂直的連接線
+.vertical-connect-line {
   &::after,
   &::before {
     display: none;

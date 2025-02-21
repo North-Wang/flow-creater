@@ -24,70 +24,70 @@ function returnEmptyTree() {
     title: "點擊設定事件",
     data: {}, //自訂的節點的資料
     depth: 1, //節點深度(必要)
-    disabledConnect: false,
+    showConnectLine: false,
   });
   emptyTree.insert(0, 1, {
     attr: "wether_yes",
     title: "是",
     data: {},
     depth: 2,
-    disabledConnect: false,
+    showConnectLine: false,
   });
   emptyTree.insert(0, 2, {
     attr: "wether_no",
     title: "否",
     data: {},
     depth: 2,
-    disabledConnect: false,
+    showConnectLine: false,
   });
   emptyTree.insert(1, 3, {
     attr: "action",
     title: "點擊設定動作",
     data: {},
     depth: 3,
-    disabledConnect: false,
+    showConnectLine: false,
   });
   emptyTree.insert(2, 4, {
     attr: "action",
     title: "點擊設定動作",
     data: {},
     depth: 3,
-    disabledConnect: false,
+    showConnectLine: false,
   });
   emptyTree.insert(3, 5, {
     attr: "template",
     title: "插入模板",
     data: {},
     depth: 4,
-    disabledConnect: false,
+    showConnectLine: true,
   });
   emptyTree.insert(4, 6, {
     attr: "template",
     title: "插入模板",
     data: {},
     depth: 4,
-    disabledConnect: false,
+    showConnectLine: true,
   });
   // emptyTree.insert(5, 7, {
   //   attr: "response",
   //   title: "點擊設定事件",
   //   data: {},
   //   depth: 5,
-  //   disabledConnect: true,
+  //   showConnectLine: true,
   // });
   // emptyTree.insert(6, 8, {
   //   attr: "response",
   //   title: "點擊設定事件",
   //   data: {},
   //   depth: 5,
-  //   disabledConnect: true,
+  //   showConnectLine: true,
   // });
   // emptyTree.insert(6, 9, {
   //   attr: "response",
   //   title: "點擊設定事件",
   //   data: {},
   //   depth: 5,
-  //   disabledConnect: true,
+  //   showConnectLine: true,
   // });
   return emptyTree;
 }
@@ -105,12 +105,12 @@ function handleAddNode(id, nodeType) {
   console.log("想要新增id:" + id + "節點, 類型：" + nodeType);
   switch (nodeType) {
     case "template":
-      emptyTree.value.insert(id, 9, {
+      emptyTree.value.insert(id, null, {
         attr: "response",
         title: "點擊設定事件",
         data: {},
         depth: 5,
-        disabledConnect: true,
+        showConnectLine: true,
       });
       break;
 
@@ -132,7 +132,12 @@ onMounted(() => {
     </ul>
     <div class="w-full flex mt-4 relative">
       <SideToolbar
-        :style="{ width: '200px', minHeight: '400px', position: 'absolute' }"
+        :style="{
+          width: '200px',
+          minHeight: '400px',
+          position: 'absolute',
+          zIndex: 10,
+        }"
       ></SideToolbar>
       <TreeChart
         class=""

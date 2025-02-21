@@ -7,7 +7,15 @@
     @dragover="(e) => e.preventDefault()"
   >
     工具列
-    <slot name="content"></slot>
+    <div class="wra-block">
+      <slot name="content">
+        <div v-for="block in props.tools" :key="block">
+          {{ block?.name }}
+        </div>
+      </slot>
+    </div>
+
+    <button>確定</button>
   </aside>
 </template>
 
@@ -25,6 +33,12 @@ const props = defineProps({
     type: String,
     default: "250px",
   },
+  tools: {
+    type: Array,
+    default: () => {
+      [{ name: "Email" }, { name: "SMS" }];
+    },
+  },
 });
 
 async function receiveDropData(e) {
@@ -39,10 +53,18 @@ async function receiveDropData(e) {
   padding: 12px;
   border-radius: 15px;
   box-shadow: 0 0 5px 0 rgba(0, 0, 0, 0.1), 0 0 1px 0 rgba(0, 0, 0, 0.1);
-  display: grid;
-  grid-template-columns: 1fr;
-  grid-template-rows: repeat(1fr);
+  display: flex;
+  flex-direction: column;
+  // display: grid;
+  // grid-template-columns: 1fr;
+  // grid-template-rows: repeat(1fr);
+  justify-content: space-between;
+  height: 100%;
   // left: 0;
   // top: 0;
+}
+.wra-block {
+  display: flex;
+  flex-direction: column;
 }
 </style>
