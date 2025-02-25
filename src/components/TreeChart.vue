@@ -13,7 +13,7 @@
           colspan="8"
           class="parent-node"
           :class="[
-            props.data?.value?.showConnectLine ? 'vertical-connect-line' : '',
+            showVerticalConnectLine ? '' : 'hidden-vertical-connect-line',
             child_counts === 1 || !child_counts ? 'one-line' : 'two-line',
           ]"
         >
@@ -42,8 +42,14 @@
           >
             <slot name="root-node">
               <!--方塊顯示圖片-->
+              <!-- aaa -->
               <div
-                class="node-icon"
+                :class="
+                  returnNodeIcon(props.data?.value?.title)
+                    ? 'node-icon'
+                    : 'no-icon'
+                "
+                class=""
                 v-if="ruleHasIcon.includes(parentNodeType)"
               ></div>
               <!--方塊顯示文字title-->
@@ -76,7 +82,7 @@
 
           <button
             class="add-more-block-btn"
-            v-if="isShowPlusButton"
+            v-if="isShowPlusButton && !showVerticalConnectLine"
             @click="handleClickAddNode(props.data, parentNodeType)"
           >
             <img :src="iconAdd" class="w-[18px] h-[18px]" alt="icon-add" />
@@ -106,7 +112,9 @@
             :returnInterfaceNodeColor="returnInterfaceNodeColor"
             v-if="item.value"
             @clickNode="(id, block_type) => emits('clickNode', id, block_type)"
-            @addNode="(id, block_type) => emits('addNode', id, block_type)"
+            @addNode="
+              (nodeData, nodeType) => emits('addNode', nodeData, nodeType)
+            "
           />
         </td>
       </tr>
@@ -141,7 +149,6 @@ const props = defineProps({
       parent: null,
       value: {
         attr: "response",
-        isActive: true,
         title: "點擊設定事件",
         data: {},
         depth: 1,
@@ -163,6 +170,15 @@ const props = defineProps({
   preview: {
     type: Boolean,
     default: false,
+  },
+  /**
+   * 根據節點title，回傳對應的icon
+   */
+  returnNodeIcon: {
+    type: Function,
+    default: (nodeTitle) => {
+      return "";
+    },
   },
   /**
    * 根據節點種類，回傳對應的背景色
@@ -219,6 +235,9 @@ const props = defineProps({
 const isRectangleNode = computed(() => {
   return props.ruleRectangleNode.includes(parentNodeType.value) || false;
 });
+const showVerticalConnectLine = computed(() => {
+  return props.data?.value?.showConnectLine || false;
+});
 
 // 可以顯示操作tree table的劇本層數
 const activeLayer = ref(5);
@@ -246,16 +265,16 @@ const templatePlusButtonList = computed(() => {
 /**
  * emits給元件的外層，判斷要新增哪種節點
  * @description 如果已經有一個子節點，就不能新增
- * @param parentNodeType 目前節點的種類
+ * @param nodeType 目前節點的種類
  * @param {String} nodeData 目前節點的id
  */
-function handleClickAddNode(nodeData, parentNodeType) {
-  const isLimit = nodeData?.children.length >= 1;
+function handleClickAddNode(nodeData, nodeType) {
+  const isLimit = nodeData?.children.length >= 3;
   const id = nodeData?.key;
   if (!isLimit) {
-    //準備新增節點，要讓垂直的連接線顯示 aaa
+    //準備新增節點，要讓垂直的連接線顯示
     nodeData.value.showConnectLine = true;
-    emits("addNode", id, parentNodeType);
+    emits("addNode", nodeData, nodeType);
   } else {
     console.warn("已達到新增節點的上限");
   }
@@ -289,7 +308,7 @@ function getCurrentKey(e) {
     const isDisableFocus = target.dataset?.disable; //是否元素被添加disable屬性
 
     if (!props.ruleNotClick.includes(block_type) && !isDisableFocus) {
-      focusNode.value = target.classList.add("focus-animate");
+      target.classList.add("focus-animate");
       emits("clickNode", id, block_type);
     }
   } catch (error) {
@@ -323,6 +342,7 @@ const showToolBarHover = ref(false);
  * @return {string}  劇本節點資料字串
  */
 const hasTitleData = computed(() => {
+  return false;
   /**
    * @const {string} template_name 模板名稱
    * @const {string} action_name 觸發事件觸發時間
@@ -366,7 +386,7 @@ const isShowPlusButton = computed(() => {
 /**
  * mouse enter節點時，判斷是否可以顯示工具列
  * @description 需要節點內已經有資料，才能開啟工具列 編輯/預覽
- * @const {Object} blockData 節點主體tree node(包含attr/data/isActive)
+ * @const {Object} blockData 節點主體tree node(包含attr/data)
  * @param {Array} rule 節點資料內那些key需要存在
  * @constant {Object} blockData.data 實際節點設定資料
  */
@@ -395,7 +415,6 @@ function onClickCreateNewNode(id, templateData, side = "left") {
   // 產生新的空事件節點
   const newNodeData = new Tree(0, {
     attr: "response",
-    isActive: true,
     title: "點擊設定事件1",
     data: {}, //自訂的節點的資料
     depth: 1, //節點深度(必要)
@@ -463,6 +482,7 @@ table {
     align-self: center;
   }
   &.one-line {
+    cursor: default;
     &::before {
       content: "";
       position: absolute;
@@ -475,6 +495,7 @@ table {
   }
   &.two-line {
     //右側的垂直線
+    cursor: default;
     &::before {
       content: "";
       position: absolute;
@@ -516,6 +537,7 @@ table {
       height: 15px;
       border-left: 2px solid var(--color-node-line);
       transform: translate3d(-1px, 0, 0);
+      cursor: default;
     }
 
     // 共有的水平線
@@ -526,6 +548,7 @@ table {
       right: 0;
       top: 15px;
       border-top: 2px solid var(--color-node-line);
+      cursor: default;
     }
 
     // 隱藏第一個與最後一個節點的垂直線
@@ -596,16 +619,15 @@ table {
   }
 }
 
-//顯示垂直的連接線
-.vertical-connect-line {
+//隱藏節點的垂直連接線
+.hidden-vertical-connect-line {
   &::after,
   &::before {
     display: none;
   }
 }
 //被選取的節點邊框色
-.focus-animate,
-.isActive {
+.focus-animate {
   border: 8px solid var(--color-node-active);
   z-index: 5;
 }

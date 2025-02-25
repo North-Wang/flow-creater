@@ -93,6 +93,13 @@ class Tree {
     }
     return false;
   }
+  /**
+   * 取得最後一個節點的id
+   * @returns {String} 最後一個節點的id
+   */
+  getLastNodeId(){
+    return this.lastNodeId
+  }
 
   /**
     * 樹狀圖移除節點
@@ -100,7 +107,6 @@ class Tree {
     * @return {Boolean}
     * @description 會將該節點以下所有樹狀圖移除
     */
-
   remove(key) {
     for (let node of this.preOrderTraversal()) {
       const filtered = node.children.filter(c => c.key !== key);
@@ -144,10 +150,10 @@ class Tree {
   finalLeafConnectLine() {
     for(const node of this.preOrderTraversal()) {
       if (node.isLeaf) {
-         node.value.showConnectLine = true
+         node.value.showConnectLine = false
       }
       else {
-        node.value.showConnectLine = false
+        node.value.showConnectLine = true
       }
     }
   }

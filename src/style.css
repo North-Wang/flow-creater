@@ -17,7 +17,8 @@
   -moz-osx-font-smoothing: grayscale;
   -webkit-text-size-adjust: 100%;
 
-  /*  相關變數 */
+  --color-button:#71AFB6;
+  /*  tree chart 相關變數 */
   --color-parent-node:#ffbc40;
   --color-node-active:#71afb6;
   --color-node-disabled:#c4c4c4;
@@ -25,14 +26,13 @@
   --color-node-text:white; /* 一般節點的文字顏色 */
   --color-template-node-text:#71AFB6; /* 【模板】類型的節點的文字色 */  
   --color-toolbar-icon-trigger:#8265DA; /* 觸發事件的toolbar icon色 */  
-  --color-toolbar-icon-response:#96C5D7; /* 觸發事件的toolbar icon色 */  
-  --color-toolbar-icon-action:#F9C357; /* 觸發事件的toolbar icon色 */  
-  --color-toolbar-icon-default:#65da96; /* 觸發事件的toolbar icon色 */  
+  --color-toolbar-icon-response:#96C5D7; /* 回應事件的toolbar icon色 */  
+  --color-toolbar-icon-action:#F9C357; /* 投放管道的toolbar icon色 */  
+  --color-toolbar-icon-default:#65da96; /* 預設的toolbar icon色 */  
   --tree-line-height: 50px; /* 樹狀圖 連結線的高度 */
   --width-card:120px; /* 所有節點的寬度 */
 
-  --icon-url-add-more-block:"../assets/icons/add-icon.svg"
-  /* tree chart相關變數 */
+  /* tree chart 相關變數 */
 }
 
 a {
@@ -55,7 +55,7 @@ h1 {
   line-height: 1.1;
 }
 
-button {
+/* button {
   border-radius: 8px;
   border: 1px solid transparent;
   padding: 0.6em 1.2em;
@@ -72,7 +72,7 @@ button:hover {
 button:focus,
 button:focus-visible {
   outline: 4px auto -webkit-focus-ring-color;
-}
+} */
 
 /* .card {
   padding: 2em;

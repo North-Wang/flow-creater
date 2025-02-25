@@ -63,7 +63,6 @@ function handleAddNode(data) {
 function returnEmptyTree() {
   const emptyTree = new Tree(0, {
     attr: "start",
-    isActive: true,
     title: "選擇時段",
     data: {
       date: new Date(),
