@@ -42,13 +42,11 @@
           >
             <slot name="root-node">
               <!--方塊顯示圖片-->
-              <!-- aaa -->
               <div
-                :class="
-                  returnNodeIcon(props.data?.value?.title)
-                    ? 'node-icon'
-                    : 'no-icon'
-                "
+                :class="nodeIcon !== '' ? 'node-icon' : 'no-icon'"
+                :style="{
+                  backgroundImage: `url(${nodeIcon})`,
+                }"
                 class=""
                 v-if="ruleHasIcon.includes(parentNodeType)"
               ></div>
@@ -82,7 +80,7 @@
 
           <button
             class="add-more-block-btn"
-            v-if="isShowPlusButton && !showVerticalConnectLine"
+            v-if="canShowPlusButton && !showVerticalConnectLine"
             @click="handleClickAddNode(props.data, parentNodeType)"
           >
             <img :src="iconAdd" class="w-[18px] h-[18px]" alt="icon-add" />
@@ -110,6 +108,7 @@
             :currentKey="props.currentKey"
             :activeLayer="activeLayer"
             :returnInterfaceNodeColor="returnInterfaceNodeColor"
+            :returnNodeIcon="props.returnNodeIcon"
             v-if="item.value"
             @clickNode="(id, block_type) => emits('clickNode', id, block_type)"
             @addNode="
@@ -176,7 +175,7 @@ const props = defineProps({
    */
   returnNodeIcon: {
     type: Function,
-    default: (nodeTitle) => {
+    default: () => {
       return "";
     },
   },
@@ -241,36 +240,31 @@ const showVerticalConnectLine = computed(() => {
 
 // 可以顯示操作tree table的劇本層數
 const activeLayer = ref(5);
-// 目前被focus的節點
-const focusNode = ref(null);
+const nodeIcon = ref("");
 
 /**
  *  模板節點的「+」號側邊要顯示的樣板資料
  */
-const templatePlusButtonList = computed(() => {
-  if (props.data?.value?.data?.plusButtonList) {
-    return props.data?.value?.data?.plusButtonList.map((item, index) => {
-      const side = index === 0 ? "left" : "right";
-      return {
-        ...item,
-        side: side,
-      };
-    });
-  } else
-    return [
-      { template_name: "模板A", side: "left" },
-      { template_name: "模板B", side: "right" },
-    ]; //aaa 暫時給假資料
-});
+// const templatePlusButtonList = computed(() => {
+//   if (props.data?.value?.data?.plusButtonList) {
+//     return props.data?.value?.data?.plusButtonList.map((item, index) => {
+//       const side = index === 0 ? "left" : "right";
+//       return {
+//         ...item,
+//         side: side,
+//       };
+//     });
+//   } else
+//     return [];
+// });
 /**
  * emits給元件的外層，判斷要新增哪種節點
  * @description 如果已經有一個子節點，就不能新增
  * @param nodeType 目前節點的種類
- * @param {String} nodeData 目前節點的id
+ * @param {String} nodeData 要包含節點的id
  */
 function handleClickAddNode(nodeData, nodeType) {
   const isLimit = nodeData?.children.length >= 3;
-  const id = nodeData?.key;
   if (!isLimit) {
     //準備新增節點，要讓垂直的連接線顯示
     nodeData.value.showConnectLine = true;
@@ -356,8 +350,8 @@ const hasTitleData = computed(() => {
   return template_name || action_name || event_name || is_yes;
 });
 
-// 是否顯示+號按鈕 (需要更改)
-const isShowPlusButton = computed(() => {
+// 可以顯示+號按鈕
+const canShowPlusButton = computed(() => {
   return props.ruleHasAddNode.includes(parentNodeType.value);
   const hasTemplateButtonList = templatePlusButtonList.value?.length > 0;
   console.log(
@@ -384,7 +378,7 @@ const isShowPlusButton = computed(() => {
 });
 
 /**
- * mouse enter節點時，判斷是否可以顯示工具列
+ * mouse enter節點時，判斷是否可以顯示工具列 (需要確認是否可用)
  * @description 需要節點內已經有資料，才能開啟工具列 編輯/預覽
  * @const {Object} blockData 節點主體tree node(包含attr/data)
  * @param {Array} rule 節點資料內那些key需要存在
@@ -405,50 +399,17 @@ function handleShowToolBar(blockData, rule) {
     showToolBarHover.value = false;
   }
 }
-/**
- * 點擊+號創建新節點
- * @param id
- * @param templateData
- * @param side
- */
-function onClickCreateNewNode(id, templateData, side = "left") {
-  // 產生新的空事件節點
-  const newNodeData = new Tree(0, {
-    attr: "response",
-    title: "點擊設定事件1",
-    data: {}, //自訂的節點的資料
-    depth: 1, //節點深度(必要)
-  });
-
-  // 移除buttonList該樣板選項
-  templatePlusButtonList.value = templatePlusButtonList.value?.filter(
-    (item) => {
-      console.log("filter plus按鈕", item, "templateData", templateData);
-      return item.template_id !== templateData?.template_id;
-    }
-  );
-  // createNewNode(id, newNodeData, side, templateData);
-}
-/**
- * 創建新節點
- * @param current_id 目前的節點id，要成為新節點的父節點id
- * @param templateData 節點的資料
- * @param side 新節點在left/right大分支
- */
-function createNewNode(current_id, data, side = "left", templateData) {
-  // 左節點和右節點 創建節點d會不太一樣
-  const next_node_id =
-    side === "left" ? Number(current_id) * 2 + 1 : Number(current_id) * 2 + 2;
-  tree.value.insert(current_id, next_node_id, data);
-  // 產生對應id preview script
-  const new_preview_tree = createResPonseEventDefaultTree();
-  new_preview_tree.root.value.data.template = templateData;
-  previewTreeScript.value[next_node_id] = new_preview_tree;
-}
-
 defineExpose({
   openNextLayer,
 });
+
+//選擇了節點之後，要回傳對應的icon
+watch(
+  () => props.data?.value?.title,
+  (nodeType) => {
+    nodeIcon.value = props.returnNodeIcon(nodeType);
+  }
+);
 </script>
 
 <style scoped lang="scss">
@@ -473,9 +434,8 @@ table {
     border-radius: 5px;
   }
   .node-icon {
-    width: 50px;
+    width: var(--width-node-icon);
     aspect-ratio: 1;
-    background-color: #fff;
     background-repeat: no-repeat;
     background-size: contain;
     background-position: center;
@@ -564,13 +524,13 @@ table {
     //控制<tree-chart>下一層的table 左側
     &:first-child {
       > table {
-        left: 8%;
+        left: calc(var(--width-node-connect) * -1 + 48%);
       }
     }
     //控制<tree-chart>下一層的table 右側
     &:last-child {
       > table {
-        right: 8%;
+        right: calc(var(--width-node-connect) * -1 + 48%);
       }
     }
 
@@ -593,15 +553,14 @@ table {
       width: 100%;
       //左側 連接父節點的水平線
       &:first-child::after {
-        // left: 54%;
-        left: 57.5%;
+        left: calc(var(--width-node-connect) * -1 + 97.5%);
         height: 30px;
         border: 2px solid;
         border-color: var(--color-node-line) transparent transparent
           var(--color-node-line);
         border-radius: 6px 0 0 0;
         transform: translate3d(1px, 0, 0);
-        width: 40%;
+        width: var(--width-node-connect);
       }
 
       //右側 連接父節點的水平線
@@ -613,7 +572,7 @@ table {
           transparent;
         border-radius: 0 6px 0 0;
         transform: translate3d(1px, 0, 0);
-        width: 40%;
+        width: var(--width-node-connect);
       }
     }
   }

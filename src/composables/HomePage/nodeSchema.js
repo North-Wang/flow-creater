@@ -163,11 +163,6 @@ export class iconMap {
         "傳送SMS": iconSendSms,
     }
   }
-  //根據節點的選項，回傳對應的icon
-  get getIconByNode(){
-    // if(!this.nodeIconMap[option]) return ""
-    console.log("aaa nodeIconMap", this.nodeIconMap)
-  }
   //根據節點的種類，回傳工具列選項
   returnToolbarOptions(nodeType){
     const options = this.nodeToolbarMap[nodeType] || []

@@ -9,12 +9,11 @@ const buttonList = ref([
 </script>
 
 <template>
-  <div class="flex gap-2 w-full justify-center">
+  <div class="flex gap-2 w-full justify-center p-2 bg-yellow-200">
     <router-link :to="btn?.path" v-for="btn in buttonList">{{
       btn?.name
     }}</router-link>
   </div>
-  <h1 class="bg-yellow-400 p-4 rounded-lg">測試客製化</h1>
 
   <RouterView></RouterView>
 </template>

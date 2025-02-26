@@ -31,7 +31,7 @@ import {
   defineEmits,
   Teleport,
 } from "vue";
-import interfaceNodeColor from "../utility/interfaceNodeColor.js";
+import { interfaceNodeColor } from "../utility/interfaceNode.js";
 import { iconMap } from "../composables/HomePage/nodeSchema.js";
 import iconSignUp from "../assets/icons/sign-up.svg";
 import iconAfterSales from "../assets/icons/after-sales.svg";
@@ -128,7 +128,7 @@ aside {
       }
     }
     img {
-      width: 60%;
+      width: var(--width-node-icon);
       aspect-ratio: 1;
       background-size: contain;
       background-repeat: no-repeat;

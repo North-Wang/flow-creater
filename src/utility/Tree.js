@@ -162,7 +162,7 @@ class Tree {
     * @return {Array}
     * @description 回傳攤平陣列
     */
-  nodeData() {
+  getNodeData() {
     return [...this.preOrderTraversal()].map(x=>x.value)
   }
 

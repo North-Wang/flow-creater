@@ -31,6 +31,8 @@
   --color-toolbar-icon-default:#65da96; /* 預設的toolbar icon色 */  
   --tree-line-height: 50px; /* 樹狀圖 連結線的高度 */
   --width-card:120px; /* 所有節點的寬度 */
+  --width-node-icon:60%; /* 節點內的icon寬度 */
+  --width-node-connect:40%; /* 節點連接線第一層的寬度。會影響最多有幾層 節點不會重疊 */
 
   /* tree chart 相關變數 */
 }
@@ -82,8 +84,6 @@ button:focus-visible {
   /* max-width: 1280px; */
   width: 100dvw;
   min-height: 100dvh;
-  /* margin: 0 auto ; */
-  padding: 2rem;
   text-align: center;
 }
 

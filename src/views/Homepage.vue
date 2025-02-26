@@ -7,7 +7,10 @@ import {
   createResponseEventDefaultTree,
   iconMap,
 } from "../composables/HomePage/nodeSchema.js";
-import interfaceNodeColor from "../utility/interfaceNodeColor.js";
+import {
+  interfaceNodeColor,
+  returnIconByNode,
+} from "../utility/interfaceNode.js";
 import SideToolbar from "../components/SideToolbar.vue";
 
 const emptyTree = ref({});
@@ -16,7 +19,6 @@ const currentKey = ref(0);
 //是否預覽樹狀圖
 const isPreviewTree = ref(false);
 const nodeType = ref("");
-const interfaceIcon = ref(new iconMap());
 
 // 點選到主劇本方塊id、block type資料
 function handleClickNode(id, block_type) {
@@ -61,10 +63,9 @@ function handleAddNode(nodeData, nodeType) {
  * @param {String} val 選擇的工具列選項
  */
 function handleSelectTool(val) {
-  console.log("aaa val", val);
   const targetNode = emptyTree.value.find(currentKey.value);
   targetNode.value.title = val;
-  console.log("aaa 選擇工具", targetNode?.value?.title);
+  console.log("選擇的選項：" + targetNode?.value?.title);
 }
 
 onMounted(() => {
@@ -93,7 +94,7 @@ onMounted(() => {
         class=""
         :data="emptyTree?.root"
         :currentKey="currentKey"
-        :returnNodeIcon="interfaceIcon.getIconByNode"
+        :returnNodeIcon="returnIconByNode"
         :returnInterfaceNodeColor="interfaceNodeColor"
         :preview="isPreviewTree"
         @clickNode="(id, block_type) => handleClickNode(id, block_type)"

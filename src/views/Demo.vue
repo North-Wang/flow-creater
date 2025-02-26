@@ -15,6 +15,7 @@
           :nodeAttr="emptyTree?.root?.value?.attr"
           :currentKey="mainTreeActiveStep"
           :returnInterfaceNodeColor="returnInterfaceNodeColor"
+          :ruleHasAddNode="[]"
           :activeLayer="activeLayer"
           :preview="isPreviewTree"
           @clickNode="(id, block_type) => handleClickNode(id, block_type)"
