@@ -1,5 +1,4 @@
 import { Tree  } from "../../utility/Tree.js";
-import { ref,computed } from "vue";
 import iconSignUp from "../../assets/icons/sign-up.svg";
 import iconAfterSales from "../../assets/icons/after-sales.svg";
 import iconShoppingCar from "../../assets/icons/shopping-car.svg";
@@ -15,8 +14,8 @@ import iconSendSms from "../../assets/icons/send-sms.svg";
 export function createTriggerEventDefaultTree(depth = 1) {  
  
   const triggerEventTree = new Tree(0, {
-    attr: "trigger",
-    title: "點擊設定事件",
+    attr: "trigger", //節點的種類
+    title: "點擊設定事件", //會顯示在節點上
     data: new triggerNodeSchema(), //自訂的節點的資料
     depth: depth, //節點深度(必要)
     
@@ -135,74 +134,9 @@ export function createResponseEventDefaultTree(treeData, depth, id) {
 
 }
 
-/**
- * 「節點種類」與「工具列選項」與「icon」的對照表
- */
-export class iconMap {
-  constructor(){
-    // 「節點種類」與工具列的選項
-    this.nodeToolbarMap = {
-      "trigger":{
-        "註冊": iconSignUp,
-        "購物車未結": iconAfterSales,
-        "購買後促銷": iconShoppingCar,
-        "定期投放": iconCycleTime
-      },
-      "action":{
-        "傳送Email": iconSendEmail,
-        "傳送SMS": iconSendSms,
-      }
-    }
-    // 「節點選項」與對應的icon
-    this.nodeIconMap = {
-       "註冊": iconSignUp,
-        "購物車未結": iconAfterSales,
-        "購買後促銷": iconShoppingCar,
-        "定期投放": iconCycleTime,
-        "傳送Email": iconSendEmail,
-        "傳送SMS": iconSendSms,
-    }
-  }
-  //根據節點的種類，回傳工具列選項
-  returnToolbarOptions(nodeType){
-    const options = this.nodeToolbarMap[nodeType] || []
-    return options
-  }
-}
-/**
- * 「節點種類」與工具列的選項
- */
-// const nodeToolbarMap = ref({
-//   "trigger":{
-//     "註冊": iconSignUp,
-//     "購物車未結": iconAfterSales,
-//     "購買後促銷": iconShoppingCar,
-//     "定期投放": iconCycleTime
-//   },
-//   "action":{
-//     "傳送Email": iconSendEmail,
-//     "傳送SMS": iconSendSms,
-//   }
-// })
-// 「節點選項」與icon的對照表
-// export const nodeIconMap = computed(()=>{
-//   return Object.assign({}, ...Object.values(nodeToolbarMap.value).map(opt => ({ ...opt })))
-// })
-// /**
-//  * 根據「節點種類」回傳對應的工具列選項
-//  * @param {String} nodeType 
-//  * @param {String} value 
-//  */
-// export function returnToolbarOptions(nodeType, value) {
-//   /**
-//    * @constant nodeToolbarMap 各種節點的選項
-//    */ 
-//   const options = nodeToolbarMap.value[nodeType] || []
-//   return options
-// }
 
 
-// 劇本節點參數名稱schema
+// 要放到節點的value.data的物件schema
 // 觸發事件
 export class triggerNodeSchema {
   constructor() {

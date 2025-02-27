@@ -1,3 +1,5 @@
+import {toRaw} from "vue"
+
 /**
  * 產生樹狀圖的節點
  */
@@ -163,7 +165,7 @@ class Tree {
     * @description 回傳攤平陣列
     */
   getNodeData() {
-    return [...this.preOrderTraversal()].map(x=>x.value)
+    return [...this.preOrderTraversal()].map(x=>x.value).map((item) => toRaw(item))
   }
 
 }

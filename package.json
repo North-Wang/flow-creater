@@ -10,6 +10,7 @@
     "build-storybook": "storybook build"
   },
   "dependencies": {
+    "@vueuse/core": "^12.7.0",
     "sass": "^1.85.0",
     "vue": "^3.2.45",
     "vue-router": "^4.5.0"

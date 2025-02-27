@@ -40,7 +40,30 @@ const nodeIconMap = {
    "傳送Email": iconSendEmail,
    "傳送SMS": iconSendSms,
 }
-
+ // 「節點種類」與工具列的選項
+const nodeToolbarMap = {
+      "trigger":{
+        "註冊": iconSignUp,
+        "購物車未結": iconAfterSales,
+        "購買後促銷": iconShoppingCar,
+        "定期投放": iconCycleTime
+      },
+      'starter':{
+        "註冊": iconSignUp,
+        "購物車未結": iconAfterSales,
+        "購買後促銷": iconShoppingCar,
+        "定期投放": iconCycleTime
+      },
+      "action":{
+        "傳送Email": iconSendEmail,
+        "傳送SMS": iconSendSms,
+      },
+      "response":{
+         "開啟信件":"",
+         "點擊連結":"",
+         "轉換":""
+      }
+    }
 /**
  * 根據節點選項，回傳正確的icon
  * @param {String} option 節點的選項 ex:註冊、購物車未結
@@ -51,3 +74,13 @@ export function  returnIconByNode(option){
     if(!nodeIconMap[option]) return ""
     return nodeIconMap[option]
   }
+
+/**
+ * 根據節點的種類，回傳工具列選項
+ * @param {String} nodeType 節點的選項 ex:註冊、購物車未結
+ * @returns {Object} 對應的工具列選項
+ */
+export function returnToolbarOptions(nodeType){
+   const options = nodeToolbarMap[nodeType] || []
+   return options
+} 

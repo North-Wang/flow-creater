@@ -19,7 +19,7 @@
         >
           <!--父節點的內容-->
           <div
-            @click="(event) => getCurrentKey(event)"
+            @click.stop="(event) => getCurrentKey(event)"
             @mouseenter="handleShowToolBar(props.data?.value, toolbarKey)"
             @mouseleave="showToolBarHover = false"
             :data-id="props.data?.key"
@@ -40,7 +40,13 @@
                   : 'var(--color-node-text)',
             }"
           >
-            <slot name="root-node">
+            <slot
+              name="node"
+              :key="props.data.key"
+              :nodeType="parentNodeType"
+              :nodeData="props.data?.value?.data"
+              :nodeTitle="props.data?.value?.title"
+            >
               <!--方塊顯示圖片-->
               <div
                 :class="nodeIcon !== '' ? 'node-icon' : 'no-icon'"
@@ -57,24 +63,28 @@
             </slot>
 
             <!-- 父節點側邊的tool工具列-->
-            <div
-              class="tool-bar"
+            <slot
+              name="toolbar"
+              :key="props.data.key"
+              :nodeType="parentNodeType"
+              :nodeData="props.data?.value?.data"
               v-if="ruleHasToolbar.includes(parentNodeType) && showToolBarHover"
             >
-              <slot name="parent-node-toolbar">
+              <div class="tool-bar">
                 <SvgEye
                   :color="`var(--color-toolbar-icon-${parentNodeType})`"
-                  @click="seeBlockPreview(props.data?.key)"
+                  @click.stop="previewNode(props.data?.key)"
                 ></SvgEye>
                 <SvgPen
                   :color="`var(--color-toolbar-icon-${parentNodeType})`"
+                  @click="editNode(props.data?.key)"
                 ></SvgPen>
                 <SvgTrash
                   :color="`var(--color-toolbar-icon-${parentNodeType})`"
-                  @click="deleteBlock(props.data?.key)"
+                  @click.stop="deleteBlock(props.data?.key)"
                 ></SvgTrash>
-              </slot>
-            </div>
+              </div>
+            </slot>
           </div>
           <!--方塊顯示樣板名稱hover和新增plus按鈕-->
 
@@ -106,15 +116,37 @@
           <tree-chart
             :data="item"
             :currentKey="props.currentKey"
+            :preview="preview"
             :activeLayer="activeLayer"
+            :ruleHasAddNode="ruleHasAddNode"
             :returnInterfaceNodeColor="returnInterfaceNodeColor"
             :returnNodeIcon="props.returnNodeIcon"
+            v-bind="$slots"
             v-if="item.value"
             @clickNode="(id, block_type) => emits('clickNode', id, block_type)"
             @addNode="
               (nodeData, nodeType) => emits('addNode', nodeData, nodeType)
             "
-          />
+          >
+            <template #node="{ key, nodeType, nodeData, nodeTitle }">
+              <slot
+                name="node"
+                :key="key"
+                :nodeType="nodeType"
+                :nodeData="nodeData"
+                :nodeTitle="nodeTitle"
+              >
+              </slot>
+            </template>
+            <template #toolbar="{ key, nodeType, nodeData }">
+              <slot
+                name="toolbar"
+                :key="key"
+                :nodeType="nodeType"
+                :nodeData="nodeData"
+              ></slot>
+            </template>
+          </tree-chart>
         </td>
       </tr>
     </tbody>
@@ -134,7 +166,7 @@ import { Tree } from "../utility/Tree.js";
 
 import iconAdd from "../assets/icons/add-icon.svg";
 
-const emits = defineEmits(["clickNode", "addNode"]);
+const emits = defineEmits(["clickNode", "addNode", "previewNode", "editNode"]);
 const props = defineProps({
   /**
    * 樹狀圖資料.
@@ -168,7 +200,7 @@ const props = defineProps({
    */
   preview: {
     type: Boolean,
-    default: false,
+    default: true,
   },
   /**
    * 根據節點title，回傳對應的icon
@@ -224,10 +256,10 @@ const props = defineProps({
     type: Array,
     default: () => ["trigger"],
   },
-  //當節點.data內有任一參數的時候，表示有設定過資料，才能顯示側邊工具列
+  //當節點.data內任一參數的時候，表示有設定過資料，才能顯示側邊工具列
   toolbarKey: {
-    type: Array,
-    default: () => ["action", "event"],
+    type: [Array, Object],
+    default: () => ["send_time", "event"],
   },
 });
 
@@ -390,6 +422,8 @@ function handleShowToolBar(blockData, rule) {
     if (!blockData.data) throw Error("沒有父節點的資料");
     if (!rule) throw Error("要設定blockData.data須確認是否有有那些key的資料");
 
+    console.log("節點要存在那些Key:", rule);
+    //檢查節點的data是否有存在必要的key
     const hasSettingData = rule.every((key) => {
       return Object.keys(blockData.data).includes(key);
     });
@@ -399,8 +433,33 @@ function handleShowToolBar(blockData, rule) {
     showToolBarHover.value = false;
   }
 }
+/**
+ * 工具列：刪除節點
+ * @param {String} id 節點id
+ */
+function deleteBlock(id) {
+  console.log("刪除節點", props.data);
+}
+/**
+ * 工具列：編輯節點
+ * @param {String} id 節點id
+ */
+function editNode(id) {
+  console.log("編輯節點", id);
+  emits("editNode", id);
+}
+/**
+ * 工具列：預覽節點的內容
+ * @param {String} id 節點id
+ */
+function previewNode(id) {
+  console.log("觸發預覽事件");
+  emits("previewNode", id);
+}
+
 defineExpose({
   openNextLayer,
+  deleteBlock,
 });
 
 //選擇了節點之後，要回傳對應的icon
@@ -638,7 +697,7 @@ table {
   width: 40%;
   height: 100%;
   top: 0;
-  right: -35%;
+  right: -45px;
   z-index: 2;
   > * {
     all: unset;

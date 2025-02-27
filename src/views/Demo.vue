@@ -1,34 +1,60 @@
 <template>
   <div class="wrapper" style="">
-    <span>DEMO</span>
+    <span>DEMO 目前的節點id:{{ currentKey }}</span>
     <div class="wra-tree">
       <SideToolbar
         :style="{
-          width: 'auto',
-          minHeight: '800px',
+          width: '200px',
+          minHeight: '400px',
+          position: 'absolute',
+          left: '24px',
+          zIndex: 10,
         }"
+        :nodeType="nodeType"
+        @select="handleSelectTool"
+        v-if="nodeType"
       />
-      <div>
-        <TreeChart
-          class="mt-2"
-          :data="emptyTree?.root"
-          :nodeAttr="emptyTree?.root?.value?.attr"
-          :currentKey="mainTreeActiveStep"
-          :returnInterfaceNodeColor="returnInterfaceNodeColor"
-          :ruleHasAddNode="[]"
-          :activeLayer="activeLayer"
-          :preview="isPreviewTree"
-          @clickNode="(id, block_type) => handleClickNode(id, block_type)"
-          @addNode="(node) => handleAddNode(node)"
-        >
-          <!-- <template #root-node>
-        <div class="wra-root-node">
-          選擇起點 <br />
-          <div class="default-icon"></div>
-        </div>
-      </template> -->
-        </TreeChart>
-      </div>
+      <TreeChart
+        class="mt-2"
+        :data="emptyTree?.root"
+        :nodeAttr="emptyTree?.root?.value?.attr"
+        :currentKey="currentKey"
+        :returnInterfaceNodeColor="returnInterfaceNodeColor"
+        :ruleHasAddNode="['meat', 'template']"
+        :ruleHasToolbar="['intention', 'starter']"
+        :toolbarKey="[]"
+        :activeLayer="activeLayer"
+        :preview="isPreviewTree"
+        v-bind="$slots"
+        @clickNode="(id, block_type) => handleClickNode(id, block_type)"
+        @addNode="(node) => handleAddNode(node)"
+      >
+        <template #node="{ key, nodeType, nodeData, nodeTitle }">
+          <div v-if="nodeType === 'intention'">{{ nodeTitle }}</div>
+          <div v-if="nodeType === 'starter'">
+            <div class="flex flex-col">
+              <h3 class="text-[18px] mb-1">{{ nodeTitle }}</h3>
+              {{ nodeType }}
+              <h5>凱薩沙拉</h5>
+              <h5>vs</h5>
+              <h5>海鮮拼盤</h5>
+            </div>
+          </div>
+        </template>
+        <template #toolbar="{ key, nodeType, nodeData }">
+          <div class="tool-bar text-black">
+            <div v-if="nodeType === 'intention'">
+              <SvgTrash :color="`var(--color-toolbar-icon-trigger)`" />
+            </div>
+            <div v-if="nodeType === 'starter'">
+              <SvgPen
+                :color="`var(--color-toolbar-icon-trigger)`"
+                @click="handleEditNode(key, nodeType, nodeData)"
+              />
+            </div>
+          </div>
+        </template>
+      </TreeChart>
     </div>
     <!-- <Teleport to="#app">
       <div class="right-0 bottom-0 bg-white">
@@ -43,94 +69,57 @@ import { ref, onMounted, provide, Teleport } from "vue";
 import TreeChart from "../components/TreeChart.vue";
 import { Tree } from "../utility/Tree.js";
 import returnInterfaceNodeColor from "../utility/demoInterfaceNodeColor.js";
-import SideToolbar from "../components/SideToolbar.vue";
+import { createTriggerEventDefaultTree } from "../composables/demo/nodeSchema.js";
+import SideToolbar from "../components/Demo/SideToolbar.vue";
+
+import SvgTrash from "../components/icon/SvgTrash.vue";
+import SvgPen from "../components/icon/SvgPen.vue";
 
 const emptyTree = ref({});
-// 目前主劇本進度資料
-const mainTreeActiveStep = ref(0);
 // 目前在編輯第幾層?
 const activeLayer = ref(3);
 //是否預覽樹狀圖
 const isPreviewTree = ref(false);
+//目前click的節點種類
+const nodeType = ref("");
+// 目前的節點id
+const currentKey = ref(0);
+
+const styleToolbar = ref({ right: 0, left: "-20px" });
 
 function handleAddNode(data) {
   console.log("想要新增節點", data);
 }
 
-/**
- * 回傳一個基礎的樹狀資料
- * @description 可以根據專案不同，自訂基礎的樹狀圖結構
- */
-function returnEmptyTree() {
-  const emptyTree = new Tree(0, {
-    attr: "start",
-    title: "選擇時段",
-    data: {
-      date: new Date(),
-      value: "",
-    }, //自訂的節點的資料
-    depth: 1, //節點深度(必要)
-  });
-  emptyTree.insert(0, 1, {
-    attr: "starter",
-    title: "選擇前菜",
-    data: {},
-    depth: 2,
-  });
-  emptyTree.insert(0, 2, {
-    attr: "starter",
-    title: "選擇前菜",
-    data: {},
-    depth: 2,
-  });
-  emptyTree.insert(1, 3, {
-    attr: "template",
-    title: "填入模板",
-    data: {},
-    depth: 3,
-  });
-  emptyTree.insert(1, 4, {
-    attr: "template",
-    title: "填入模板",
-    data: {},
-    depth: 3,
-  });
-  emptyTree.insert(2, 5, {
-    attr: "wether_yes",
-    title: "是",
-    data: {},
-    depth: 3,
-  });
-  emptyTree.insert(2, 6, {
-    attr: "wether_no",
-    title: "否",
-    data: {},
-    depth: 3,
-  });
-  emptyTree.insert(3, 7, {
-    attr: "action",
-    title: "第二層7",
-    data: {},
-    depth: 3,
-  });
-  emptyTree.insert(3, 8, {
-    attr: "action",
-    title: "第二層8",
-    data: {},
-    depth: 3,
-  });
-  return emptyTree;
+// 點選到主劇本方塊id、block type資料
+function handleClickNode(id, block_type) {
+  currentKey.value = Number(id);
+  console.log("外層偵測到click 節點, 類型是:" + block_type);
+  nodeType.value = block_type;
 }
 
-// 點選到主劇本方塊id、block type資料
-function handleClickNode(id, nodeType) {
-  mainTreeActiveStep.value = Number(id);
-  console.log("外層偵測到click 節點, 類型是:" + nodeType);
+/**
+ * 從工具列選擇種類，更新節點資料
+ * @param {String} nodeTitle 節點要顯示的title文本
+ * @param {Object} data 工具列選項設定的資料 (非必要)
+ */
+function handleSelectTool(nodeTitle, nodeData) {
+  const targetNode = emptyTree.value.find(currentKey.value);
+  targetNode.value.title = nodeTitle;
+
+  if (nodeData) {
+    //如果選擇工具列選項時有設定資料，則要放到節點的value.data
+    targetNode.value.data = nodeData;
+    console.log("節點資料：", targetNode);
+  }
 }
-function openModalWithType(params) {}
+
+function handleEditNode(key, nodeType, nodeData) {
+  console.log("編輯節點:", key, nodeType, nodeData);
+}
 
 onMounted(() => {
-  emptyTree.value = returnEmptyTree();
+  emptyTree.value = createTriggerEventDefaultTree();
 });
 </script>
 
@@ -154,7 +143,29 @@ onMounted(() => {
   }
 }
 .wra-tree {
-  display: grid;
-  grid-template-columns: 200px 1fr;
+  width: 100%;
+  // display: grid;
+  // grid-template-columns: 200px 1fr;
+  position: relative;
+}
+.tool-bar {
+  position: absolute;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  width: 40%;
+  height: 100%;
+  top: 0;
+  left: -45px;
+  z-index: 2;
+  > * {
+    all: unset;
+    margin-bottom: 5px;
+    opacity: 0.5;
+    &:hover {
+      opacity: 1;
+    }
+  }
 }
 </style>

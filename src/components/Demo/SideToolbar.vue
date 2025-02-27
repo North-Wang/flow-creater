@@ -1,7 +1,11 @@
 <template>
   <aside class="" :style="style">
-    <slot name="content">
-      <div class="wra-button">
+    <div class="wra-button">
+      <IntentionTool
+        @save="handleSaveIntention"
+        v-if="nodeType === 'intention'"
+      />
+      <div v-else>
         <div
           class="item"
           v-for="[name, icon] in Object.entries(returnToolbarOptions(nodeType))"
@@ -16,18 +20,26 @@
           </button>
           <span class="select-none"> {{ name }}</span>
         </div>
+        <button type="submit" @click="submitBlock">確定</button>
       </div>
-    </slot>
-    <button type="submit" @click="submitBlock">確定</button>
+    </div>
   </aside>
 </template>
 
 <script setup>
-import { ref, onMounted, provide, defineProps, defineEmits } from "vue";
+import {
+  ref,
+  onMounted,
+  provide,
+  defineProps,
+  defineEmits,
+  Teleport,
+} from "vue";
 import {
   interfaceNodeColor,
   returnToolbarOptions,
-} from "../utility/interfaceNode.js";
+} from "../../utility/interfaceNode.js";
+import IntentionTool from "./IntentionTool.vue";
 
 const emits = defineEmits(["select"]);
 const props = defineProps({
@@ -37,10 +49,6 @@ const props = defineProps({
       width: "200px",
       minHeight: "400px",
     }),
-  },
-  width: {
-    type: String,
-    default: "250px",
   },
   nodeType: {
     type: String,
@@ -65,6 +73,14 @@ function submitBlock() {
   }
   console.log("提交", currentBlock.value);
   emits("select", currentBlock.value);
+}
+
+/**
+ * 將選項的title與彈窗設定的資料都回傳給節點
+ * @param data
+ */
+function handleSaveIntention(data) {
+  emits("select", data?.title, data);
 }
 </script>
 

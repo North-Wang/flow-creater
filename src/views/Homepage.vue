@@ -1,11 +1,10 @@
 <script setup>
-import { ref, onMounted, provide, watch } from "vue";
+import { ref, onMounted, provide, watch, toRaw } from "vue";
 import TreeChart from "../components/TreeChart.vue";
 
 import {
   createTriggerEventDefaultTree,
   createResponseEventDefaultTree,
-  iconMap,
 } from "../composables/HomePage/nodeSchema.js";
 import {
   interfaceNodeColor,
@@ -68,6 +67,15 @@ function handleSelectTool(val) {
   console.log("選擇的選項：" + targetNode?.value?.title);
 }
 
+function saveScript() {
+  const res = emptyTree.value.getNodeData();
+  console.log("儲存劇本", res);
+}
+
+function previewNode(id) {
+  console.log("外層開啟預覽圖, 節點id:", id);
+}
+
 onMounted(() => {
   emptyTree.value = createTriggerEventDefaultTree(1);
 });
@@ -75,10 +83,13 @@ onMounted(() => {
 
 <template>
   <div class="wrapper" style="">
-    <ul class="flex flex-col align-left justify-left">
+    <ul class="w-full flex align-left justify-between">
       <li>目前的節點id：{{ currentKey }}</li>
+      <button class="px-4 py-2 rounded-[10px] bg-blue-200" @click="saveScript">
+        儲存
+      </button>
     </ul>
-    <div class="w-full flex mt-4 relative">
+    <div class="w-full flex-col flex mt-4 relative">
       <SideToolbar
         :style="{
           width: '200px',
@@ -99,6 +110,7 @@ onMounted(() => {
         :preview="isPreviewTree"
         @clickNode="(id, block_type) => handleClickNode(id, block_type)"
         @addNode="handleAddNode"
+        @previewNode="previewNode"
       />
     </div>
   </div>
@@ -110,5 +122,6 @@ onMounted(() => {
   flex-direction: column;
   justify-content: center;
   align-items: flex-start;
+  padding: 20px;
 }
 </style>
