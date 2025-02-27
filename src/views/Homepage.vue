@@ -73,7 +73,7 @@ function saveScript() {
 }
 
 function previewNode(id) {
-  console.log("外層開啟預覽圖, 節點id:", id);
+  console.log("外層開啟預覽圖, 節點資料:", id);
 }
 
 onMounted(() => {

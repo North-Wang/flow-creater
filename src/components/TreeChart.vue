@@ -73,7 +73,7 @@
               <div class="tool-bar">
                 <SvgEye
                   :color="`var(--color-toolbar-icon-${parentNodeType})`"
-                  @click.stop="previewNode(props.data?.key)"
+                  @click.stop="previewNode(props.data)"
                 ></SvgEye>
                 <SvgPen
                   :color="`var(--color-toolbar-icon-${parentNodeType})`"
