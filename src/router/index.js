@@ -5,6 +5,7 @@ import {
 } from "vue-router";
 import Homepage from "../views/Homepage.vue";
 import Demo from "../views/Demo.vue";
+import DemoVueFlow from "../views/DemoVueFlow.vue";
 
 const router = createRouter({
   history: createWebHashHistory("/"),
@@ -24,10 +25,15 @@ const router = createRouter({
       name: "Homepage",
       component: Homepage,
     },
-     {
+    {
       path: "/demo",
       name: "Demo",
       component: Demo,
+    },
+    {
+      path: "/vueFlow",
+      name: "DemoVueFlow",
+      component: DemoVueFlow,
     },
   ],
 });
