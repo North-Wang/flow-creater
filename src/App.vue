@@ -5,6 +5,7 @@ import { useRouter, useRoute, RouterLink } from "vue-router";
 const buttonList = ref([
   { name: "首頁", path: "/" },
   { name: "demo", path: "/demo" },
+  { name: "自動化劇本測試", path: "/vueFlow" },
 ]);
 </script>
 

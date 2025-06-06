@@ -18,7 +18,8 @@
     "@vueuse/core": "^12.7.0",
     "sass": "^1.85.0",
     "vue": "^3.2.45",
-    "vue-router": "^4.5.0"
+    "vue-router": "^4.5.0",
+    "zod": "^3.25.53"
   },
   "devDependencies": {
     "@chromatic-com/storybook": "3.2.4",

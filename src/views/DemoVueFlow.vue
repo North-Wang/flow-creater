@@ -5,6 +5,8 @@ import { Background } from "@vue-flow/background";
 import { ControlButton, Controls } from "@vue-flow/controls";
 import { MiniMap } from "@vue-flow/minimap";
 import { NodeToolbar } from "@vue-flow/node-toolbar";
+import NodeTriggerEvent from "../components/ReMAScript/NodeTriggerEvent.vue";
+import NodeAction from "../components/ReMAScript/NodeAction.vue";
 
 const {
   onInit,
@@ -22,19 +24,19 @@ const elements = ref([
   {
     id: "1",
     position: { x: 0, y: 0 },
-    type: "custom",
+    type: "trigger-event",
     data: { nodeType: "trigger", label: "Node 1" },
   },
   {
     id: "2",
     position: { x: -100, y: 150 },
-    type: "default",
+    type: "action",
     data: { label: "Node 2" },
   },
   {
     id: "3",
     position: { x: 100, y: 150 },
-    type: "default",
+    type: "template",
     data: { label: "Node 3" },
     targetPosition: "top",
     sourcePosition: "bottom",
@@ -111,9 +113,7 @@ onMounted(() => {
       :max-zoom="4"
     >
       <Background pattern-color="#aaa" :gap="20" :height="100" :width="100" />
-      <Panel>
-        <button @click="removeEdge('e1->2')">Remove Edge</button>
-      </Panel>
+
       <!-- <NodeToolbar /> -->
       <MiniMap class="w-fit h-fit fixed left-0 top-[40px]" />
       <template #connection-line="connectionLineProps">
@@ -137,12 +137,12 @@ onMounted(() => {
           ><div>logToObject</div>
         </ControlButton> -->
       </Controls>
-      <template #node-custom="{ id, data, selected }">
-        <div class="p-2 rounded bg-purple-500 text-white shadow">
-          <strong>{{ data.label }}</strong
-          ><br />
-          <small>ID: {{ id }}</small>
-        </div>
+      <template #node-trigger-event="{ id, data, selected }">
+        <NodeTriggerEvent />
+      </template>
+
+      <template #node-action="{ id, data, selected }">
+        <NodeAction />
       </template>
     </VueFlow>
   </div>
