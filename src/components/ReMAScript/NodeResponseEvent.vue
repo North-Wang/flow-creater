@@ -1,8 +1,8 @@
 <template>
   <SquareNode>
     <template #content>
-      <div>觸發事件</div>
       <div class="empty"></div>
+      <div>點擊設定事件</div>
     </template>
   </SquareNode>
 </template>
