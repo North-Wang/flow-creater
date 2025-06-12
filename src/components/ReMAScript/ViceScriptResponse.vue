@@ -27,10 +27,10 @@ import NodeResponseEvent from "./NodeResponseEvent.vue";
 import NodeAction from "./NodeAction.vue";
 
 //假資料
-import { scriptDefault, scriptSchema, taskSchema } from "../../public/script";
+import { TaskSchema } from "../../schemas/ReMaScript/scriptSchema";
 
 interface Props {
-  taskList?: z.infer<typeof taskSchema>[];
+  taskList?: z.infer<typeof TaskSchema>[]; //要顯示的兩個task
 }
 interface Emits {
   (e: "save"): void;

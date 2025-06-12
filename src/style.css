@@ -24,7 +24,7 @@
   --color-node-disabled:#c4c4c4;
   --color-node-line:#9fbaca;
   --color-node-text:white; /* 一般節點的文字顏色 */
-  --color-template-node-text:#71AFB6; /* 【模板】類型的節點的文字色 */  
+  --color-node-template:#71AFB6; /* 【模板】類型的節點的文字色 */  
   --color-toolbar-icon-trigger:#8265DA; /* 觸發事件的toolbar icon色 */  
   --color-toolbar-icon-response:#96C5D7; /* 回應事件的toolbar icon色 */  
   --color-toolbar-icon-action:#F9C357; /* 投放管道的toolbar icon色 */  
@@ -97,6 +97,16 @@ textarea{
 .card {
   width: 120px;
   aspect-ratio: 1/1;
+  border-radius: 10px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  row-gap: 4px;
+}
+.rectangle {
+  width: 180px;
+  height: 40px;
   border-radius: 10px;
   display: flex;
   flex-direction: column;

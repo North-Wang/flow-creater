@@ -8,12 +8,16 @@ import {z} from "zod";
  * - trigger-event: 子劇本：觸發事件
  * - response-event: 子劇本：回應事件劇本
  */
-type TreeType = "main" | "trigger-event" | "response-event";
+export type TreeType = "main" | "trigger-event" | "response-event";
+//觸發事件的種類的種類
+export type TriggerType = "註冊" | "購物車未結" | "購買後促銷" | "定期投放";
+//傳送渠道的種類
+export type ActionType = "Email" | "SMS";
 
 /**
  * 一個task的資料格式
 */
-export const taskSchema = z.object({
+export const TaskSchema = z.object({
   id: z.string(),
   reaction: z.enum(['trigger', 'response']), //事件的種類
   sourceId: z.string().nullable(), //前一個task的id
@@ -41,7 +45,7 @@ export const taskSchema = z.object({
 /**
  * 一個劇本的資料格式
 */
-export const scriptSchema = z.object({
+export const ScriptSchema = z.object({
   info: z.object({
     name: z.string(),
     time_range: z.object({
@@ -62,5 +66,5 @@ export const scriptSchema = z.object({
    }),
   status: z.string(),
   version: z.number(),
-  task: z.array(taskSchema)
+  task: z.array(TaskSchema)
 });

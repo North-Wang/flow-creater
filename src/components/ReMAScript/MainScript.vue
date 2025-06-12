@@ -21,9 +21,6 @@
     <template #node-response-event="{ id, data, selected }">
       <TaskResponseEvent />
     </template>
-    <template #node-action="{ id, data, selected }">
-      <NodeAction />
-    </template>
   </VueFlow>
 </template>
 
@@ -52,13 +49,8 @@ const {
 import type { TreeType } from "../../schemas/ReMaScript/scriptSchema";
 
 //節點元件
-import NodeAction from "../../components/ReMAScript/NodeAction.vue";
 import TaskTriggerEvent from "../../components/ReMAScript/TaskTriggerEvent.vue";
 import TaskResponseEvent from "../../components/ReMAScript/TaskResponseEvent.vue";
-
-//假資料
-import { scriptDefault, scriptSchema } from "../public/script";
-import { elements1, task1, task2, task3 } from "../public/fakeTask";
 
 interface Props {
   // script?: z.object();

@@ -7,7 +7,7 @@ import MainScript from "../components/ReMAScript/MainScript.vue";
 import ViceScript from "../components/ReMAScript/ViceScript.vue";
 
 //假資料
-import { scriptDefault, scriptSchema } from "../public/script";
+import { scriptDefault, ScriptSchema } from "../public/script";
 
 /**
  * 定義目前顯示哪種樹狀圖
@@ -58,12 +58,12 @@ const elements = ref([
   },
 ]);
 
-const currentTreeType = ref<treeType>("main");
+const currentTreeType = ref<treeType>("trigger-event");
 /**
  * 更新目前的樹狀圖類型
  */
 function updateTreeType(type: treeType) {
-  console.log("aaa 更新樹狀圖類型", type);
+  console.log("更新樹狀圖類型", type);
   currentTreeType.value = type;
 }
 

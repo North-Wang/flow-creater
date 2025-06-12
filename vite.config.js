@@ -13,6 +13,11 @@ export default defineConfig({
         }
       }
     }
+  },
+   resolve: {
+    alias: {
+      '@': path.resolve(__dirname, './src'), // 將 @ 指到 /src
+    }
   }
     
 })

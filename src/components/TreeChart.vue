@@ -36,7 +36,7 @@
               backgroundColor: returnInterfaceNodeColor(parentNodeType),
               color:
                 parentNodeType === 'template'
-                  ? 'var(--color-template-node-text)'
+                  ? 'var(--color-node-template)'
                   : 'var(--color-node-text)',
             }"
           >

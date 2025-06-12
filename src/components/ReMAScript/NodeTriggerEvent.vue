@@ -1,47 +1,29 @@
 <template>
-  <SquareNode>
-    <template #content>
-      <div>觸發事件</div>
-      <div class="empty"></div>
-    </template>
-  </SquareNode>
+  <section class="card bg-[#BAABE7]">
+    <div class="empty"></div>
+    <div>{{ triggerType }}</div>
+    <div>{{ startTime }}{{ startTimeUnit }}</div>
+  </section>
 </template>
 
 <script setup lang="ts">
-import SquareNode from "./SquareNode.vue";
+import { ref, watch, computed } from "vue";
 import { z } from "zod/v4";
+import { TriggerType } from "../../schemas/ReMaScript/scriptSchema";
 
 interface Props {
-  data?: {
-    label: string;
-  };
   id?: string;
-  isSelected?: boolean;
-  textColor?: string;
-  nodeBgColor?: string;
-  nodeBgColorDisabled?: string;
+  triggerType?: TriggerType;
 }
 
-const props = withDefaults(defineProps<Props>(), {
-  isSelected: false,
-  textColor: "white",
-  nodeBgColor: "#BAABE7",
-  nodeBgColorDisabled: "#BAABE7",
+const props = withDefaults(defineProps<Props>(), {});
+
+const triggerType = computed(() => {
+  if (!props.triggerType) return "點擊設定事件";
+  return props.triggerType || "點擊設定事件";
 });
+const startTime = ref("");
+const startTimeUnit = ref("");
 </script>
 
-<style scoped>
-.card {
-  width: 120px;
-  aspect-ratio: 1/1;
-  border-radius: 10px;
-  background: var(#b8bcfd);
-}
-.empty {
-  width: 45px;
-  aspect-ratio: 1;
-  border: 2px solid #ffffff;
-  border-radius: 4px;
-  border-style: dashed;
-}
-</style>
+<style scoped></style>
