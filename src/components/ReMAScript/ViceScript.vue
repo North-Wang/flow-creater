@@ -7,7 +7,7 @@
   <VueFlow v-model="elements" :min-zoom="0.2" :max-zoom="4">
     <Background pattern-color="#aaa" :gap="20" :height="100" :width="100" />
     <template #node-trigger-event="{ id, data, selected }">
-      <NodeTriggerEvent />
+      <NodeTriggerEvent ref="refTriggerNode" />
     </template>
     <template #node-action="{ id, data, selected }">
       <NodeAction :templateType="'Email'" />
@@ -45,6 +45,7 @@ const {
   onPaneReady,
 } = useVueFlow();
 
+const refTriggerNode = ref(null);
 interface Props {
   taskList?: z.infer<typeof TaskSchema>[]; //要顯示的兩個task
 }
@@ -70,6 +71,16 @@ onNodeClick(({ node }) => {
   console.log("aaa 點擊subScript的節點", node);
   const nodeType = node.type;
   console.log("打開" + nodeType + "的設定彈窗");
+  switch (nodeType) {
+    case "trigger-event":
+      if (refTriggerNode.value) {
+        refTriggerNode.value?.openModalTriggerEventSetting();
+      }
+      break;
+
+    default:
+      break;
+  }
 });
 function goFrontPage() {
   emit("cancel");

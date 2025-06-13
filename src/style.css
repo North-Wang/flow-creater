@@ -2,6 +2,30 @@
 @tailwind components;
 @tailwind utilities;
 
+:root{
+    --color-brand-01:#EAF3F4;
+    --color-brand-02:#DAEDF0;
+    --color-brand-03:#B5DBE0;
+    --color-brand-04:#94C8CE;
+    --color-brand-05:#71AFB6;
+    --color-brand-06:#4C8E95;
+    --neutral-00:#ffffff;
+    --neutral-01:#F1F1F1;
+    --neutral-02:#C4C4C4;
+    --neutral-03:#8A8A8A;
+    --neutral-04:#575757;
+    --negative-01:#FF8B8B;
+    --negative-02:#FF614D;
+    --success-01:#76D37A;
+
+    /* 非必要色 */
+    --extraordinary-01:linear-gradient(90deg, var(--color-brand-02, #94C8CE) 0%, var(--color-brand-03, #4C8E95) 100%);
+    --extraordinary-02:linear-gradient(90deg, var(--color-brand-03, #B5DBE0) 0%, var(--color-brand-05, #71AFB6) 100%);
+    --extraordinary-03:linear-gradient(90deg, var(--color-brand-04, #DAEDF0) 0%, var(--color-brand-06, #B5DBE0) 100%);
+
+    /* 次要色 */
+    --secondary-01:#63A7C8;
+}
 :root {
   font-family: Inter, system-ui, Avenir, Helvetica, Arial, sans-serif;
   line-height: 1.5;
