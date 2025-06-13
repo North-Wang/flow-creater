@@ -59,7 +59,7 @@ function closeModal() {
   align-self: center;
 }
 .close-arrow-btn::before {
-  content: url("../../../assets/downArrowWhite.svg");
+  /* content: url("../../../assets/downArrowWhite.svg"); */
 }
 .fade-enter-active,
 .fade-leave-active {

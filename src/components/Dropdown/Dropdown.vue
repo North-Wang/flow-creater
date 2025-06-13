@@ -39,6 +39,7 @@
     <section
       class="wra-options"
       :style="{
+        ...$attrs.styleDropdownOptions,
         width,
         '--bg-default': `var(${bgColorDefault})`,
         '--color-text': `var(${textColor})`,
@@ -86,11 +87,33 @@
 <script setup lang="ts">
 import { ref, defineProps, defineEmits, computed, useAttrs, watch } from "vue";
 import { onClickOutside } from "@vueuse/core";
+import { z } from "zod";
 
 const $attrs = useAttrs();
 const refDropdown = ref(null);
 const showDropdown = ref(false);
 
+//規範每個選項的結構，可暴露給外部驗證用
+interface OptionItem {
+  name: string;
+  value: string;
+  [key: string]: any;
+}
+
+interface Props {
+  width?: string;
+  options?: OptionItem;
+  dropdownPlaceholder?: string;
+  selectedValue?: OptionItem;
+  maxHeight?: string;
+  isTextShouldWrap?: boolean;
+  isLoading?: boolean;
+  textColor?: string;
+  bgColorDefault?: string;
+  textColorHover?: string;
+  bgColorHover?: string;
+  iconColor?: string;
+}
 /**
  * 顯示所選選項的文字
  */
@@ -104,79 +127,23 @@ interface emitsEvents {
 }
 
 const emit = defineEmits<emitsEvents>();
-const props = defineProps({
-  // id: {
-  //   //整個下拉選單的id。Google gtm埋碼會用來辨識下拉選單
-  //   type: String,
-  //   default: "",
-  // },
-  width: {
-    type: String,
-    default: "200px",
-  },
-  //所有下拉選單的選項
-  options: {
-    type: Array,
-    default: () => [
-      { name: "日本" },
-      { name: "韓國" },
-      { name: "上海自來水來自海上海自來水來自海" },
-      { name: "Repoblikan'i Madagasikara" },
-    ],
-    //必須有name
-    validator: (value: any[]) => {
-      return (
-        Array.isArray(value) &&
-        value.every(
-          (item) => typeof item === "object" && typeof item.name === "string"
-        )
-      );
-    },
-  },
-  //尚未選擇任何其他選項時顯示的提示性文字
-  dropdownPlaceholder: {
-    type: String,
-    default: "員工旅遊去哪裡?",
-  },
-  //從外部控制要選哪一樣
-  selectedValue: {
-    type: String,
-    default: "",
-  },
-  maxHeight: {
-    //選單的最大高度
-    type: String,
-    default: "200px",
-  },
-  isTextShouldWrap: {
-    //文字是否要省略符號、出現v-tooltip?
-    type: Boolean,
-    default: false,
-  },
-  isLoading: {
-    type: Boolean,
-    default: false,
-  },
-  textColor: {
-    type: String,
-    default: "--neutral-04",
-  },
-  bgColorDefault: {
-    type: String,
-    default: "--neutral-00",
-  },
-  textColorHover: {
-    type: String,
-    default: "--neutral-04",
-  },
-  bgColorHover: {
-    type: String,
-    default: "--color-brand-01",
-  },
-  iconColor: {
-    type: String,
-    default: "--color-brand-05",
-  },
+const props = withDefaults(defineProps<Props>(), {
+  width: "200px",
+  options: () => [
+    { name: "日本", value: "Japan" },
+    { name: "韓國", value: "韓國" },
+    { name: "上海自來水來自海上海自來水來自海", value: "上海" },
+    { name: "Repoblikan'i Madagasikara", value: "Madagasikara" },
+  ],
+  dropdownPlaceholder: "員工旅遊去哪裡?",
+  maxHeight: "200px",
+  isTextShouldWrap: false,
+  isLoading: false,
+  textColor: "--neutral-04",
+  bgColorDefault: "--neutral-00",
+  textColorHover: "--neutral-04",
+  bgColorHover: "--color-brand-01",
+  iconColor: "--color-brand-05",
 });
 function clickOption(option, index) {
   selectedOption.value = option?.name;
@@ -211,17 +178,21 @@ watch(
   () => props.selectedValue,
   (val) => {
     if (!val) return;
-    selectedOption.value = val;
+    selectedOption.value = val?.name;
     emitsSelect(val, null);
-  }
+  },
+  { immediate: true }
 );
 
-//如果有設定下拉選單的預設文字，則顯示
+// 若有設定下拉選單的預設文字，且尚未選擇任何初始值，則顯示該預設文字
 watch(
   () => props.dropdownPlaceholder,
   (val) => {
     if (!val || val?.trim() === "") return;
-    selectedOption.value = val;
+
+    if (!props.selectedValue || props.selectedValue?.value.trim() === "") {
+      selectedOption.value = val;
+    }
   },
   { immediate: true }
 );

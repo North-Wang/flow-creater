@@ -4,7 +4,11 @@
     <div>{{ triggerType }}</div>
     <div>{{ startTime }}{{ startTimeUnit }}</div>
   </section>
-  <ModalTriggerEvent v-if="showModal" />
+  <ModalTriggerEvent
+    v-if="showModal"
+    @updateSetting="showModal = false"
+    @removeEvent="showModal = false"
+  />
 </template>
 
 <script setup lang="ts">

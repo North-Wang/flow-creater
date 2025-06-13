@@ -3,6 +3,9 @@ import './style.css'
 import router from "./router";
 import App from './App.vue'
 
+import PrimeVue from 'primevue/config';
+import Aura  from '@primeuix/themes/aura';
+
 import "@vue-flow/core/dist/style.css";
 import "@vue-flow/core/dist/theme-default.css";
 
@@ -12,4 +15,8 @@ app.config.errorHandler = (err) => {
 };
 
 
-app.use(router).mount('#app')
+app.use(router).use(PrimeVue, {
+    theme: {
+        preset: Aura 
+    }
+}).mount('#app')

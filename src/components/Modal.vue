@@ -66,7 +66,7 @@
 <script setup>
 import { ref, onMounted, defineEmits, defineProps } from "vue";
 import whiteX from "../assets/icons/whiteX.svg";
-import goBackIcon from "../assets/icons/white-left-arrow.svg";
+// import goBackIcon from "../assets/icons/white-left-arrow.svg";
 
 const props = defineProps({
   modalId: {

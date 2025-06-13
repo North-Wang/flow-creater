@@ -10,9 +10,20 @@ import {z} from "zod";
  */
 export type TreeType = "main" | "trigger-event" | "response-event";
 //觸發事件的種類的種類
-export type TriggerType = "註冊" | "購物車未結" | "購買後促銷" | "定期投放";
+export const TriggerType = z.enum([
+  "註冊",
+  "購物車未結",
+  "購買後促銷",
+  "定期投放",
+]);
+//觸發事件的發送頻率
+export const TriggerEventFrequencyType = z.enum([
+  "once",
+  "recurrence",
+])  ;
 //傳送渠道的種類
 export type ActionType = "Email" | "SMS";
+
 
 /**
  * 一個task的資料格式
@@ -68,3 +79,5 @@ export const ScriptSchema = z.object({
   version: z.number(),
   task: z.array(TaskSchema)
 });
+
+ 
