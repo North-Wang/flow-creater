@@ -80,14 +80,15 @@ export function calculateLayoutWithDagre(tasks, options = {}) {
 
     // 找到對應的任務
     const task = tasks.find((t) => t.id === nodeId);
+
+    //調整一個節點的資料架構
     if (task) {
       nodes.push({
         id: nodeId,
         type: getNodeType(task),
         position,
         data: {
-          task,
-          nodeType: task.reaction,
+          ...task,
         },
       });
     }

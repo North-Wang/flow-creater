@@ -27,6 +27,8 @@ const scriptStatus = computed(() => {
   return script.value?.status || "--";
 });
 
+const triggerScript = ref([]);
+
 /**
  * 更新目前檢視的樹狀圖類型
  */
@@ -56,10 +58,21 @@ function transformScriptToVueFlow(script: typeof ScriptSchema) {
   console.log("調整好VueFlow的資料架構", vueFlowData.value);
 }
 
+/**
+ * 取出屬於觸發事件的tasks
+ * @param taskList
+ */
+function getTriggerTasks(taskList) {
+  triggerScript.value =
+    taskList?.find((task) => task.data?.reaction === "trigger") || null;
+}
+
 watch(
   script,
-  (script) => {
-    transformScriptToVueFlow(script);
+  async (script) => {
+    await transformScriptToVueFlow(script);
+    if (!vueFlowData.value) return;
+    getTriggerTasks(vueFlowData.value);
   },
   { immediate: true, deep: true }
 );
@@ -75,6 +88,7 @@ provide("updateTriggerEventSetting", updateTriggerEventSetting);
     <div class="w-full h-[calc(100dvh-50px)] relative">
       <div>劇本狀態{{ scriptStatus }}</div>
       <ViceScript
+        :task="triggerScript"
         v-if="currentTreeType === 'trigger-event'"
         @cancel="currentTreeType = 'main'"
       />

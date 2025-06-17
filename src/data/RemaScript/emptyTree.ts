@@ -282,7 +282,7 @@ export const emptyScriptBySchema = ScriptSchema.parse({
         type: "sign",
       },
       schedule: {
-        type: "once",
+        type: "recurrence",
         time: {
           once: "2025-01-01T09:00:00Z",
         },
@@ -301,7 +301,7 @@ export const emptyScriptBySchema = ScriptSchema.parse({
         type: "open",
       },
       schedule: {
-        type: "once",
+        type: "recurrence",
         time: {
           once: "2025-01-01T10:00:00Z",
         },

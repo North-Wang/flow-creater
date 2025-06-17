@@ -25,24 +25,12 @@
 
 <script setup lang="ts">
 import { ref, onMounted, watch, computed, inject } from "vue";
-import { z } from "zod/v4";
 import { VueFlow, useVueFlow, Panel, Position } from "@vue-flow/core";
 import { Background } from "@vue-flow/background";
 import { ControlButton, Controls } from "@vue-flow/controls";
 import { MiniMap } from "@vue-flow/minimap";
 import { NodeToolbar } from "@vue-flow/node-toolbar";
-const {
-  onInit,
-  onNodeDragStop,
-  onConnect,
-  addEdges,
-  setViewport,
-  toObject,
-  onNodeClick,
-  fitView,
-  fitBounds,
-  onPaneReady,
-} = useVueFlow();
+const { onInit, onNodeClick } = useVueFlow();
 
 import type { TreeType } from "../../schemas/ReMaScript/scriptSchema";
 
@@ -58,9 +46,6 @@ const props = withDefaults(defineProps<Props>(), {
   vueFlowData: null,
 });
 
-/**
- * vueFlow所需要的節點資料
- */
 const elements = ref(null);
 
 /**
@@ -82,19 +67,8 @@ onNodeClick(({ node }) => {
   }
 });
 
-onPaneReady((instance) => {});
-
 onInit((vueFlowInstance) => {
   vueFlowInstance.fitView();
-});
-
-onNodeDragStop(({ event, nodes, node }) => {
-  console.log("Node Drag Stop", { event, nodes, node });
-});
-
-onConnect((connection) => {
-  console.log("驗證是否可以連接", connection);
-  addEdges(connection);
 });
 
 watch(

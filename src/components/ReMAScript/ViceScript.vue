@@ -4,7 +4,7 @@
       回到前一頁
     </button>
   </div>
-  {{ triggerEventSetting }}
+  觸發事件設定： {{ triggerEventSetting }}
   <VueFlow v-model="elements" :min-zoom="0.2" :max-zoom="4">
     <Background :gap="20" :height="100" :width="100" />
     <template #node-trigger-event="{ id, data, selected }">
@@ -57,7 +57,7 @@ type typeTask = z.infer<typeof TaskSchema>;
 type TriggerEvent = z.infer<typeof TriggerEventSchema>;
 
 interface Props {
-  taskList?: z.infer<typeof TaskSchema>; //要顯示的兩個task
+  task?: z.infer<typeof TaskSchema>; //要顯示的兩個task
 }
 interface Emits {
   (e: "save"): void;
@@ -92,23 +92,25 @@ onNodeClick(({ node }) => {
 });
 
 /**
- * 從taskList中取出觸發事件設定的資料
- * @param taskList
+ * 取出觸發事件設定的資料
+ * @param task
  */
-function getTriggerEventSettingFromTask(task: typeTask) {
+function getTriggerEventSettingFromTask(data) {
+  console.log("aaa 取出觸發事件設定的資料", data);
+
   //如果是購買後促銷，則會有purchaseTypes、purchaseItems這兩個參數
-  if (task?.eventOption?.type === "purchase") {
+  if (data?.eventOption?.type === "purchase") {
     triggerEventSetting.value = {
-      event: task?.eventOption?.type,
-      frequency: task?.schedule?.type,
-      purchaseTypes: task?.eventOption?.purchaseTypes,
-      purchaseItems: task?.eventOption?.purchaseItems,
+      event: data?.eventOption?.type,
+      frequency: data?.schedule?.type,
+      purchaseTypes: data?.eventOption?.purchaseTypes,
+      purchaseItems: data?.eventOption?.purchaseItems,
     };
     return;
   }
   triggerEventSetting.value = {
-    event: task?.eventOption?.type,
-    frequency: task?.schedule?.type,
+    event: data?.eventOption?.type,
+    frequency: data?.schedule?.type,
   };
 }
 
@@ -120,23 +122,20 @@ function goFrontPage() {
  * 取出各節點的資料
  */
 watch(
-  () => props.taskList,
-  (newTaskList) => {
-    console.log("subScript收到主劇本傳來的兩個task資料", newTaskList);
-    if (!newTaskList) {
+  () => props.task,
+  (task) => {
+    console.log("subScript從頁面收到有trigger event的一個task資料", task);
+    if (!task) {
       console.warn("沒有先前的觸發事件task資料");
       return;
     }
 
-    //取出有【觸發事件設定】的task
-    const taskTrigger = newTaskList.find((task) => task.reaction === "trigger");
-    getTriggerEventSettingFromTask(taskTrigger);
+    getTriggerEventSettingFromTask(task?.data);
   },
   { immediate: true }
 );
 
 provide("triggerEventSetting", triggerEventSetting);
-// provide("triggerEventTaskList", props.taskList);
 </script>
 
 <style lang="sass"></style>
