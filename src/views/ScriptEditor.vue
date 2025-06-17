@@ -40,15 +40,24 @@ function updateTreeType(type: TreeType) {
 /**
  * 更新【觸發事件設定】
  */
-function updateTriggerEventSetting(
-  taskId: string,
-  newSetting: typeof TriggerEventSchema
-) {
+function updateTriggerEventSetting(taskId: string, newSetting) {
   const target = script.value?.task?.find((task) => task?.id === taskId);
-  target.eventOption = {
-    event: newSetting?.event,
-  };
-  target.schedule.type = newSetting?.frequency;
+  if (!target || !newSetting) return;
+  const { frequency, ...setting } = newSetting;
+
+  if (setting.event === "purchase") {
+    target.eventOption = {
+      event: setting?.event,
+      purchaseItems: setting?.purchase_item,
+      purchaseTypes: setting?.purchase_type,
+    };
+  } else {
+    target.eventOption = {
+      event: setting?.event,
+    };
+  }
+
+  target.schedule.type = frequency;
   console.log("更新完【觸發事件設定】的劇本", script.value);
 }
 

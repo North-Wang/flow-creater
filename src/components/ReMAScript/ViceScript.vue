@@ -96,7 +96,7 @@ onNodeClick(({ node }) => {
 function getTriggerEventSettingFromTask(data) {
   console.log("要取出觸發事件設定的資料", data);
   //如果是購買後促銷，則會有purchaseTypes、purchaseItems這兩個參數
-  if (data?.eventOption?.type === "purchase") {
+  if (data?.eventOption?.event === "purchase") {
     triggerEventSetting.value = {
       event: data?.eventOption?.event,
       frequency: data?.schedule?.type,
@@ -121,7 +121,7 @@ function goFrontPage() {
 watch(
   () => props.task,
   (task) => {
-    console.log("subScript從頁面收到有trigger event的一個task資料", task);
+    console.warn("子劇本監聽到一個task資料改變", task);
     if (!task) {
       console.warn("沒有先前的觸發事件task資料");
       editingTaskId.value = "";

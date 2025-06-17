@@ -28,10 +28,7 @@
             :options="purchaseTypeOptions"
             :dropdownPlaceholder="'-'"
             :width="'138px'"
-            :selectedValue="{
-              name: injectTriggerEventSetting?.purchaseTypes,
-              value: injectTriggerEventSetting?.purchaseTypes,
-            }"
+            :selectedValue="presetPurchasedType"
             @select="selectPurchaseType"
           />
           <ul
@@ -49,10 +46,7 @@
             :width="'250px'"
             :options="purchaseItemsOptions"
             :dropdownPlaceholder="'-'"
-            :selectedValue="{
-              name: injectTriggerEventSetting?.purchaseItems,
-              value: injectTriggerEventSetting?.purchaseItems,
-            }"
+            :selectedValue="presetPurchasedItem"
             class="w-full"
             @select="selectPurchaseItem"
             v-else
@@ -122,7 +116,7 @@
             <span>功能做下一步設定。</span>
           </p>
         </div>
-
+        {{ formData }}
         <div class="button-wrap">
           <button class="button-basic-light btn-cancel" @click="closeModal">
             移除
@@ -165,6 +159,24 @@ let injectUpdateTriggerEventSetting = inject("updateTriggerEventSetting");
 let injectEditingTaskId = inject("editingTaskId");
 
 const emits = defineEmits(["closeModal", "removeEvent"]);
+
+//先前設定的【購買項目】的【種類】
+const presetPurchasedType = computed(() => {
+  if (!injectTriggerEventSetting.value?.purchaseTypes) return null;
+  return {
+    name: injectTriggerEventSetting.value?.purchaseTypes,
+    value: injectTriggerEventSetting.value?.purchaseTypes,
+  };
+});
+
+//先前設定的【購買項目】的【品項】
+const presetPurchasedItem = computed(() => {
+  if (!injectTriggerEventSetting.value?.purchaseItems) return null;
+  return {
+    name: injectTriggerEventSetting.value?.purchaseItems,
+    value: injectTriggerEventSetting.value?.purchaseItems,
+  };
+});
 
 const triggerEventMap = new Map<string, string>([
   ["sign", "註冊"],
@@ -243,10 +255,10 @@ function selectTriggerEvent(opt) {
   formData.value.event = opt?.value;
 }
 function selectPurchaseType(type) {
-  formData.value.purchaseTypes = type;
+  formData.value.purchaseTypes = type?.value;
 }
 function selectPurchaseItem(item) {
-  formData.value.purchaseItems = item;
+  formData.value.purchaseItems = item?.value;
 }
 
 function removeEvent() {
@@ -286,8 +298,8 @@ async function prepareSaveSetting() {
 
       data = {
         event: formData.value.event,
-        purchase_type: formData.value?.purchaseTypes?.value,
-        purchase_item: formData.value.purchaseItems?.value,
+        purchase_type: formData.value?.purchaseTypes,
+        purchase_item: formData.value.purchaseItems,
         frequency: formData.value.frequency,
       };
       break;
@@ -295,7 +307,6 @@ async function prepareSaveSetting() {
       console.warn("未定義的觸發事件種類", formData.value.event);
       break;
   }
-  // emits("updateSetting", data);
   injectUpdateTriggerEventSetting(injectEditingTaskId.value, data);
   closeModal();
 }
@@ -337,7 +348,7 @@ watch(
   () => formData.value.purchaseTypes,
   (type) => {
     //根據「購買項目」的種類，給後端對應的參數
-    switch (type) {
+    switch (type?.name) {
       case "商品":
         // getPurchaseItems("productsales");
         formData.value.purchaseItems = "-";

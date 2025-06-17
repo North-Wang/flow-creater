@@ -57,8 +57,8 @@ export const TriggerEventBasicSchema = z.object({
 export const TriggerEventPurchaseAfterPromotionSchema = z.object({
   event: z.literal("purchase"),
   frequency: TriggerEventFrequencyType.default("once"),
-  purchaseTypes: z.object({ name: z.string(), value: z.string() }),
-  purchaseItems: z.object({ name: z.string(), value: z.string() }),
+  purchaseTypes: z.string(),
+  purchaseItems: z.string(),
 });
 
 /**
