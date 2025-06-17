@@ -3,7 +3,7 @@ import { ref, onMounted, watch, computed, provide } from "vue";
 import { z } from "zod";
 import {
   TreeType,
-  TriggerEventPurchaseAfterPromotionSchema,
+  TriggerEventSchema,
   TaskSchema,
   ScriptSchema,
 } from "../schemas/ReMaScript/scriptSchema";
@@ -41,18 +41,22 @@ function updateTreeType(type: TreeType) {
  * 更新【觸發事件設定】
  */
 function updateTriggerEventSetting(
-  taskIdList: string[],
-  newSetting: typeof TriggerEventPurchaseAfterPromotionSchema
+  taskId: string,
+  newSetting: typeof TriggerEventSchema
 ) {
-  console.log("aaa 準備更新task", taskIdList, newSetting);
+  const target = script.value?.task?.find((task) => task?.id === taskId);
+  target.eventOption = {
+    event: newSetting?.event,
+  };
+  target.schedule.type = newSetting?.frequency;
+  console.log("更新完【觸發事件設定】的劇本", script.value);
 }
 
 /**
- * 將後端的script資料轉成VueFlow的格式
+ * 將script資料轉成VueFlow的格式
  * @param script
  */
 function transformScriptToVueFlow(script: typeof ScriptSchema) {
-  console.log("從api收到的原始script資料", script);
   const result = createVueFlowLayout(script?.task);
   vueFlowData.value = result;
   console.log("調整好VueFlow的資料架構", vueFlowData.value);
@@ -70,14 +74,13 @@ function getTriggerTasks(taskList) {
 watch(
   script,
   async (script) => {
+    console.warn("偵測到劇本變更");
     await transformScriptToVueFlow(script);
     if (!vueFlowData.value) return;
     getTriggerTasks(vueFlowData.value);
   },
   { immediate: true, deep: true }
 );
-
-onMounted(() => {});
 
 provide("updateTreeType", updateTreeType);
 provide("updateTriggerEventSetting", updateTriggerEventSetting);

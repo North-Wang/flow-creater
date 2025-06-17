@@ -79,7 +79,7 @@ export const TaskSchema = z.object({
   targetId: z.array(z.string()).nullable(), //下一個task的id
   //事件的種類
   eventOption: z.object({
-    type: z.union([TriggerType, ResponseType]),
+    event: z.union([TriggerType, ResponseType]),
     purchaseTypes: z.string().optional(),
     purchaseItems: z.string().optional(),
   }),

@@ -34,8 +34,6 @@ import NodeEmailTemplate from "./NodeEmailTemplate.vue";
 //假資料
 import {
   TaskSchema,
-  TriggerEventBasicSchema,
-  TriggerEventPurchaseAfterPromotionSchema,
   TriggerEventSchema,
 } from "../../schemas/ReMaScript/scriptSchema";
 import { emptyResponseTree } from "../../data/RemaScript/emptyTree";
@@ -53,7 +51,6 @@ const {
 
 const refTriggerNode = ref(null);
 
-type typeTask = z.infer<typeof TaskSchema>;
 type TriggerEvent = z.infer<typeof TriggerEventSchema>;
 
 interface Props {
@@ -66,6 +63,7 @@ interface Emits {
 const props = withDefaults(defineProps<Props>(), {});
 const emit = defineEmits<Emits>();
 const elements = ref(emptyResponseTree);
+const editingTaskId = ref<string>("");
 
 // 提供給子元件：先前儲存的或預設的觸發事件設定
 const triggerEventSetting = ref<TriggerEvent>({
@@ -96,12 +94,11 @@ onNodeClick(({ node }) => {
  * @param task
  */
 function getTriggerEventSettingFromTask(data) {
-  console.log("aaa 取出觸發事件設定的資料", data);
-
+  console.log("要取出觸發事件設定的資料", data);
   //如果是購買後促銷，則會有purchaseTypes、purchaseItems這兩個參數
   if (data?.eventOption?.type === "purchase") {
     triggerEventSetting.value = {
-      event: data?.eventOption?.type,
+      event: data?.eventOption?.event,
       frequency: data?.schedule?.type,
       purchaseTypes: data?.eventOption?.purchaseTypes,
       purchaseItems: data?.eventOption?.purchaseItems,
@@ -109,7 +106,7 @@ function getTriggerEventSettingFromTask(data) {
     return;
   }
   triggerEventSetting.value = {
-    event: data?.eventOption?.type,
+    event: data?.eventOption?.event,
     frequency: data?.schedule?.type,
   };
 }
@@ -127,15 +124,17 @@ watch(
     console.log("subScript從頁面收到有trigger event的一個task資料", task);
     if (!task) {
       console.warn("沒有先前的觸發事件task資料");
+      editingTaskId.value = "";
       return;
     }
-
+    editingTaskId.value = task?.id;
     getTriggerEventSettingFromTask(task?.data);
   },
   { immediate: true }
 );
 
 provide("triggerEventSetting", triggerEventSetting);
+provide("editingTaskId", editingTaskId);
 </script>
 
 <style lang="sass"></style>

@@ -30,7 +30,7 @@ export const sampleScript = ScriptSchema.parse({
       sourceId: null,
       targetId: ["task-3"],
       eventOption: {
-        type: "purchase",
+        event: "purchase",
         purchaseTypes: "商品",
         purchaseItems: "棉花糖",
       },
@@ -52,7 +52,7 @@ export const sampleScript = ScriptSchema.parse({
       sourceId: null,
       targetId: ["task-3"],
       eventOption: {
-        type: "purchase",
+        event: "purchase",
         purchaseTypes: "商品",
         purchaseItems: "棉花糖",
       },
@@ -74,7 +74,7 @@ export const sampleScript = ScriptSchema.parse({
       sourceId: ["task-2"],
       targetId: ["task-4"],
       eventOption: {
-        type: "open",
+        event: "open",
       },
       schedule: {
         type: "once",
@@ -94,7 +94,7 @@ export const sampleScript = ScriptSchema.parse({
       sourceId: ["task-3"],
       targetId: ["task-5"],
       eventOption: {
-        type: "open",
+        event: "open",
       },
       schedule: {
         type: "once",
@@ -114,7 +114,7 @@ export const sampleScript = ScriptSchema.parse({
       sourceId: ["task-4"],
       targetId: null,
       eventOption: {
-        type: "open",
+        event: "open",
       },
       schedule: {
         type: "once",
@@ -279,7 +279,7 @@ export const emptyScriptBySchema = ScriptSchema.parse({
       sourceId: [],
       targetId: ["task-2", "task-3"],
       eventOption: {
-        type: "sign",
+        event: "sign",
       },
       schedule: {
         type: "recurrence",
@@ -298,7 +298,7 @@ export const emptyScriptBySchema = ScriptSchema.parse({
       sourceId: ["task-1"],
       targetId: [],
       eventOption: {
-        type: "open",
+        event: "open",
       },
       schedule: {
         type: "recurrence",
@@ -318,7 +318,7 @@ export const emptyScriptBySchema = ScriptSchema.parse({
       sourceId: ["task-1"],
       targetId: ["task-4"],
       eventOption: {
-        type: "open",
+        event: "open",
       },
       schedule: {
         type: "once",
@@ -338,7 +338,7 @@ export const emptyScriptBySchema = ScriptSchema.parse({
       sourceId: ["task-3"],
       targetId: [],
       eventOption: {
-        type: "open",
+        event: "open",
       },
       schedule: {
         type: "once",
@@ -382,7 +382,7 @@ export const minimalEmptyScript = ScriptSchema.parse({
       sourceId: null,
       targetId: null,
       eventOption: {
-        type: "sign",
+        event: "sign",
       },
       schedule: {
         type: "once",

@@ -76,7 +76,7 @@
                 :id="options?.value"
                 :value="options?.value"
                 style="margin-right: 16px"
-                v-model="currentSendTimeType"
+                v-model="formData.frequency"
               />
               <label :for="options?.value" class="cursor-pointer">{{
                 options?.name
@@ -124,7 +124,7 @@
         </div>
 
         <div class="button-wrap">
-          <button class="button-basic-light btn-cancel" @click="removeEvent">
+          <button class="button-basic-light btn-cancel" @click="closeModal">
             移除
           </button>
           <button class="button-basic btn-next" @click="prepareSaveSetting">
@@ -137,7 +137,15 @@
 </template>
 
 <script setup lang="ts">
-import { ref, defineEmits, onMounted, watch, computed, inject } from "vue";
+import {
+  ref,
+  defineEmits,
+  onMounted,
+  watch,
+  computed,
+  inject,
+  defineProps,
+} from "vue";
 import DrawerModal from "../Modal/DrawerModal.vue";
 import ExplainTriggerEvent from "./ExplainTriggerEvent.vue";
 import Dropdown from "../../Dropdown/Dropdown.vue";
@@ -154,7 +162,10 @@ let injectTriggerEventSetting = inject<typeof TriggerEventSchema>(
   "triggerEventSetting"
 );
 let injectUpdateTriggerEventSetting = inject("updateTriggerEventSetting");
-const emits = defineEmits(["updateSetting", "removeEvent"]);
+let injectEditingTaskId = inject("editingTaskId");
+
+const emits = defineEmits(["closeModal", "removeEvent"]);
+
 const triggerEventMap = new Map<string, string>([
   ["sign", "註冊"],
   ["cart_abandonment", "購物車未結"],
@@ -241,7 +252,9 @@ function selectPurchaseItem(item) {
 function removeEvent() {
   emits("removeEvent");
 }
-
+function closeModal() {
+  emits("closeModal");
+}
 //驗證資料是否填寫完整
 function validateFormData(schema) {
   const result = schema.safeParse(formData.value);
@@ -264,7 +277,7 @@ async function prepareSaveSetting() {
       if (validateFormData(TriggerEventBasicSchema) === false) return;
       data = {
         event: formData.value.event,
-        frequency: "",
+        frequency: formData.value.frequency,
       };
       break;
     case "purchase":
@@ -275,6 +288,7 @@ async function prepareSaveSetting() {
         event: formData.value.event,
         purchase_type: formData.value?.purchaseTypes?.value,
         purchase_item: formData.value.purchaseItems?.value,
+        frequency: formData.value.frequency,
       };
       break;
     default:
@@ -282,7 +296,8 @@ async function prepareSaveSetting() {
       break;
   }
   // emits("updateSetting", data);
-  injectUpdateTriggerEventSetting(null, formData.value);
+  injectUpdateTriggerEventSetting(injectEditingTaskId.value, data);
+  closeModal();
 }
 
 const styleSpecialWrapper = computed(() => {
@@ -297,8 +312,6 @@ const styleSpecialWrapper = computed(() => {
     };
   }
 });
-
-function setPurchase(setting: type) {}
 
 /**
  * 還原先前設定的彈窗內容

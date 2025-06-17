@@ -6,7 +6,7 @@
   </section>
   <ModalTriggerEvent
     v-if="showModal"
-    @updateSetting="handleSaveTriggerEventSetting"
+    @closeModal="showModal = false"
     @removeEvent="showModal = false"
   />
 </template>
@@ -46,11 +46,6 @@ const showModal = ref(false);
 //讓外部元件可以打開【設定觸發事件】的彈窗
 function openModalTriggerEventSetting() {
   showModal.value = true;
-}
-
-function handleSaveTriggerEventSetting(setting: object) {
-  console.log("aaa Save Trigger Event Setting:", setting);
-  showModal.value = false;
 }
 
 defineExpose({ openModalTriggerEventSetting });
