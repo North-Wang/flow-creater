@@ -102,7 +102,7 @@ interface OptionItem {
 
 interface Props {
   width?: string;
-  options?: OptionItem;
+  options?: OptionItem[];
   dropdownPlaceholder?: string;
   selectedValue?: OptionItem;
   maxHeight?: string;
@@ -173,13 +173,21 @@ function isOverflow(e, text) {
   // showTooltip.value = text.length * fontSize <= e.target.scrollWidth * line;
 }
 
-//如果有設定初始選項，則顯示
+/**
+ * 由外部控制要選擇哪個選項
+ * @description 初始時不要emit，避免無限迴圈
+ */
+let hasInitialized = false;
 watch(
   () => props.selectedValue,
   (val) => {
     if (!val) return;
     selectedOption.value = val?.name;
-    emitsSelect(val, null);
+    if (hasInitialized) {
+      emitsSelect(val, null);
+    } else {
+      hasInitialized = true;
+    }
   },
   { immediate: true }
 );

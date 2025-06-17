@@ -6,6 +6,7 @@ const buttonList = ref([
   { name: "首頁", path: "/" },
   { name: "demo", path: "/demo" },
   { name: "自動化劇本測試", path: "/vueFlow" },
+  { name: "cursor自動產生", path: "/script-editor" },
 ]);
 </script>
 

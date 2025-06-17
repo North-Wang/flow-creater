@@ -5,7 +5,8 @@ import {
 } from "vue-router";
 import Homepage from "../views/Homepage.vue";
 import Demo from "../views/Demo.vue";
-import DemoVueFlow from "../views/DemoVueFlow.vue";
+import ScriptEditor from "../views/ScriptEditor.vue";
+import ScriptEditorPage from "../views/ScriptEditorPage.vue";
 
 const router = createRouter({
   history: createWebHashHistory("/"),
@@ -32,8 +33,13 @@ const router = createRouter({
     },
     {
       path: "/vueFlow",
-      name: "DemoVueFlow",
-      component: DemoVueFlow,
+      name: "ScriptEditor",
+      component: ScriptEditor,
+    },
+    {
+      path: "/script-editor",
+      name: "ScriptEditorPage",
+      component: ScriptEditorPage,
     },
   ],
 });

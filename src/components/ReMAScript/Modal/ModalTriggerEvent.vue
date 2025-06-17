@@ -13,9 +13,10 @@
             @select="selectTriggerEvent"
           />
         </div>
+
         <div
           class="position-relative w-full grid grid-cols-[auto_auto_1fr] gap-x-[25px] place-items-center"
-          v-if="formData.event === '購買後促銷'"
+          v-if="formData.event === 'purchase'"
         >
           <label
             for=""
@@ -27,6 +28,10 @@
             :options="purchaseTypeOptions"
             :dropdownPlaceholder="'-'"
             :width="'138px'"
+            :selectedValue="{
+              name: injectTriggerEventSetting?.purchaseTypes,
+              value: injectTriggerEventSetting?.purchaseTypes,
+            }"
             @select="selectPurchaseType"
           />
           <ul
@@ -42,9 +47,12 @@
           </ul>
           <Dropdown
             :width="'250px'"
-            :options="purchaseItems"
+            :options="purchaseItemsOptions"
             :dropdownPlaceholder="'-'"
-            :selectValue="formData.purchaseItems"
+            :selectedValue="{
+              name: injectTriggerEventSetting?.purchaseItems,
+              value: injectTriggerEventSetting?.purchaseItems,
+            }"
             class="w-full"
             @select="selectPurchaseItem"
             v-else
@@ -78,17 +86,19 @@
         </div>
       </li>
       <li class="introduction">
-        {{ formData }}
         <div>
           <div class="title">事件說明</div>
-          <p class="text-left font-18" v-if="formData.event === '註冊'">
+          <p class="text-left font-18" v-if="formData.event === 'sign'">
             <span>設定當</span>
             <span class="Cyan">顧客註冊後過多久</span>
             <span>，系統即會觸發。請到</span>
             <span class="Cyan">時間</span>
             <span>功能做下一步設定。</span>
           </p>
-          <p class="text-left font-18" v-if="formData.event === '購物車未結'">
+          <p
+            class="text-left font-18"
+            v-if="formData.event === 'cart_abandonment'"
+          >
             <span>設定當顧客加入購物車且</span>
             <span class="Cyan">且在幾天內未進行結帳</span>
             <span>，系統即會觸發。請到</span>
@@ -97,14 +107,14 @@
               >功能做下一步設定。此事件目前僅供API進行觸發來判斷，建議要有技術人員來協助串接。</span
             >
           </p>
-          <p class="text-left font-18" v-if="formData.event === '購買後促銷'">
+          <p class="text-left font-18" v-if="formData.event === 'purchase'">
             <span>設定當</span>
             <span class="Cyan">顧客購買後過多久</span>
             <span>，系統即會觸發，您可以選擇購買的項目。完成後請到</span>
             <span class="Cyan">時間</span>
             <span>功能做下一步設定。</span>
           </p>
-          <p class="text-left font-18" v-if="formData.event === '定期投放'">
+          <p class="text-left font-18" v-if="formData.event === 'scheduled'">
             <span>根據</span>
             <span class="Cyan">指定的時間範圍與頻率</span>
             <span>，系統即會觸發。請到</span>
@@ -127,35 +137,47 @@
 </template>
 
 <script setup lang="ts">
-import { ref, defineEmits, onMounted, watch, computed } from "vue";
+import { ref, defineEmits, onMounted, watch, computed, inject } from "vue";
 import DrawerModal from "../Modal/DrawerModal.vue";
 import ExplainTriggerEvent from "./ExplainTriggerEvent.vue";
 import Dropdown from "../../Dropdown/Dropdown.vue";
 import DropdownWithSearch from "../../Dropdown/DropdownCheckbox.vue";
 import DatePicker from "primevue/datepicker";
 import {
-  TriggerType,
-  TriggerEventFrequencyType,
+  TriggerEventBasicSchema,
+  TriggerEventPurchaseAfterPromotionSchema,
+  TriggerEventSchema,
 } from "../../../schemas/ReMaScript/scriptSchema";
 import { z } from "zod";
 
+let injectTriggerEventSetting = inject<typeof TriggerEventSchema>(
+  "triggerEventSetting"
+);
+let injectUpdateTriggerEventSetting = inject("updateTriggerEventSetting");
 const emits = defineEmits(["updateSetting", "removeEvent"]);
+const triggerEventMap = new Map<string, string>([
+  ["sign", "註冊"],
+  ["cart_abandonment", "購物車未結"],
+  ["purchase", "購買後促銷"],
+  ["scheduled", "定期投放"],
+]);
 const triggerEventOptions = ref([
-  { name: "註冊", value: "註冊" },
-  { name: "購物車未結", value: "購物車未結" },
-  { name: "購買後促銷", value: "購買後促銷" },
-  { name: "定期投放", value: "定期投放" },
+  { name: "註冊", value: "sign" },
+  { name: "購物車未結", value: "cart_abandonment" },
+  { name: "購買後促銷", value: "purchase" },
+  { name: "定期投放", value: "scheduled" },
 ]);
 const purchaseTypeOptions = ref([
   { name: "商品", value: "商品" },
   { name: "類別", value: "類別" },
   { name: "品牌", value: "品牌" },
-]); //購買項目的類別
-const purchaseItems = ref([
+]);
+//購買項目的類別
+const purchaseItemsOptions = ref([
   { name: "桂冠食品", value: "桂冠食品" },
   { name: "冰淇淋", value: "冰淇淋" },
 ]); //購買項目
-const currentSendTimeType = ref("once"); //目前選擇的發送方式
+const currentSendTimeType = ref<"once" | "recurrence">("once"); //目前選擇的發送方式
 
 const sendTimeTypeOptions = ref([
   {
@@ -168,39 +190,42 @@ const sendTimeTypeOptions = ref([
   },
 ]);
 
-/* 選擇的選項 */
-const basicFormDataSchema = z.object({
-  event: TriggerType.default("註冊"),
-  frequency: TriggerEventFrequencyType.default("once"),
-});
-//購買後促銷的schema
-const postPurchasePromotionSchema = basicFormDataSchema.extend({
-  purchaseTypes: z.object({ name: z.string(), value: z.string() }),
-  purchaseItems: z.object({ name: z.string(), value: z.string() }),
-});
 // 推導型別
-type FormDataType = z.infer<typeof basicFormDataSchema>;
-const formData = ref<FormDataType>(basicFormDataSchema.parse({}));
+type FormDataType = z.infer<typeof TriggerEventBasicSchema>;
+const formData = ref<FormDataType>(TriggerEventBasicSchema.parse({}));
 const errorMsg = ref("需要選擇購買的項目");
 
 const showLoadingInput = ref(false);
 const showErrorMsg = ref(false);
 const showExplainTriggerEvent = ref(false); //顯示【購買後促銷】的彈窗說明
-const defaultTriggerEvent = ref({ name: "購買後促銷", value: "購買後促銷" }); //預設的觸發事件
+const defaultTriggerEvent = ref({ name: "購買後促銷", value: "purchase" }); //預設的觸發事件
 const recurringStartDate = ref(null); //定期投放的開始日期
 
 /**
- * 還原設定「觸發事件」選項
+ * 還原先前的設定
  */
-function initialTriggerEvent() {
-  console.log("還原「觸發事件」的種類");
-}
+function restoreSetting(setting) {
+  if (!setting) return;
+  console.log("還原先前的設定", setting);
 
-/**
- * 設定「觸發設定」要顯示的選項
- */
-function initialStartTime() {
-  console.log("還原「開始時間」");
+  //下拉選單顯示觸發事件
+  defaultTriggerEvent.value = {
+    name: triggerEventMap.get(setting.event),
+    value: setting.event,
+  };
+
+  //觸發事件
+  formData.value.event = setting.event;
+  formData.value.frequency = setting.frequency;
+
+  //購買項目 (購買後促銷才有)
+  if (setting.event === "purchase") {
+    formData.value.purchaseTypes = setting.purchaseTypes;
+    formData.value.purchaseItems = setting.purchaseItems;
+  }
+
+  //發送方式
+  currentSendTimeType.value = setting.frequency || "once";
 }
 
 function selectTriggerEvent(opt) {
@@ -217,6 +242,7 @@ function removeEvent() {
   emits("removeEvent");
 }
 
+//驗證資料是否填寫完整
 function validateFormData(schema) {
   const result = schema.safeParse(formData.value);
 
@@ -232,17 +258,18 @@ function validateFormData(schema) {
 async function prepareSaveSetting() {
   let data = {};
   switch (formData.value.event) {
-    case "註冊":
-    case "購物車未結":
-    case "定期投放":
-      if (validateFormData(basicFormDataSchema) === false) return;
+    case "sign":
+    case "cart_abandonment":
+    case "scheduled":
+      if (validateFormData(TriggerEventBasicSchema) === false) return;
       data = {
         event: formData.value.event,
         frequency: "",
       };
       break;
-    case "購買後促銷":
-      if (validateFormData(postPurchasePromotionSchema) === false) return;
+    case "purchase":
+      if (validateFormData(TriggerEventPurchaseAfterPromotionSchema) === false)
+        return;
 
       data = {
         event: formData.value.event,
@@ -254,8 +281,8 @@ async function prepareSaveSetting() {
       console.warn("未定義的觸發事件種類", formData.value.event);
       break;
   }
-  console.log("aaa 準備儲存設定", data);
-  emits("updateSetting", data);
+  // emits("updateSetting", data);
+  injectUpdateTriggerEventSetting(null, formData.value);
 }
 
 const styleSpecialWrapper = computed(() => {
@@ -270,6 +297,19 @@ const styleSpecialWrapper = computed(() => {
     };
   }
 });
+
+function setPurchase(setting: type) {}
+
+/**
+ * 還原先前設定的彈窗內容
+ */
+watch(
+  injectTriggerEventSetting,
+  (setting) => {
+    restoreSetting(setting);
+  },
+  { immediate: true }
+);
 
 /**
  * 變更「發送方式」
@@ -307,13 +347,6 @@ watch(
     }
   }
 );
-/**
- * 如果有prop原有設定，則顯示之
- */
-onMounted(async function () {
-  initialTriggerEvent();
-  initialStartTime();
-});
 </script>
 
 <style scoped lang="scss">

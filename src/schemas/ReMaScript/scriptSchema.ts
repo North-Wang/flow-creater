@@ -9,37 +9,88 @@ import {z} from "zod";
  * - response-event: 子劇本：回應事件劇本
  */
 export type TreeType = "main" | "trigger-event" | "response-event";
-//觸發事件的種類的種類
+
+export const ReactionType = z.enum(['trigger', 'response']);
+export const sourceType = z.enum(['data', 'api'])
+
+//觸發事件傳遞給api的種類
 export const TriggerType = z.enum([
-  "註冊",
-  "購物車未結",
-  "購買後促銷",
-  "定期投放",
+  "sign",               // 註冊
+  "cart_abandonment",   // 購物車未結
+  "purchase",           // 購買後促銷
+  "scheduled",     // 定期投放
 ]);
-//觸發事件的發送頻率
+//觸發事件的【發送頻率】傳遞給api的種類
 export const TriggerEventFrequencyType = z.enum([
   "once",
   "recurrence",
 ])  ;
 //傳送渠道的種類
 export type ActionType = "Email" | "SMS";
+//回應事件事件傳遞給api的種類
+export const ResponseType = z.enum([
+  "open",            
+]);
 
+/**
+ * 下拉選單的單一選項
+ * @property name - 顯示於介面上的文字
+ * @property value - 對應儲存至資料庫的參數值
+ */
+export const OptionItemSchema = z.object({
+  name: z.string(),
+  value: z.string(),
+});
+type OptionItem = z.infer<typeof OptionItemSchema>;
+
+
+
+/**
+ * 【觸發事件】的彈窗 所有種類共有的資料格式
+ * @description 觸發事件【購買後促銷】不適用此schema
+ */
+export const TriggerEventBasicSchema = z.object({
+   event: z.enum([
+  "sign", //註冊
+  "cart_abandonment",
+  "scheduled",
+]).default("sign"),
+  frequency: TriggerEventFrequencyType.default("once"),
+});
+
+//【觸發事件】的特例：購買後促銷
+export const TriggerEventPurchaseAfterPromotionSchema = z.object({
+  event: z.literal('purchase'),
+  frequency: TriggerEventFrequencyType.default("once"),
+  purchaseTypes: z.object({ name: z.string(), value: z.string() }),
+  purchaseItems: z.object({ name: z.string(), value: z.string() }),
+});
+
+/**
+ * 會依據event，判斷要套用的【觸發事件】的彈窗資料格式
+ */
+export const TriggerEventSchema = z.discriminatedUnion('event', [
+  TriggerEventPurchaseAfterPromotionSchema,
+  TriggerEventBasicSchema,
+]);
 
 /**
  * 一個task的資料格式
 */
 export const TaskSchema = z.object({
   id: z.string(),
-  reaction: z.enum(['trigger', 'response']), //事件的種類
+  reaction: ReactionType, //事件的種類
   sourceId: z.string().nullable(), //前一個task的id
-  targetId: z.string(), //下一個task的id
+  targetId: z.string().nullable(), //下一個task的id
   //事件的種類
   eventOption: z.object({
-    type:z.string()
+    type:z.union([TriggerType, ResponseType]),
+    purchaseTypes: z.string().optional(),
+    purchaseItems: z.string().optional(),
   }), 
   //發送時間  
   schedule: z.object({
-    type: z.enum(['once', 'cycle']), 
+    type: TriggerEventFrequencyType, 
     time: z.union([
       z.object({ cron: z.string() }),
       z.object({ once: z.string() })
@@ -64,7 +115,7 @@ export const ScriptSchema = z.object({
       end: z.string()
     }),
     source: z.object({
-      type: z.enum(['data', 'api'])
+      type: sourceType
     })
   }),
   senderInfo: z.object({
@@ -79,5 +130,3 @@ export const ScriptSchema = z.object({
   version: z.number(),
   task: z.array(TaskSchema)
 });
-
- 
