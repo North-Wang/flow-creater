@@ -116,7 +116,6 @@
             <span>功能做下一步設定。</span>
           </p>
         </div>
-        {{ formData }}
         <div class="button-wrap">
           <button class="button-basic-light btn-cancel" @click="closeModal">
             移除
