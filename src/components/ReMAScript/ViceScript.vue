@@ -11,7 +11,7 @@
       <NodeTriggerEvent ref="refTriggerNode" />
     </template>
     <template #node-action="{ id, data, selected }">
-      <NodeAction :templateType="'Email'" />
+      <NodeAction />
     </template>
     <template #node-template="{ id, data, selected }">
       <NodeEmailTemplate />

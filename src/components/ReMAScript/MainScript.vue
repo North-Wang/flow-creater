@@ -14,10 +14,10 @@
       <div>line</div>
     </template>
 
-    <template #node-trigger="{ id, data, selected }">
+    <template #node-trigger-event="{ id, data, selected }">
       <TaskTriggerEvent />
     </template>
-    <template #node-response="{ id, data, selected }">
+    <template #node-response-event="{ id, data, selected }">
       <TaskResponseEvent />
     </template>
   </VueFlow>

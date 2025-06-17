@@ -28,7 +28,7 @@ export const sampleScript = ScriptSchema.parse({
       id: "task-1",
       reaction: "trigger",
       sourceId: null,
-      targetId: "task-3",
+      targetId: ["task-3"],
       eventOption: {
         type: "purchase",
         purchaseTypes: "商品",
@@ -50,7 +50,7 @@ export const sampleScript = ScriptSchema.parse({
       id: "task-2",
       reaction: "trigger",
       sourceId: null,
-      targetId: "task-3",
+      targetId: ["task-3"],
       eventOption: {
         type: "purchase",
         purchaseTypes: "商品",
@@ -71,8 +71,8 @@ export const sampleScript = ScriptSchema.parse({
     {
       id: "task-3",
       reaction: "response",
-      sourceId: "task-2",
-      targetId: "task-4",
+      sourceId: ["task-2"],
+      targetId: ["task-4"],
       eventOption: {
         type: "open",
       },
@@ -91,8 +91,8 @@ export const sampleScript = ScriptSchema.parse({
     {
       id: "task-4",
       reaction: "response",
-      sourceId: "task-3",
-      targetId: "task-5",
+      sourceId: ["task-3"],
+      targetId: ["task-5"],
       eventOption: {
         type: "open",
       },
@@ -111,7 +111,7 @@ export const sampleScript = ScriptSchema.parse({
     {
       id: "task-5",
       reaction: "response",
-      sourceId: "task-4",
+      sourceId: ["task-4"],
       targetId: null,
       eventOption: {
         type: "open",
@@ -276,8 +276,8 @@ export const emptyScriptBySchema = ScriptSchema.parse({
     {
       id: "task-1",
       reaction: "trigger",
-      sourceId: null,
-      targetId: "task-2",
+      sourceId: [],
+      targetId: ["task-2", "task-3"],
       eventOption: {
         type: "sign",
       },
@@ -289,15 +289,14 @@ export const emptyScriptBySchema = ScriptSchema.parse({
       },
       template: {
         type: "email",
-        id: "template-trigger-001",
-        subject: "觸發事件",
+        id: "",
       },
     },
     {
       id: "task-2",
       reaction: "response",
-      sourceId: "task-1",
-      targetId: null,
+      sourceId: ["task-1"],
+      targetId: [],
       eventOption: {
         type: "open",
       },
@@ -316,8 +315,8 @@ export const emptyScriptBySchema = ScriptSchema.parse({
     {
       id: "task-3",
       reaction: "response",
-      sourceId: "task-1",
-      targetId: "task-4",
+      sourceId: ["task-1"],
+      targetId: ["task-4"],
       eventOption: {
         type: "open",
       },
@@ -336,8 +335,8 @@ export const emptyScriptBySchema = ScriptSchema.parse({
     {
       id: "task-4",
       reaction: "response",
-      sourceId: "task-3",
-      targetId: null,
+      sourceId: ["task-3"],
+      targetId: [],
       eventOption: {
         type: "open",
       },
@@ -395,132 +394,6 @@ export const minimalEmptyScript = ScriptSchema.parse({
         type: "email",
         id: "template-minimal-001",
         subject: "預設模板",
-      },
-    },
-  ],
-});
-
-/**
- * 完整的空白劇本（包含所有類型的示例）
- */
-export const completeEmptyScript = ScriptSchema.parse({
-  info: {
-    name: "完整空白劇本",
-    time_range: {
-      start: "2025-01-01T00:00:00Z",
-      end: "2025-12-31T23:59:59Z",
-    },
-    source: {
-      type: "data",
-    },
-  },
-  senderInfo: {
-    sender: "行銷團隊",
-    email: "marketing@example.com",
-  },
-  status: "draft",
-  version: 1,
-  task: [
-    {
-      id: "task-1",
-      reaction: "trigger",
-      sourceId: null,
-      targetId: "task-2",
-      eventOption: {
-        type: "sign",
-      },
-      schedule: {
-        type: "once",
-        time: {
-          once: "2025-01-01T09:00:00Z",
-        },
-      },
-      template: {
-        type: "email",
-        id: "template-sign-001",
-        subject: "註冊歡迎信",
-      },
-    },
-    {
-      id: "task-2",
-      reaction: "trigger",
-      sourceId: null,
-      targetId: "task-3",
-      eventOption: {
-        type: "cart_abandonment",
-      },
-      schedule: {
-        type: "recurrence",
-        time: {
-          cron: "0 14 * * *",
-        },
-      },
-      template: {
-        type: "sms",
-        id: "template-cart-001",
-        subject: "購物車提醒",
-      },
-    },
-    {
-      id: "task-3",
-      reaction: "trigger",
-      sourceId: null,
-      targetId: "task-4",
-      eventOption: {
-        type: "purchase",
-        purchaseTypes: "商品",
-        purchaseItems: "示例商品",
-      },
-      schedule: {
-        type: "once",
-        time: {
-          once: "2025-01-01T15:00:00Z",
-        },
-      },
-      template: {
-        type: "email",
-        id: "template-purchase-001",
-        subject: "購買確認",
-      },
-    },
-    {
-      id: "task-4",
-      reaction: "trigger",
-      sourceId: null,
-      targetId: "task-5",
-      eventOption: {
-        type: "scheduled",
-      },
-      schedule: {
-        type: "recurrence",
-        time: {
-          cron: "0 10 * * 1",
-        },
-      },
-      template: {
-        type: "email",
-        id: "template-scheduled-001",
-        subject: "週一促銷",
-      },
-    },
-    {
-      id: "task-5",
-      reaction: "response",
-      sourceId: "task-4",
-      targetId: null,
-      eventOption: {
-        type: "open",
-      },
-      schedule: {
-        type: "once",
-        time: {
-          once: "2025-01-01T16:00:00Z",
-        },
-      },
-      template: {
-        type: "popup",
-        id: "template-response-001",
-        subject: "互動回應",
       },
     },
   ],

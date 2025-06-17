@@ -449,10 +449,15 @@
 import { ref, computed, onMounted, watch } from "vue";
 import { useRouter } from "vue-router";
 import { useScriptStore } from "../stores/scriptStore";
-import { useNodeRegistry } from "../composables/useNodeRegistry";
+import { useNodeRegistry } from "../composables/useNodeRegistry.js";
 import { ScriptValidator } from "../utils/scriptValidator";
 import { createCompleteLayout, getLayoutStats } from "../utils/nodeLayout";
-import { testLayout, testComplexLayouts } from "../utils/testLayout";
+import {
+  testDagreLayout,
+  testDirectionalLayouts,
+  testComplexLayouts,
+  testPerformance,
+} from "../utils/testLayout";
 import { emptyScriptBySchema } from "../data/RemaScript/emptyTree";
 
 // 组件导入
@@ -545,12 +550,15 @@ const updateCanvasElements = () => {
     return;
   }
 
-  // 使用自動布局計算節點位置
+  // 使用 dagre 自動布局計算節點位置
   const layoutResult = createCompleteLayout(currentScript.value.task, {
-    startX: 400,
-    startY: 100,
-    horizontalSpacing: 350,
-    verticalSpacing: 250,
+    nodeWidth: 200,
+    nodeHeight: 120,
+    rankdir: "TB",
+    ranksep: 150,
+    nodesep: 80,
+    marginx: 50,
+    marginy: 50,
   });
 
   // 合併節點和連接
@@ -629,14 +637,15 @@ const handleAutoLayout = () => {
   }
 
   try {
-    // 使用自動布局功能
+    // 使用 dagre 自動布局功能
     const layoutResult = createCompleteLayout(currentScript.value.task, {
-      startX: 400,
-      startY: 100,
-      horizontalSpacing: 350,
-      verticalSpacing: 250,
       nodeWidth: 200,
       nodeHeight: 120,
+      rankdir: "TB", // 由上而下
+      ranksep: 150, // 層級間距
+      nodesep: 80, // 同層節點間距
+      marginx: 50, // 水平邊距
+      marginy: 50, // 垂直邊距
     });
 
     // 更新節點位置
@@ -662,29 +671,37 @@ const handleAutoLayout = () => {
 
     // 顯示布局統計信息
     const stats = getLayoutStats(currentScript.value.task);
-    console.log("自動布局完成:", stats);
+    console.log("dagre 自動布局完成:", stats);
 
     alert(
-      `自動布局完成！\n總節點數: ${stats.totalNodes}\n總層級數: ${stats.totalLevels}\n最大層級節點數: ${stats.maxNodesInLevel}`
+      `dagre 自動布局完成！\n總節點數: ${stats.totalNodes}\n總連接數: ${stats.totalEdges}\n總層級數: ${stats.totalLevels}\n最大層級節點數: ${stats.maxNodesInLevel}`
     );
   } catch (error) {
-    console.error("自動布局失敗:", error);
-    alert("自動布局失敗，請檢查節點連接關係");
+    console.error("dagre 自動布局失敗:", error);
+    alert("dagre 自動布局失敗，請檢查節點連接關係");
   }
 };
 
 const handleTestLayout = () => {
-  console.log("開始測試布局功能...");
+  console.log("開始測試 dagre 布局功能...");
 
   // 測試基本布局
-  const basicResult = testLayout();
+  const basicResult = testDagreLayout();
   console.log("基本布局測試結果:", basicResult);
+
+  // 測試不同方向布局
+  const directionalResult = testDirectionalLayouts();
+  console.log("方向布局測試結果:", directionalResult);
 
   // 測試複雜布局
   const complexResult = testComplexLayouts();
   console.log("複雜布局測試結果:", complexResult);
 
-  alert("布局測試完成！請查看控制台輸出。");
+  // 性能測試
+  const performanceResult = testPerformance();
+  console.log("性能測試結果:", performanceResult);
+
+  alert("dagre 布局測試完成！請查看控制台輸出。");
 };
 
 const toggleCategory = (categoryName: string) => {

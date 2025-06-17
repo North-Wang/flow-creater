@@ -1,237 +1,217 @@
 /**
- * 節點自動布局工具
+ * 使用 dagre 的節點自動布局工具
  * 根據sourceId和targetId關係自動排列節點位置
- * 布局特點
- * 由上而下排列：根據節點的層級關係自動排列
- * 同層水平排列：同一層級的節點水平分布
- * 避免重疊：自動檢測並調整重疊的節點
- * 可配置間距：支持自定義水平和垂直間距
  */
+import dagre from "dagre";
 
 /**
- * 計算節點的自動布局位置
+ * 使用 dagre 計算節點的自動布局位置
  * @param {Array} tasks - 任務數組
  * @param {Object} options - 布局選項
- * @returns {Object} 節點ID到位置的映射
+ * @returns {Object} 包含節點、連接和位置的布局結果
  */
-export function calculateNodeLayout(tasks, options = {}) {
+export function calculateLayoutWithDagre(tasks, options = {}) {
   const {
-    startX = 100,
-    startY = 100,
-    nodeWidth = 200,
-    nodeHeight = 120,
-    horizontalSpacing = 300,
-    verticalSpacing = 200,
-    maxNodesPerLevel = 5,
+    nodeWidth = 150,
+    nodeHeight = 150,
+    rankdir = "TB", // TB: top to bottom, LR: left to right
+    ranksep = 50, // 層級間距
+    nodesep = 50, // 同層節點間距
+    marginx = 50, // 水平邊距
+    marginy = 50, // 垂直邊距
   } = options;
 
-  // 構建節點關係圖
-  const nodeMap = new Map();
-  const childrenMap = new Map();
-  const parentMap = new Map();
-  const rootNodes = [];
+  // 創建 dagre 圖
+  const g = new dagre.graphlib.Graph();
 
-  // 初始化節點映射
+  // 設置圖的默認屬性
+  g.setGraph({
+    rankdir,
+    ranksep,
+    nodesep,
+    marginx,
+    marginy,
+  });
+
+  // 設置默認節點屬性
+  g.setDefaultEdgeLabel(() => ({}));
+
+  // 添加節點到圖中
   tasks.forEach((task) => {
-    nodeMap.set(task.id, task);
-    childrenMap.set(task.id, []);
-  });
-
-  // 建立父子關係
-  tasks.forEach((task) => {
-    if (task.sourceId) {
-      parentMap.set(task.id, task.sourceId);
-      const children = childrenMap.get(task.sourceId) || [];
-      children.push(task.id);
-      childrenMap.set(task.sourceId, children);
-    } else {
-      rootNodes.push(task.id);
-    }
-  });
-
-  // 計算每個節點的層級
-  const levelMap = new Map();
-  const visited = new Set();
-
-  function calculateLevel(nodeId, level = 0) {
-    if (visited.has(nodeId)) return;
-    visited.add(nodeId);
-
-    levelMap.set(nodeId, Math.max(levelMap.get(nodeId) || 0, level));
-
-    const children = childrenMap.get(nodeId) || [];
-    children.forEach((childId) => {
-      calculateLevel(childId, level + 1);
-    });
-  }
-
-  // 從根節點開始計算層級
-  rootNodes.forEach((rootId) => {
-    calculateLevel(rootId, 0);
-  });
-
-  // 按層級分組節點
-  const levelGroups = new Map();
-  tasks.forEach((task) => {
-    const level = levelMap.get(task.id) || 0;
-    if (!levelGroups.has(level)) {
-      levelGroups.set(level, []);
-    }
-    levelGroups.get(level).push(task.id);
-  });
-
-  // 計算節點位置
-  const positions = new Map();
-
-  levelGroups.forEach((nodeIds, level) => {
-    const y = startY + level * verticalSpacing;
-    const totalWidth = (nodeIds.length - 1) * horizontalSpacing;
-    const startXForLevel = startX - totalWidth / 2;
-
-    nodeIds.forEach((nodeId, index) => {
-      const x = startXForLevel + index * horizontalSpacing;
-      positions.set(nodeId, { x, y });
+    g.setNode(task.id, {
+      width: nodeWidth,
+      height: nodeHeight,
+      label: task.id,
     });
   });
 
-  return positions;
-}
+  // 添加邊到圖中 - 支持數組和字符串格式的 sourceId/targetId
+  tasks.forEach((task) => {
+    // 處理 targetId - 可能是字符串或數組
+    const targetIds = Array.isArray(task.targetId)
+      ? task.targetId
+      : task.targetId
+      ? [task.targetId]
+      : [];
 
-/**
- * 優化布局，避免節點重疊
- * @param {Object} positions - 初始位置映射
- * @param {Array} tasks - 任務數組
- * @param {Object} options - 布局選項
- * @returns {Object} 優化後的位置映射
- */
-export function optimizeLayout(positions, tasks, options = {}) {
-  const { nodeWidth = 200, nodeHeight = 120, minSpacing = 50 } = options;
-
-  const optimizedPositions = new Map(positions);
-  const nodeIds = Array.from(positions.keys());
-
-  // 檢查並調整重疊的節點
-  for (let i = 0; i < nodeIds.length; i++) {
-    for (let j = i + 1; j < nodeIds.length; j++) {
-      const node1 = nodeIds[i];
-      const node2 = nodeIds[j];
-      const pos1 = optimizedPositions.get(node1);
-      const pos2 = optimizedPositions.get(node2);
-
-      const distanceX = Math.abs(pos1.x - pos2.x);
-      const distanceY = Math.abs(pos1.y - pos2.y);
-
-      // 如果節點重疊或太近
-      if (
-        distanceX < nodeWidth + minSpacing &&
-        distanceY < nodeHeight + minSpacing
-      ) {
-        // 水平分離
-        if (distanceX < nodeWidth + minSpacing) {
-          const separation = (nodeWidth + minSpacing - distanceX) / 2;
-          if (pos1.x < pos2.x) {
-            pos1.x -= separation;
-            pos2.x += separation;
-          } else {
-            pos1.x += separation;
-            pos2.x -= separation;
-          }
-        }
-
-        // 垂直分離
-        if (distanceY < nodeHeight + minSpacing) {
-          const separation = (nodeHeight + minSpacing - distanceY) / 2;
-          if (pos1.y < pos2.y) {
-            pos1.y -= separation;
-            pos2.y += separation;
-          } else {
-            pos1.y += separation;
-            pos2.y -= separation;
-          }
-        }
-
-        optimizedPositions.set(node1, pos1);
-        optimizedPositions.set(node2, pos2);
+    targetIds.forEach((targetId) => {
+      if (targetId) {
+        g.setEdge(task.id, targetId);
       }
-    }
-  }
-
-  return optimizedPositions;
-}
-
-/**
- * 應用布局到Vue Flow元素
- * @param {Array} elements - Vue Flow元素數組
- * @param {Array} tasks - 任務數組
- * @param {Object} options - 布局選項
- * @returns {Array} 更新後的元素數組
- */
-export function applyLayoutToElements(elements, tasks, options = {}) {
-  const positions = calculateNodeLayout(tasks, options);
-  const optimizedPositions = optimizeLayout(positions, tasks, options);
-
-  return elements.map((element) => {
-    if (element.type && optimizedPositions.has(element.id)) {
-      return {
-        ...element,
-        position: optimizedPositions.get(element.id),
-      };
-    }
-    return element;
+    });
   });
-}
 
-/**
- * 獲取節點的連接關係
- * @param {Array} tasks - 任務數組
- * @returns {Array} 連接關係數組
- */
-export function getConnections(tasks) {
-  const connections = [];
+  // 計算布局
+  dagre.layout(g);
 
-  tasks.forEach((task) => {
-    if (task.sourceId && task.targetId) {
-      connections.push({
-        id: `edge-${task.sourceId}-${task.targetId}`,
-        source: task.sourceId,
-        target: task.targetId,
-        type: "step",
-        class: "dark",
-        animated: false,
+  // 提取節點位置
+  const positions = new Map();
+  const nodes = [];
+  const edges = [];
+
+  // 獲取節點位置
+  g.nodes().forEach((nodeId) => {
+    const node = g.node(nodeId);
+    const position = {
+      x: node.x - node.width / 2, // dagre 返回的是中心點，轉換為左上角
+      y: node.y - node.height / 2,
+    };
+    positions.set(nodeId, position);
+
+    // 找到對應的任務
+    const task = tasks.find((t) => t.id === nodeId);
+    if (task) {
+      nodes.push({
+        id: nodeId,
+        type: getNodeType(task),
+        position,
+        data: {
+          task,
+          nodeType: task.reaction,
+        },
       });
     }
   });
 
-  return connections;
-}
-
-/**
- * 完整的布局函數，包含節點和連接
- * @param {Array} tasks - 任務數組
- * @param {Object} options - 布局選項
- * @returns {Object} 包含節點和連接的布局結果
- */
-export function createCompleteLayout(tasks, options = {}) {
-  const positions = calculateNodeLayout(tasks, options);
-  const optimizedPositions = optimizeLayout(positions, tasks, options);
-
-  const nodes = tasks.map((task) => ({
-    id: task.id,
-    type: getNodeType(task),
-    position: optimizedPositions.get(task.id) || { x: 0, y: 0 },
-    data: {
-      task,
-      nodeType: task.reaction,
-    },
-  }));
-
-  const edges = getConnections(tasks);
+  // 獲取邊
+  g.edges().forEach((edge) => {
+    edges.push({
+      id: `edge-${edge.v}-${edge.w}`,
+      source: edge.v,
+      target: edge.w,
+      type: "step",
+      class: "dark",
+      animated: false,
+    });
+  });
 
   return {
     nodes,
     edges,
-    positions: optimizedPositions,
+    positions,
+    graph: g,
   };
+}
+
+/**
+ * 簡化的布局函數，直接返回 Vue Flow 格式的元素
+ * @param {Array} tasks - 任務數組
+ * @param {Object} options - 布局選項
+ * @returns {Array} Vue Flow 元素數組
+ */
+export function createVueFlowLayout(tasks, options = {}) {
+  const layoutResult = calculateLayoutWithDagre(tasks, options);
+  return [...layoutResult.nodes, ...layoutResult.edges];
+}
+
+/**
+ * 獲取布局統計信息
+ * @param {Array} tasks - 任務數組
+ * @returns {Object} 統計信息
+ */
+export function getLayoutStats(tasks) {
+  const layoutResult = calculateLayoutWithDagre(tasks);
+  const graph = layoutResult.graph;
+
+  return {
+    totalNodes: tasks.length,
+    totalEdges: graph.edges().length,
+    totalLevels: getMaxLevel(tasks),
+    maxNodesInLevel: getMaxNodesInLevel(tasks),
+    hasConnections: tasks.some((task) => {
+      const targetIds = Array.isArray(task.targetId)
+        ? task.targetId
+        : task.targetId
+        ? [task.targetId]
+        : [];
+      return targetIds.length > 0;
+    }),
+    graphInfo: {
+      width: graph.graph().width,
+      height: graph.graph().height,
+    },
+  };
+}
+
+/**
+ * 獲取最大層級數
+ * @param {Array} tasks - 任務數組
+ * @returns {Number} 最大層級
+ */
+function getMaxLevel(tasks) {
+  const levels = new Set();
+
+  tasks.forEach((task) => {
+    const level = getNodeLevel(task, tasks);
+    levels.add(level);
+  });
+
+  return Math.max(...Array.from(levels)) + 1;
+}
+
+/**
+ * 獲取單層最大節點數
+ * @param {Array} tasks - 任務數組
+ * @returns {Number} 最大節點數
+ */
+function getMaxNodesInLevel(tasks) {
+  const levelCounts = new Map();
+
+  tasks.forEach((task) => {
+    const level = getNodeLevel(task, tasks);
+    levelCounts.set(level, (levelCounts.get(level) || 0) + 1);
+  });
+
+  return Math.max(...Array.from(levelCounts.values()));
+}
+
+/**
+ * 獲取節點所在的層級
+ * @param {Object} task - 任務對象
+ * @param {Array} allTasks - 所有任務數組
+ * @returns {Number} 層級
+ */
+function getNodeLevel(task, allTasks) {
+  // 處理數組格式的 sourceId
+  const sourceIds = Array.isArray(task.sourceId)
+    ? task.sourceId
+    : task.sourceId
+    ? [task.sourceId]
+    : [];
+
+  if (sourceIds.length === 0) return 0;
+
+  // 找到所有父節點的最大層級
+  let maxParentLevel = 0;
+  sourceIds.forEach((sourceId) => {
+    const parent = allTasks.find((t) => t.id === sourceId);
+    if (parent) {
+      const parentLevel = getNodeLevel(parent, allTasks);
+      maxParentLevel = Math.max(maxParentLevel, parentLevel);
+    }
+  });
+
+  return maxParentLevel + 1;
 }
 
 /**
@@ -251,45 +231,73 @@ function getNodeType(task) {
 }
 
 /**
- * 獲取布局統計信息
+ * 應用布局到現有元素
+ * @param {Array} elements - 現有元素數組
  * @param {Array} tasks - 任務數組
- * @returns {Object} 統計信息
+ * @param {Object} options - 布局選項
+ * @returns {Array} 更新後的元素數組
  */
-export function getLayoutStats(tasks) {
-  const positions = calculateNodeLayout(tasks);
-  const levels = new Set();
-  const nodesPerLevel = new Map();
+export function applyDagreLayout(elements, tasks, options = {}) {
+  const layoutResult = calculateLayoutWithDagre(tasks, options);
 
-  tasks.forEach((task) => {
-    const level = getNodeLevel(task, tasks);
-    levels.add(level);
-
-    if (!nodesPerLevel.has(level)) {
-      nodesPerLevel.set(level, 0);
+  return elements.map((element) => {
+    if (element.type && layoutResult.positions.has(element.id)) {
+      return {
+        ...element,
+        position: layoutResult.positions.get(element.id),
+      };
     }
-    nodesPerLevel.set(level, nodesPerLevel.get(level) + 1);
+    return element;
   });
-
-  return {
-    totalNodes: tasks.length,
-    totalLevels: levels.size,
-    maxNodesInLevel: Math.max(...Array.from(nodesPerLevel.values())),
-    nodesPerLevel: Object.fromEntries(nodesPerLevel),
-    hasConnections: tasks.some((task) => task.sourceId && task.targetId),
-  };
 }
 
 /**
- * 獲取節點所在的層級
- * @param {Object} task - 任務對象
- * @param {Array} allTasks - 所有任務數組
- * @returns {Number} 層級
+ * 創建不同方向的布局
+ * @param {Array} tasks - 任務數組
+ * @param {String} direction - 方向 ('TB', 'BT', 'LR', 'RL')
+ * @param {Object} options - 其他選項
+ * @returns {Object} 布局結果
  */
-function getNodeLevel(task, allTasks) {
-  if (!task.sourceId) return 0;
-
-  const parent = allTasks.find((t) => t.id === task.sourceId);
-  if (!parent) return 0;
-
-  return getNodeLevel(parent, allTasks) + 1;
+export function createDirectionalLayout(tasks, direction = "TB", options = {}) {
+  return calculateLayoutWithDagre(tasks, {
+    ...options,
+    rankdir: direction,
+  });
 }
+
+/**
+ * 獲取連接關係
+ * @param {Array} tasks - 任務數組
+ * @returns {Array} 連接關係數組
+ */
+export function getConnections(tasks) {
+  const connections = [];
+
+  tasks.forEach((task) => {
+    // 處理數組格式的 targetId
+    const targetIds = Array.isArray(task.targetId)
+      ? task.targetId
+      : task.targetId
+      ? [task.targetId]
+      : [];
+
+    targetIds.forEach((targetId) => {
+      if (targetId) {
+        connections.push({
+          id: `edge-${task.id}-${targetId}`,
+          source: task.id,
+          target: targetId,
+          type: "step",
+          class: "dark",
+          animated: false,
+        });
+      }
+    });
+  });
+
+  return connections;
+}
+
+// 為了向後兼容，保留舊的函數名稱
+export const createCompleteLayout = calculateLayoutWithDagre;
+export const applyLayoutToElements = applyDagreLayout;

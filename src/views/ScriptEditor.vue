@@ -7,6 +7,11 @@ import {
   TaskSchema,
   ScriptSchema,
 } from "../schemas/ReMaScript/scriptSchema";
+import {
+  calculateLayoutWithDagre,
+  createVueFlowLayout,
+} from "../utils/nodeLayout";
+
 //節點元件
 import MainScript from "../components/ReMAScript/MainScript.vue";
 import ViceScript from "../components/ReMAScript/ViceScript.vue";
@@ -46,14 +51,8 @@ function updateTriggerEventSetting(
  */
 function transformScriptToVueFlow(script: typeof ScriptSchema) {
   console.log("從api收到的原始script資料", script);
-  const res = script?.task.map((task, index) => {
-    return {
-      ...task,
-      type: task?.reaction,
-      position: { x: 200, y: 200 * index },
-    };
-  });
-  vueFlowData.value = res;
+  const result = createVueFlowLayout(script?.task);
+  vueFlowData.value = result;
   console.log("調整好VueFlow的資料架構", vueFlowData.value);
 }
 
@@ -62,7 +61,7 @@ watch(
   (script) => {
     transformScriptToVueFlow(script);
   },
-  { immediate: true }
+  { immediate: true, deep: true }
 );
 
 onMounted(() => {});
