@@ -1,11 +1,12 @@
 <template>
   <DrawerModal @closeModal="removeEvent()">
-    <form class="wrapper" @submit.prevent="prepareSaveSetting">
+    <form class="wrapper">
       <div class="event-form font-18">
         <p class="title">事件設定</p>
 
         <div class="selector flex-wrap" :style="styleSpecialWrapper">
           <label for="" class="selector-title">觸發事件 (Trigger)</label>
+
           <Dropdown
             :options="triggerEventOptions"
             :width="'100%'"
@@ -87,7 +88,13 @@
           <button class="button-basic-light btn-cancel" @click="closeModal">
             移除
           </button>
-          <button type="submit" class="button-basic btn-next">儲存</button>
+          <button
+            type="submit"
+            class="button-basic btn-next"
+            @click="prepareSaveSetting(formData)"
+          >
+            儲存
+          </button>
         </div>
       </div>
     </form>
@@ -109,7 +116,7 @@ import {
   TriggerEventFrequencyType,
 } from "../../../../schemas/ReMaScript/schema.triggerEvent";
 import { z } from "zod";
-import { useForm } from "vee-validate";
+import { useForm, useField } from "vee-validate";
 import { toTypedSchema } from "@vee-validate/zod";
 
 const injectTriggerEventSetting = inject<z.infer<typeof TriggerEventSchema>>(
@@ -122,10 +129,16 @@ let injectUpdateSubscriptTriggerEventSetting = inject(
 
 //aaa
 //定義Form表單欄位、綁定資料
-const { values, handleSubmit, resetForm, defineField } = useForm({
+const { values, handleSubmit, resetForm } = useForm({
   validationSchema: toTypedSchema(TriggerEventSchema),
 });
-const [modalData, modalDataAttrs] = defineField("modalData");
+const { value: event, errorMessage: eventError } = useField("event");
+const { value: frequency, errorMessage: frequencyError } =
+  useField("frequency");
+const { value: purchaseTypes, errorMessage: purchaseTypesError } =
+  useField("purchaseTypes");
+const { value: purchaseItems, errorMessage: purchaseItemsError } =
+  useField("purchaseItems");
 
 const emits = defineEmits(["closeModal", "removeEvent"]);
 
@@ -222,6 +235,7 @@ function restoreSetting(setting) {
 
 function selectTriggerEvent(opt) {
   formData.value.event = opt?.value;
+  event.value = opt?.value;
 }
 function selectPurchaseType(type) {
   formData.value.purchaseTypes = type?.value;
@@ -249,8 +263,7 @@ function validateFormData(schema) {
   }
 }
 
-async function prepareSaveSetting(formData) {
-  console.log("aaa formData", formData);
+async function prepareSaveSetting() {
   let data = {};
   switch (formData.value.event) {
     case "sign":
