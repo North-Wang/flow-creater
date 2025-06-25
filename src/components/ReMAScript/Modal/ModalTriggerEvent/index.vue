@@ -6,7 +6,7 @@
 
         <div class="selector flex-wrap" :style="styleSpecialWrapper">
           <label for="" class="selector-title">觸發事件 (Trigger)</label>
-
+          {{ eventName }}
           <Dropdown
             :options="triggerEventOptions"
             :width="'100%'"
@@ -17,7 +17,7 @@
 
         <div
           class="position-relative w-full grid grid-cols-[auto_auto_1fr] gap-x-[25px] place-items-center"
-          v-if="formData.event === 'purchase'"
+          v-if="eventName === 'purchase'"
         >
           <label
             for=""
@@ -54,11 +54,11 @@
           />
           <div class="Red error-msg" v-if="showErrorMsg">{{ errorMsg }}</div>
         </div>
-        <div class="selector flex-wrap" v-if="formData.event === '定期投放'">
+        <div class="selector flex-wrap" v-if="eventName === '定期投放'">
           <label for="" class="selector-title">條件開始的時間</label>
           <DatePicker v-model="recurringStartDate" />
         </div>
-        <DelayUntilFirstEmail :event="formData?.event" />
+        <DelayUntilFirstEmail :event="eventName" />
         <div class="selector flex-wrap">
           <label for="" class="selector-title">發送方式</label>
           <div class="flex">
@@ -72,8 +72,9 @@
                 :id="options?.value"
                 :value="options?.value"
                 style="margin-right: 16px"
-                v-model="formData.frequency"
+                v-model="frequency"
               />
+
               <label :for="options?.value" class="cursor-pointer">{{
                 options?.name
               }}</label>
@@ -83,7 +84,7 @@
       </div>
 
       <div class="introduction">
-        <EventInform :event="formData?.event" />
+        <EventInform :event="eventName" />
         <div class="button-wrap">
           <button class="button-basic-light btn-cancel" @click="closeModal">
             移除
@@ -132,13 +133,26 @@ let injectUpdateSubscriptTriggerEventSetting = inject(
 const { values, handleSubmit, resetForm } = useForm({
   validationSchema: toTypedSchema(TriggerEventSchema),
 });
-const { value: event, errorMessage: eventError } = useField("event");
-const { value: frequency, errorMessage: frequencyError } =
-  useField("frequency");
-const { value: purchaseTypes, errorMessage: purchaseTypesError } =
-  useField("purchaseTypes");
-const { value: purchaseItems, errorMessage: purchaseItemsError } =
-  useField("purchaseItems");
+const {
+  value: eventName,
+  errorMessage: eventError,
+  setValue: setEventName,
+} = useField<string>("event");
+const {
+  value: frequency,
+  errorMessage: frequencyError,
+  setValue: setFrequency,
+} = useField("frequency");
+const {
+  value: purchaseTypes,
+  errorMessage: purchaseTypesError,
+  setValue: setPurchaseTypes,
+} = useField("purchaseTypes");
+const {
+  value: purchaseItems,
+  errorMessage: purchaseItemsError,
+  setValue: setPurchaseItems,
+} = useField("purchaseItems");
 
 const emits = defineEmits(["closeModal", "removeEvent"]);
 
@@ -234,8 +248,8 @@ function restoreSetting(setting) {
 }
 
 function selectTriggerEvent(opt) {
-  formData.value.event = opt?.value;
-  event.value = opt?.value;
+  // formData.value.event = opt?.value;
+  eventName.value = opt?.value;
 }
 function selectPurchaseType(type) {
   formData.value.purchaseTypes = type?.value;
