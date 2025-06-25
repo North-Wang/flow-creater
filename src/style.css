@@ -2,29 +2,41 @@
 @tailwind components;
 @tailwind utilities;
 
-:root{
-    --color-brand-01:#EAF3F4;
-    --color-brand-02:#DAEDF0;
-    --color-brand-03:#B5DBE0;
-    --color-brand-04:#94C8CE;
-    --color-brand-05:#71AFB6;
-    --color-brand-06:#4C8E95;
-    --neutral-00:#ffffff;
-    --neutral-01:#F1F1F1;
-    --neutral-02:#C4C4C4;
-    --neutral-03:#8A8A8A;
-    --neutral-04:#575757;
-    --negative-01:#FF8B8B;
-    --negative-02:#FF614D;
-    --success-01:#76D37A;
+:root {
+  --color-brand-01: #eaf3f4;
+  --color-brand-02: #daedf0;
+  --color-brand-03: #b5dbe0;
+  --color-brand-04: #94c8ce;
+  --color-brand-05: #71afb6;
+  --color-brand-06: #4c8e95;
+  --neutral-00: #ffffff;
+  --neutral-01: #f1f1f1;
+  --neutral-02: #c4c4c4;
+  --neutral-03: #8a8a8a;
+  --neutral-04: #575757;
+  --negative-01: #ff8b8b;
+  --negative-02: #ff614d;
+  --success-01: #76d37a;
 
-    /* 非必要色 */
-    --extraordinary-01:linear-gradient(90deg, var(--color-brand-02, #94C8CE) 0%, var(--color-brand-03, #4C8E95) 100%);
-    --extraordinary-02:linear-gradient(90deg, var(--color-brand-03, #B5DBE0) 0%, var(--color-brand-05, #71AFB6) 100%);
-    --extraordinary-03:linear-gradient(90deg, var(--color-brand-04, #DAEDF0) 0%, var(--color-brand-06, #B5DBE0) 100%);
+  /* 非必要色 */
+  --extraordinary-01: linear-gradient(
+    90deg,
+    var(--color-brand-02, #94c8ce) 0%,
+    var(--color-brand-03, #4c8e95) 100%
+  );
+  --extraordinary-02: linear-gradient(
+    90deg,
+    var(--color-brand-03, #b5dbe0) 0%,
+    var(--color-brand-05, #71afb6) 100%
+  );
+  --extraordinary-03: linear-gradient(
+    90deg,
+    var(--color-brand-04, #daedf0) 0%,
+    var(--color-brand-06, #b5dbe0) 100%
+  );
 
-    /* 次要色 */
-    --secondary-01:#63A7C8;
+  /* 次要色 */
+  --secondary-01: #63a7c8;
 }
 :root {
   font-family: Inter, system-ui, Avenir, Helvetica, Arial, sans-serif;
@@ -41,24 +53,23 @@
   -moz-osx-font-smoothing: grayscale;
   -webkit-text-size-adjust: 100%;
 
-  --color-button:#71AFB6;
+  --color-button: #71afb6;
   /*  tree chart 相關變數 */
-  --color-parent-node:#ffbc40;
-  --color-node-active:#71afb6;
-  --color-node-disabled:#c4c4c4;
-  --color-node-line:#9fbaca;
-  --color-node-text:white; /* 一般節點的文字顏色 */
-  --color-node-template:#71AFB6; /* 【模板】類型的節點的文字色 */  
-  --color-toolbar-icon-trigger:#8265DA; /* 觸發事件的toolbar icon色 */  
-  --color-toolbar-icon-response:#96C5D7; /* 回應事件的toolbar icon色 */  
-  --color-toolbar-icon-action:#F9C357; /* 投放管道的toolbar icon色 */  
-  --color-toolbar-icon-default:#65da96; /* 預設的toolbar icon色 */  
+  --color-parent-node: #ffbc40;
+  --color-node-active: #71afb6;
+  --color-node-disabled: #c4c4c4;
+  --color-node-line: #9fbaca;
+  --color-node-text: white; /* 一般節點的文字顏色 */
+  --color-node-template: #71afb6; /* 【模板】類型的節點的文字色 */
+  --color-toolbar-icon-trigger: #8265da; /* 觸發事件的toolbar icon色 */
+  --color-toolbar-icon-response: #96c5d7; /* 回應事件的toolbar icon色 */
+  --color-toolbar-icon-action: #f9c357; /* 投放管道的toolbar icon色 */
+  --color-toolbar-icon-default: #65da96; /* 預設的toolbar icon色 */
   --tree-line-height: 50px; /* 樹狀圖 連結線的高度 */
-  --width-card:120px; /* 所有節點的寬度 */
-  --width-node-icon:60%; /* 節點內的icon寬度 */
-  --width-node-connect:40%; /* 節點連接線第一層的寬度。會影響最多有幾層 節點不會重疊 */
+  --width-card: 120px; /* 所有節點的寬度 */
+  --width-node-icon: 60%; /* 節點內的icon寬度 */
+  --width-node-connect: 40%; /* 節點連接線第一層的寬度。會影響最多有幾層 節點不會重疊 */
   /* tree chart 相關變數 */
-
 }
 
 a {
@@ -66,7 +77,6 @@ a {
   color: #1a1a1a;
   text-decoration: inherit;
 }
-
 
 body {
   margin: 0;
@@ -88,14 +98,14 @@ input[type="text"] {
   padding: 10px 15px;
   gap: 10px;
   border-radius: 10px;
-  border: 1px solid #c4c4c4;  
+  border: 1px solid #c4c4c4;
 }
-input[type="text"]:focus{
-  border: 1px solid #c4c4c4;  
+input[type="text"]:focus {
+  border: 1px solid #c4c4c4;
   outline: none;
 }
-textarea{
-  border: 1px solid #c4c4c4;  
+textarea {
+  border: 1px solid #c4c4c4;
   border-radius: 10px;
   outline: none;
 }
@@ -145,3 +155,7 @@ textarea{
   border-radius: 4px;
   border-style: dashed;
 }
+
+/* input {
+  background-color: #fff;
+} */

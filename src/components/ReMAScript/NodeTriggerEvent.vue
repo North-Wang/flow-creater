@@ -14,30 +14,29 @@
 <script setup lang="ts">
 import { ref, watch, computed, defineExpose } from "vue";
 import { z } from "zod/v4";
-import {
-  TriggerType,
-  TriggerEventFrequencyType,
-} from "../../schemas/ReMaScript/scriptSchema";
-import ModalTriggerEvent from "./Modal/ModalTriggerEvent.vue";
+import { TriggerEventSchema } from "../../schemas/ReMaScript/schema.triggerEvent";
+import ModalTriggerEvent from "./Modal/ModalTriggerEvent/index.vue";
 
 interface OptionItem {
   name: string;
   value: string;
 }
 interface Props {
-  triggerEventSetting?: {
-    event: z.infer<typeof TriggerType>;
-    frequency: z.infer<typeof TriggerEventFrequencyType>;
-    purchaseTypes: OptionItem;
-    purchaseItems: OptionItem;
-  };
+  triggerEventSetting?: z.infer<typeof TriggerEventSchema>;
 }
 
 const props = withDefaults(defineProps<Props>(), {});
 
 const msgTriggerType = computed(() => {
   if (!props.triggerEventSetting?.event) return "點擊設定事件";
-  return props.triggerEventSetting?.event || "點擊設定事件";
+  const triggerEventNameMap = {
+    sign: "註冊",
+    cart_abandonment: "購物車未結",
+    purchase: "購買後促銷",
+  };
+  return (
+    triggerEventNameMap[props.triggerEventSetting?.event] || "點擊設定事件"
+  );
 });
 const startTime = ref("");
 const startTimeUnit = ref("");

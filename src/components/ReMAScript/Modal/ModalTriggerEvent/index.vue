@@ -8,7 +8,7 @@
           <label for="" class="selector-title">觸發事件 (Trigger)</label>
           <Dropdown
             :options="triggerEventOptions"
-            :width="'500px'"
+            :width="'100%'"
             :selectedValue="defaultTriggerEvent"
             @select="selectTriggerEvent"
           />
@@ -43,7 +43,7 @@
             </li>
           </ul>
           <Dropdown
-            :width="'250px'"
+            :width="'100%'"
             :options="purchaseItemsOptions"
             :dropdownPlaceholder="'-'"
             :selectedValue="presetPurchasedItem"
@@ -57,9 +57,10 @@
           <label for="" class="selector-title">條件開始的時間</label>
           <DatePicker v-model="recurringStartDate" />
         </div>
+        <DelayUntilFirstEmail :event="formData?.event" />
         <div class="selector flex-wrap">
           <label for="" class="selector-title">發送方式</label>
-          <div class="flex gap-">
+          <div class="flex">
             <div
               class="d-flex align-items-center"
               v-for="options in sendTimeTypeOptions"
@@ -79,43 +80,9 @@
           </div>
         </div>
       </li>
+
       <li class="introduction">
-        <div>
-          <div class="title">事件說明</div>
-          <p class="text-left font-18" v-if="formData.event === 'sign'">
-            <span>設定當</span>
-            <span class="Cyan">顧客註冊後過多久</span>
-            <span>，系統即會觸發。請到</span>
-            <span class="Cyan">時間</span>
-            <span>功能做下一步設定。</span>
-          </p>
-          <p
-            class="text-left font-18"
-            v-if="formData.event === 'cart_abandonment'"
-          >
-            <span>設定當顧客加入購物車且</span>
-            <span class="Cyan">且在幾天內未進行結帳</span>
-            <span>，系統即會觸發。請到</span>
-            <span class="Cyan">時間</span>
-            <span
-              >功能做下一步設定。此事件目前僅供API進行觸發來判斷，建議要有技術人員來協助串接。</span
-            >
-          </p>
-          <p class="text-left font-18" v-if="formData.event === 'purchase'">
-            <span>設定當</span>
-            <span class="Cyan">顧客購買後過多久</span>
-            <span>，系統即會觸發，您可以選擇購買的項目。完成後請到</span>
-            <span class="Cyan">時間</span>
-            <span>功能做下一步設定。</span>
-          </p>
-          <p class="text-left font-18" v-if="formData.event === 'scheduled'">
-            <span>根據</span>
-            <span class="Cyan">指定的時間範圍與頻率</span>
-            <span>，系統即會觸發。請到</span>
-            <span class="Cyan">時間</span>
-            <span>功能做下一步設定。</span>
-          </p>
-        </div>
+        <EventInform :event="formData?.event" />
         <div class="button-wrap">
           <button class="button-basic-light btn-cancel" @click="closeModal">
             移除
@@ -130,32 +97,28 @@
 </template>
 
 <script setup lang="ts">
-import {
-  ref,
-  defineEmits,
-  onMounted,
-  watch,
-  computed,
-  inject,
-  defineProps,
-} from "vue";
-import DrawerModal from "../Modal/DrawerModal.vue";
-import ExplainTriggerEvent from "./ExplainTriggerEvent.vue";
-import Dropdown from "../../Dropdown/Dropdown.vue";
-import DropdownWithSearch from "../../Dropdown/DropdownCheckbox.vue";
+import { ref, defineEmits, watch, computed, inject } from "vue";
+import DrawerModal from "../../Modal/DrawerModal.vue";
+import EventInform from "./EventInform.vue";
+import DelayUntilFirstEmail from "./DelayUntilFirstEmail.vue";
+import ExplainTriggerEvent from ".././ExplainTriggerEvent.vue";
+import Dropdown from "../../../Dropdown/Dropdown.vue";
 import DatePicker from "primevue/datepicker";
 import {
   TriggerEventBasicSchema,
   TriggerEventPurchaseAfterPromotionSchema,
   TriggerEventSchema,
-} from "../../../schemas/ReMaScript/scriptSchema";
+  TriggerEventFrequencyType,
+} from "../../../../schemas/ReMaScript/schema.triggerEvent";
 import { z } from "zod";
 
-let injectTriggerEventSetting = inject<typeof TriggerEventSchema>(
+const injectTriggerEventSetting = inject<z.infer<typeof TriggerEventSchema>>(
   "triggerEventSetting"
 );
-let injectUpdateTriggerEventSetting = inject("updateTriggerEventSetting");
-let injectEditingTaskId = inject("editingTaskId");
+let injectUpdateSubscriptTriggerEventSetting = inject(
+  "updateSubscriptTriggerEventSetting",
+  null
+);
 
 const emits = defineEmits(["closeModal", "removeEvent"]);
 
@@ -198,8 +161,10 @@ const purchaseTypeOptions = ref([
 const purchaseItemsOptions = ref([
   { name: "桂冠食品", value: "桂冠食品" },
   { name: "冰淇淋", value: "冰淇淋" },
-]); //購買項目
-const currentSendTimeType = ref<"once" | "recurrence">("once"); //目前選擇的發送方式
+]);
+
+type TriggerEventFrequency = z.infer<typeof TriggerEventFrequencyType>;
+const currentSendTimeType = ref<TriggerEventFrequency>("once"); //目前選擇的發送方式
 
 const sendTimeTypeOptions = ref([
   {
@@ -219,10 +184,8 @@ const errorMsg = ref("需要選擇購買的項目");
 
 const showLoadingInput = ref(false);
 const showErrorMsg = ref(false);
-const showExplainTriggerEvent = ref(false); //顯示【購買後促銷】的彈窗說明
 const defaultTriggerEvent = ref({ name: "購買後促銷", value: "purchase" }); //預設的觸發事件
 const recurringStartDate = ref(null); //定期投放的開始日期
-
 /**
  * 還原先前的設定
  */
@@ -306,7 +269,7 @@ async function prepareSaveSetting() {
       console.warn("未定義的觸發事件種類", formData.value.event);
       break;
   }
-  injectUpdateTriggerEventSetting(injectEditingTaskId.value, data);
+  injectUpdateSubscriptTriggerEventSetting(data);
   closeModal();
 }
 
@@ -397,11 +360,6 @@ watch(
     margin-bottom: 0px;
   }
 
-  .introduction {
-    display: flex;
-    flex-direction: column;
-    justify-content: space-between;
-  }
   .button-wrap {
     align-self: self-end;
     display: flex;
@@ -471,5 +429,10 @@ input[type="text"]:disabled {
   position: absolute;
   font-size: 12px;
   top: 40px;
+}
+.introduction {
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
 }
 </style>

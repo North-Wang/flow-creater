@@ -4,11 +4,14 @@
       回到前一頁
     </button>
   </div>
-  觸發事件設定： {{ triggerEventSetting }}
+  暫存的觸發事件設定： {{ triggerEventSetting }}
   <VueFlow v-model="elements" :min-zoom="0.2" :max-zoom="4">
     <Background :gap="20" :height="100" :width="100" />
     <template #node-trigger-event="{ id, data, selected }">
-      <NodeTriggerEvent ref="refTriggerNode" />
+      <NodeTriggerEvent
+        ref="refTriggerNode"
+        :triggerEventSetting="triggerEventSetting"
+      />
     </template>
     <template #node-action="{ id, data, selected }">
       <NodeAction />
@@ -31,11 +34,8 @@ import NodeTriggerEvent from "./NodeTriggerEvent.vue";
 import NodeAction from "./NodeAction.vue";
 import NodeEmailTemplate from "./NodeEmailTemplate.vue";
 
-//假資料
-import {
-  TaskSchema,
-  TriggerEventSchema,
-} from "../../schemas/ReMaScript/scriptSchema";
+import { TaskSchema } from "../../schemas/ReMaScript/scriptSchema";
+import { TriggerEventSchema } from "../../schemas/ReMaScript/schema.triggerEvent";
 import { emptyResponseTree } from "../../data/RemaScript/emptyTree";
 
 const {
@@ -64,6 +64,11 @@ const props = withDefaults(defineProps<Props>(), {});
 const emit = defineEmits<Emits>();
 const elements = ref(emptyResponseTree);
 const editingTaskId = ref<string>("");
+
+/**
+ * 暫存底下各節點
+ */
+const tempTask = ref();
 
 // 提供給子元件：先前儲存的或預設的觸發事件設定
 const triggerEventSetting = ref<TriggerEvent>({
@@ -111,30 +116,69 @@ function getTriggerEventSettingFromTask(data) {
   };
 }
 
+/**
+ * 更新【子劇本】的【觸發事件設定】
+ * @description 不會修改到主劇本對應的task資料，避免子劇本資料不完整下修改到劇本資料
+ */
+function updateSubscriptTriggerEventSetting(newSetting) {
+  if (!newSetting) return;
+  const { frequency, ...setting } = newSetting;
+
+  if (setting.event === "purchase") {
+    tempTask.value.data.eventOption = {
+      event: setting?.event,
+      purchaseItems: setting?.purchase_item,
+      purchaseTypes: setting?.purchase_type,
+    };
+  } else {
+    tempTask.value.data.eventOption = {
+      event: setting?.event,
+    };
+  }
+  console.log("更新完【觸發事件設定】的子劇本", tempTask.value);
+}
+
 function goFrontPage() {
   emit("cancel");
 }
 
-/**
- * 取出各節點的資料
- */
 watch(
   () => props.task,
   (task) => {
-    console.warn("子劇本監聽到一個task資料改變", task);
-    if (!task) {
+    console.warn("子劇本監聽到來自script的一個task資料改變", task);
+    if (task) {
+      tempTask.value = task;
+    } else {
       console.warn("沒有先前的觸發事件task資料");
       editingTaskId.value = "";
-      return;
     }
-    editingTaskId.value = task?.id;
-    getTriggerEventSettingFromTask(task?.data);
   },
   { immediate: true }
 );
 
+/**
+ * 當子劇本更新時，更新其各節點的資料
+ */
+watch(
+  tempTask,
+  (task) => {
+    console.warn("監聽到子劇本的資料更新(沒更新script)", task);
+    if (!task) {
+      return;
+    }
+
+    editingTaskId.value = task?.id;
+    getTriggerEventSettingFromTask(task?.data);
+  },
+  { deep: true }
+);
+
 provide("triggerEventSetting", triggerEventSetting);
 provide("editingTaskId", editingTaskId);
+provide(
+  "updateSubscriptTriggerEventSetting",
+  updateSubscriptTriggerEventSetting
+);
 </script>
 
 <style lang="sass"></style>

@@ -2,6 +2,7 @@
   <div
     class="wraDropdown"
     :style="{
+      width,
       '--color-text': `var(${textColor})`,
     }"
     ref="refDropdown"
@@ -11,7 +12,7 @@
       :class="isTextShouldWrap ? 'has-wrap' : ''"
       :style="{
         ...$attrs.styleDropdownSelected,
-        width,
+
         background: `var(${bgColorDefault})`,
       }"
       @click="showDropdown = !showDropdown"
@@ -40,7 +41,6 @@
       class="wra-options"
       :style="{
         ...$attrs.styleDropdownOptions,
-        width,
         '--bg-default': `var(${bgColorDefault})`,
         '--color-text': `var(${textColor})`,
       }"
@@ -208,10 +208,12 @@ watch(
 
 <style scoped lang="scss">
 .wraDropdown {
+  position: relative;
   user-select: none;
   color: var(--color-text);
   font-size: 18px;
   .selected-dropdown {
+    width: 100%;
     height: 40px;
     box-sizing: border-box;
 

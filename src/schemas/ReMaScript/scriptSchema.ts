@@ -1,5 +1,6 @@
 /** 定義自動化劇本中會使用的資料schema */
 import { z } from "zod";
+import { TriggerType, TriggerEventFrequencyType } from "./schema.triggerEvent";
 
 /**
  * 定義目前顯示哪種樹狀圖
@@ -10,20 +11,11 @@ import { z } from "zod";
  */
 export type TreeType = "main" | "trigger-event" | "response-event";
 
-export const ReactionType = z.enum(["trigger", "response"]);
+const ReactionType = z.enum(["trigger", "response"]);
+
+//資料來源的種類
 export const sourceType = z.enum(["data", "api"]);
 
-//觸發事件傳遞給api的種類
-export const TriggerType = z.enum([
-  "sign", // 註冊
-  "cart_abandonment", // 購物車未結
-  "purchase", // 購買後促銷
-  "scheduled", // 定期投放
-]);
-//觸發事件的【發送頻率】傳遞給api的種類
-export const TriggerEventFrequencyType = z.enum(["once", "recurrence"]);
-//傳送渠道的種類
-export type ActionType = "Email" | "SMS";
 //回應事件事件傳遞給api的種類
 export const ResponseType = z.enum(["open"]);
 
@@ -37,37 +29,6 @@ export const OptionItemSchema = z.object({
   value: z.string(),
 });
 type OptionItem = z.infer<typeof OptionItemSchema>;
-
-/**
- * 【觸發事件】的彈窗 所有種類共有的資料格式
- * @description 觸發事件【購買後促銷】不適用此schema
- */
-export const TriggerEventBasicSchema = z.object({
-  event: z
-    .enum([
-      "sign", //註冊
-      "cart_abandonment",
-      "scheduled",
-    ])
-    .default("sign"),
-  frequency: TriggerEventFrequencyType.default("once"),
-});
-
-//【觸發事件】的特例：購買後促銷
-export const TriggerEventPurchaseAfterPromotionSchema = z.object({
-  event: z.literal("purchase"),
-  frequency: TriggerEventFrequencyType.default("once"),
-  purchaseTypes: z.string(),
-  purchaseItems: z.string(),
-});
-
-/**
- * 會依據event，判斷要套用的【觸發事件】的彈窗資料格式
- */
-export const TriggerEventSchema = z.discriminatedUnion("event", [
-  TriggerEventPurchaseAfterPromotionSchema,
-  TriggerEventBasicSchema,
-]);
 
 /**
  * 一個task的資料格式
