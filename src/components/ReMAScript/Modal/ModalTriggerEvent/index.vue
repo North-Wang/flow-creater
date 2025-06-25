@@ -6,7 +6,7 @@
 
         <div class="selector flex-wrap" :style="styleSpecialWrapper">
           <label for="" class="selector-title">觸發事件 (Trigger)</label>
-          {{ eventName }}
+
           <Dropdown
             :options="triggerEventOptions"
             :width="'100%'"
@@ -92,7 +92,7 @@
           <button
             type="submit"
             class="button-basic btn-next"
-            @click="prepareSaveSetting(formData)"
+            @click="prepareSaveSetting()"
           >
             儲存
           </button>
@@ -128,11 +128,15 @@ let injectUpdateSubscriptTriggerEventSetting = inject(
   null
 );
 
-//aaa
 //定義Form表單欄位、綁定資料
-const { values, handleSubmit, resetForm } = useForm({
+const {
+  values: formData,
+  handleSubmit,
+  resetForm,
+} = useForm({
   validationSchema: toTypedSchema(TriggerEventSchema),
 });
+
 const {
   value: eventName,
   errorMessage: eventError,
@@ -165,7 +169,7 @@ const presetPurchasedType = computed(() => {
   };
 });
 
-//先前設定的【購買項目】的【品項】
+//先前設定的【購買項目】的【品項】 bbb
 const presetPurchasedItem = computed(() => {
   if (!injectTriggerEventSetting.value?.purchaseItems) return null;
   return {
@@ -174,12 +178,6 @@ const presetPurchasedItem = computed(() => {
   };
 });
 
-const triggerEventMap = new Map<string, string>([
-  ["sign", "註冊"],
-  ["cart_abandonment", "購物車未結"],
-  ["purchase", "購買後促銷"],
-  ["scheduled", "定期投放"],
-]);
 const triggerEventOptions = ref([
   { name: "註冊", value: "sign" },
   { name: "購物車未結", value: "cart_abandonment" },
@@ -192,10 +190,7 @@ const purchaseTypeOptions = ref([
   { name: "品牌", value: "品牌" },
 ]);
 //購買項目的類別
-const purchaseItemsOptions = ref([
-  { name: "桂冠食品", value: "桂冠食品" },
-  { name: "冰淇淋", value: "冰淇淋" },
-]);
+const purchaseItemsOptions = ref([]);
 
 type TriggerEventFrequency = z.infer<typeof TriggerEventFrequencyType>;
 const currentSendTimeType = ref<TriggerEventFrequency>("once"); //目前選擇的發送方式
@@ -212,50 +207,21 @@ const sendTimeTypeOptions = ref([
 ]);
 
 // 推導型別
-type FormDataType = z.infer<typeof TriggerEventBasicSchema>;
-const formData = ref<FormDataType>(TriggerEventBasicSchema.parse({}));
 const errorMsg = ref("需要選擇購買的項目");
 
 const showLoadingInput = ref(false);
 const showErrorMsg = ref(false);
 const defaultTriggerEvent = ref({ name: "購買後促銷", value: "purchase" }); //預設的觸發事件
 const recurringStartDate = ref(null); //定期投放的開始日期
-/**
- * 還原先前的設定
- */
-function restoreSetting(setting) {
-  if (!setting) return;
-  console.log("還原先前的設定", setting);
-
-  //下拉選單顯示觸發事件
-  defaultTriggerEvent.value = {
-    name: triggerEventMap.get(setting.event),
-    value: setting.event,
-  };
-
-  //觸發事件
-  formData.value.event = setting.event;
-  formData.value.frequency = setting.frequency;
-
-  //購買項目 (購買後促銷才有)
-  if (setting.event === "purchase") {
-    formData.value.purchaseTypes = setting.purchaseTypes;
-    formData.value.purchaseItems = setting.purchaseItems;
-  }
-
-  //發送方式
-  currentSendTimeType.value = setting.frequency || "once";
-}
 
 function selectTriggerEvent(opt) {
-  // formData.value.event = opt?.value;
-  eventName.value = opt?.value;
+  setEventName(opt?.value);
 }
 function selectPurchaseType(type) {
-  formData.value.purchaseTypes = type?.value;
+  setPurchaseTypes(type?.value);
 }
 function selectPurchaseItem(item) {
-  formData.value.purchaseItems = item?.value;
+  setPurchaseItems(item?.value);
 }
 
 function removeEvent() {
@@ -266,7 +232,7 @@ function closeModal() {
 }
 //驗證資料是否填寫完整
 function validateFormData(schema) {
-  const result = schema.safeParse(formData.value);
+  const result = schema.safeParse(formData);
 
   if (result.success) {
     console.log("驗證過資料完整", result.data);
@@ -279,14 +245,14 @@ function validateFormData(schema) {
 
 async function prepareSaveSetting() {
   let data = {};
-  switch (formData.value.event) {
+  switch (eventName.value) {
     case "sign":
     case "cart_abandonment":
     case "scheduled":
       if (validateFormData(TriggerEventBasicSchema) === false) return;
       data = {
-        event: formData.value.event,
-        frequency: formData.value.frequency,
+        event: eventName.value,
+        frequency: frequency,
       };
       break;
     case "purchase":
@@ -294,14 +260,14 @@ async function prepareSaveSetting() {
         return;
 
       data = {
-        event: formData.value.event,
-        purchase_type: formData.value?.purchaseTypes,
-        purchase_item: formData.value.purchaseItems,
-        frequency: formData.value.frequency,
+        event: eventName.value,
+        purchase_type: purchaseTypes.value,
+        purchase_item: purchaseItems.value,
+        frequency: frequency,
       };
       break;
     default:
-      console.warn("未定義的觸發事件種類", formData.value.event);
+      console.warn("未定義的觸發事件種類", eventName.value);
       break;
   }
   injectUpdateSubscriptTriggerEventSetting(data);
@@ -309,7 +275,7 @@ async function prepareSaveSetting() {
 }
 
 const styleSpecialWrapper = computed(() => {
-  if (formData.value.event === "購買後促銷") {
+  if (eventName.value === "購買後促銷") {
     return {
       flexDirection: "row",
       alignItems: "center",
@@ -327,7 +293,7 @@ const styleSpecialWrapper = computed(() => {
 watch(
   injectTriggerEventSetting,
   (setting) => {
-    restoreSetting(setting);
+    // restoreSetting(setting);
     resetForm({ values: setting ? JSON.parse(JSON.stringify(setting)) : {} });
   },
   { immediate: true }
@@ -337,38 +303,41 @@ watch(
  * 變更「發送方式」
  * */
 watch(currentSendTimeType, (val) => {
-  formData.value.frequency = val;
+  setFrequency(val);
 });
 /**
  * 當「購買項目」 的「種類」變更時，重新取得「項目」
  * */
-watch(
-  () => formData.value.purchaseTypes,
-  (type) => {
-    //根據「購買項目」的種類，給後端對應的參數
-    switch (type?.name) {
-      case "商品":
-        // getPurchaseItems("productsales");
-        formData.value.purchaseItems = "-";
-        break;
-      case "類別":
-        // getPurchaseItems("categorysales");
-        formData.value.purchaseItems = "-";
-        break;
-      case "品牌":
-        // getPurchaseItems("brandsales");
-        formData.value.purchaseItems = "-";
-        break;
-      case "-":
-        formData.value.purchaseItems = "-";
-        break;
+watch(purchaseTypes, (type) => {
+  //根據「購買項目」的種類，給後端對應的參數
+  switch (type) {
+    case "商品":
+      purchaseItemsOptions.value = [
+        { name: "桂冠食品", value: "桂冠食品" },
+        { name: "冰淇淋", value: "冰淇淋" },
+      ];
+      purchaseItems.value = null;
+      break;
+    case "類別":
+      purchaseItemsOptions.value = [
+        { name: "冷藏食品", value: "冷藏食品" },
+        { name: "飲料類", value: "飲料類" },
+      ];
+      purchaseItems.value = null;
+      break;
+    case "品牌":
+      purchaseItemsOptions.value = [
+        { name: "可口可樂", value: "可口可樂" },
+        { name: "桂冠", value: "桂冠" },
+      ];
+      purchaseItems.value = null;
+      break;
 
-      default:
-        console.warn("未定義的購買項目種類", type);
-        break;
-    }
+    default:
+      console.warn("未定義的購買項目種類", type);
+      break;
   }
-);
+});
 </script>
 
 <style scoped lang="scss">
