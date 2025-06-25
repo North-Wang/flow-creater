@@ -68,7 +68,7 @@ const editingTaskId = ref<string>("");
  */
 const tempTask = ref();
 
-// 提供給子元件：先前儲存的或預設的觸發事件設定 aaa
+// 提供給子元件：先前儲存的或預設的觸發事件設定
 const triggerEventSetting = ref<z.infer<typeof TriggerEventSchema>>({
   event: "sign",
   frequency: "once",

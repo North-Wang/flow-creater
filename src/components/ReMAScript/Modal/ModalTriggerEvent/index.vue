@@ -85,6 +85,7 @@
 
       <div class="introduction">
         <EventInform :event="eventName" />
+        {{ formData }}
         <div class="button-wrap">
           <button class="button-basic-light btn-cancel" @click="closeModal">
             移除
@@ -161,6 +162,7 @@ const {
 const emits = defineEmits(["closeModal", "removeEvent"]);
 
 //先前設定的【購買項目】的【種類】
+
 const presetPurchasedType = computed(() => {
   if (!injectTriggerEventSetting.value?.purchaseTypes) return null;
   return {
@@ -169,14 +171,8 @@ const presetPurchasedType = computed(() => {
   };
 });
 
-//先前設定的【購買項目】的【品項】 bbb
-const presetPurchasedItem = computed(() => {
-  if (!injectTriggerEventSetting.value?.purchaseItems) return null;
-  return {
-    name: injectTriggerEventSetting.value?.purchaseItems,
-    value: injectTriggerEventSetting.value?.purchaseItems,
-  };
-});
+//先前設定的【購買項目】的【品項】
+const presetPurchasedItem = ref({ name: "-", value: "-" });
 
 const triggerEventOptions = ref([
   { name: "註冊", value: "sign" },
@@ -316,28 +312,42 @@ watch(purchaseTypes, (type) => {
         { name: "桂冠食品", value: "桂冠食品" },
         { name: "冰淇淋", value: "冰淇淋" },
       ];
-      purchaseItems.value = null;
+      setPurchaseItems(null);
       break;
     case "類別":
       purchaseItemsOptions.value = [
         { name: "冷藏食品", value: "冷藏食品" },
         { name: "飲料類", value: "飲料類" },
       ];
-      purchaseItems.value = null;
       break;
     case "品牌":
       purchaseItemsOptions.value = [
         { name: "可口可樂", value: "可口可樂" },
         { name: "桂冠", value: "桂冠" },
       ];
-      purchaseItems.value = null;
       break;
 
     default:
       console.warn("未定義的購買項目種類", type);
       break;
   }
+  //還原預設
+  setPurchaseItems("-");
 });
+
+// 當表單的資料有變更，要讓【購買商品品項】的下拉選單也更新已選的選項
+watch(
+  purchaseItems,
+  (item) => {
+    if (!item) {
+      //預設選項
+      presetPurchasedItem.value = { name: "-", value: "-" };
+      return;
+    }
+    presetPurchasedItem.value = { name: item, value: item };
+  },
+  { immediate: true }
+);
 </script>
 
 <style scoped lang="scss">

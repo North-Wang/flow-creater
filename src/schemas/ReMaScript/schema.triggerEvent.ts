@@ -36,7 +36,9 @@ export const TriggerEventPurchaseAfterPromotionSchema = z.object({
   event: z.literal("purchase"),
   frequency: TriggerEventFrequencyType.default("once"),
   purchaseTypes: z.string(),
-  purchaseItems: z.string(),
+  purchaseItems: z.string().refine((val) => val !== "-", {
+    message: "請選擇購買項目",
+  }),
 });
 
 /**
