@@ -10,6 +10,9 @@ import Aura from "@primeuix/themes/aura";
 import "@vue-flow/core/dist/style.css";
 import "@vue-flow/core/dist/theme-default.css";
 
+import VueDatePicker from "@vuepic/vue-datepicker";
+import "@vuepic/vue-datepicker/dist/main.css";
+
 const app = createApp(App);
 const pinia = createPinia();
 
@@ -25,4 +28,5 @@ app
       preset: Aura,
     },
   })
+  .component("VueDatePicker", VueDatePicker)
   .mount("#app");

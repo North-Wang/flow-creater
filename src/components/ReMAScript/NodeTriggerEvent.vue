@@ -17,16 +17,13 @@ import { z } from "zod/v4";
 import { TriggerEventSchema } from "../../schemas/ReMaScript/schema.triggerEvent";
 import ModalTriggerEvent from "./Modal/ModalTriggerEvent/index.vue";
 
-interface OptionItem {
-  name: string;
-  value: string;
-}
 interface Props {
   triggerEventSetting?: z.infer<typeof TriggerEventSchema>;
 }
 
 const props = withDefaults(defineProps<Props>(), {});
 
+//節點顯示的文字
 const msgTriggerType = computed(() => {
   if (!props.triggerEventSetting?.event) return "點擊設定事件";
   const triggerEventNameMap = {

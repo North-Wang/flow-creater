@@ -21,6 +21,15 @@
   </div>
   <div class="selector" v-if="event === 'scheduled'">
     <label for="" class="selector-title">條件開始的時間</label>
+    <VueDatePicker
+      v-model="startDate"
+      :minDate="new Date()"
+      :start-date="new Date()"
+      :format="'MM/dd/yyy'"
+      :enable-time-picker="false"
+      is-expanded
+      autoApply
+    ></VueDatePicker>
   </div>
 </template>
 
@@ -38,6 +47,7 @@ const props = withDefaults(defineProps<Props>(), {
 const startTimeUnitOptions = ref([{ name: "天後", value: "天後" }]);
 const delayUntilFirstEmailValue = ref<number>(2);
 const delayUntilFirstEmailUnit = ref({ name: "天後", value: "天後" });
+const startDate = ref(null);
 type Unit = typeof delayUntilFirstEmailUnit.value;
 
 interface Emits {
@@ -77,6 +87,10 @@ watch(
     });
   }
 );
+
+watch(startDate, (date) => {
+  console.log("aaa date", date);
+});
 </script>
 
 <style scoped lang="scss">

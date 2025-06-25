@@ -51,8 +51,6 @@ const {
 
 const refTriggerNode = ref(null);
 
-type TriggerEvent = z.infer<typeof TriggerEventSchema>;
-
 interface Props {
   task?: z.infer<typeof TaskSchema>; //要顯示的兩個task
 }
@@ -70,8 +68,8 @@ const editingTaskId = ref<string>("");
  */
 const tempTask = ref();
 
-// 提供給子元件：先前儲存的或預設的觸發事件設定
-const triggerEventSetting = ref<TriggerEvent>({
+// 提供給子元件：先前儲存的或預設的觸發事件設定 aaa
+const triggerEventSetting = ref<z.infer<typeof TriggerEventSchema>>({
   event: "sign",
   frequency: "once",
 });

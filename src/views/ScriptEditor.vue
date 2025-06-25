@@ -1,16 +1,8 @@
 <script setup lang="ts">
 import { ref, onMounted, watch, computed, provide } from "vue";
 import { z } from "zod";
-import {
-  TreeType,
-  TriggerEventSchema,
-  TaskSchema,
-  ScriptSchema,
-} from "../schemas/ReMaScript/scriptSchema";
-import {
-  calculateLayoutWithDagre,
-  createVueFlowLayout,
-} from "../utils/nodeLayout";
+import { TreeType, ScriptSchema } from "../schemas/ReMaScript/scriptSchema";
+import { createVueFlowLayout } from "../utils/nodeLayout";
 
 //節點元件
 import MainScript from "../components/ReMAScript/MainScript.vue";

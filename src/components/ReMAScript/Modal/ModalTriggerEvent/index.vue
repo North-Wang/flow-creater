@@ -1,7 +1,7 @@
 <template>
   <DrawerModal @closeModal="removeEvent()">
-    <ul class="wrapper">
-      <li class="event-form font-18">
+    <form class="wrapper" @submit.prevent="prepareSaveSetting">
+      <div class="event-form font-18">
         <p class="title">事件設定</p>
 
         <div class="selector flex-wrap" :style="styleSpecialWrapper">
@@ -79,20 +79,18 @@
             </div>
           </div>
         </div>
-      </li>
+      </div>
 
-      <li class="introduction">
+      <div class="introduction">
         <EventInform :event="formData?.event" />
         <div class="button-wrap">
           <button class="button-basic-light btn-cancel" @click="closeModal">
             移除
           </button>
-          <button class="button-basic btn-next" @click="prepareSaveSetting">
-            儲存
-          </button>
+          <button type="submit" class="button-basic btn-next">儲存</button>
         </div>
-      </li>
-    </ul>
+      </div>
+    </form>
   </DrawerModal>
 </template>
 
@@ -111,6 +109,8 @@ import {
   TriggerEventFrequencyType,
 } from "../../../../schemas/ReMaScript/schema.triggerEvent";
 import { z } from "zod";
+import { useForm } from "vee-validate";
+import { toTypedSchema } from "@vee-validate/zod";
 
 const injectTriggerEventSetting = inject<z.infer<typeof TriggerEventSchema>>(
   "triggerEventSetting"
@@ -119,6 +119,13 @@ let injectUpdateSubscriptTriggerEventSetting = inject(
   "updateSubscriptTriggerEventSetting",
   null
 );
+
+//aaa
+//定義Form表單欄位、綁定資料
+const { values, handleSubmit, resetForm, defineField } = useForm({
+  validationSchema: toTypedSchema(TriggerEventSchema),
+});
+const [modalData, modalDataAttrs] = defineField("modalData");
 
 const emits = defineEmits(["closeModal", "removeEvent"]);
 
@@ -242,7 +249,8 @@ function validateFormData(schema) {
   }
 }
 
-async function prepareSaveSetting() {
+async function prepareSaveSetting(formData) {
+  console.log("aaa formData", formData);
   let data = {};
   switch (formData.value.event) {
     case "sign":
@@ -293,6 +301,7 @@ watch(
   injectTriggerEventSetting,
   (setting) => {
     restoreSetting(setting);
+    resetForm({ values: setting ? JSON.parse(JSON.stringify(setting)) : {} });
   },
   { immediate: true }
 );
