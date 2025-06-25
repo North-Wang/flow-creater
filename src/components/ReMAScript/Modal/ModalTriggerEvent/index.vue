@@ -207,7 +207,7 @@ const errorMsg = ref("需要選擇購買的項目");
 
 const showLoadingInput = ref(false);
 const showErrorMsg = ref(false);
-const defaultTriggerEvent = ref({ name: "購買後促銷", value: "purchase" }); //預設的觸發事件
+const defaultTriggerEvent = ref({ name: "註冊", value: "sign" }); //預設的觸發事件
 const recurringStartDate = ref(null); //定期投放的開始日期
 
 function selectTriggerEvent(opt) {
@@ -248,7 +248,7 @@ async function prepareSaveSetting() {
       if (validateFormData(TriggerEventBasicSchema) === false) return;
       data = {
         event: eventName.value,
-        frequency: frequency,
+        frequency: frequency.value,
       };
       break;
     case "purchase":
@@ -259,7 +259,7 @@ async function prepareSaveSetting() {
         event: eventName.value,
         purchase_type: purchaseTypes.value,
         purchase_item: purchaseItems.value,
-        frequency: frequency,
+        frequency: frequency.value,
       };
       break;
     default:
@@ -289,7 +289,6 @@ const styleSpecialWrapper = computed(() => {
 watch(
   injectTriggerEventSetting,
   (setting) => {
-    // restoreSetting(setting);
     resetForm({ values: setting ? JSON.parse(JSON.stringify(setting)) : {} });
   },
   { immediate: true }
@@ -301,6 +300,20 @@ watch(
 watch(currentSendTimeType, (val) => {
   setFrequency(val);
 });
+//還原先前設定的觸發事件
+watch(
+  eventName,
+  (event) => {
+    const target = triggerEventOptions.value?.find(
+      (opt) => opt.value === event
+    );
+    if (target) {
+      defaultTriggerEvent.value = target;
+    }
+  },
+  { immediate: true, once: true }
+);
+
 /**
  * 當「購買項目」 的「種類」變更時，重新取得「項目」
  * */
@@ -331,7 +344,7 @@ watch(purchaseTypes, (type) => {
       console.warn("未定義的購買項目種類", type);
       break;
   }
-  //還原預設
+  //清空已經選擇的購買商品的品項
   setPurchaseItems("-");
 });
 

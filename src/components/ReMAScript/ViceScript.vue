@@ -122,6 +122,7 @@ function updateSubscriptTriggerEventSetting(newSetting) {
   if (!newSetting) return;
   const { frequency, ...setting } = newSetting;
 
+  //更新觸發事件
   if (setting.event === "purchase") {
     tempTask.value.data.eventOption = {
       event: setting?.event,
@@ -133,6 +134,9 @@ function updateSubscriptTriggerEventSetting(newSetting) {
       event: setting?.event,
     };
   }
+
+  //更新發送方式
+  tempTask.value.data.schedule.type = frequency;
   console.log("更新完【觸發事件設定】的子劇本", tempTask.value);
 }
 
