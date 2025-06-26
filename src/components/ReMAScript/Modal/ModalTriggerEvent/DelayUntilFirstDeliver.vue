@@ -33,7 +33,6 @@
       ></VueDatePicker>
     </div>
     <div class="button-wrap">
-      {{ formData }}
       <button
         class="button-basic-light btn-cancel"
         @click="injectRemoveTriggerEvent"
@@ -65,6 +64,7 @@ import {
 } from "../../../../schemas/ReMaScript/schema.triggerEvent";
 
 const injectRemoveTriggerEvent = inject("removeTriggerEvent");
+const injectCloseModal = inject("closeTriggerEventModal");
 let injectUpdateDelayUntilFirstDeliver = inject("updateDelayUntilFirstDeliver");
 
 //定義Form表單欄位、綁定資料
@@ -161,6 +161,7 @@ async function prepareSaveSetting() {
       break;
   }
   injectUpdateDelayUntilFirstDeliver(data);
+  injectCloseModal();
 }
 
 //更新「條件開始的時間」

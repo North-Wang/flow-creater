@@ -4,7 +4,7 @@
     <div>{{ msgTriggerType }}</div>
     <div>{{ startTime }}{{ startTimeUnit }}</div>
   </section>
-  <ModalTriggerEvent v-if="showModal" @closeModal="showModal = false" />
+  <ModalTriggerEvent v-if="showModal" />
 </template>
 
 <script setup lang="ts">
@@ -44,8 +44,12 @@ function removeTriggerEvent() {
   console.warn("清空觸發事件");
   showModal.value = false;
 }
+function closeTriggerEventModal() {
+  showModal.value = false;
+}
 
 provide("removeTriggerEvent", removeTriggerEvent);
+provide("closeTriggerEventModal", closeTriggerEventModal);
 defineExpose({ openModalTriggerEventSetting });
 </script>
 

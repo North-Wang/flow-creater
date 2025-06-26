@@ -5,6 +5,7 @@
     </button>
   </div>
   暫存的觸發事件設定： {{ triggerEventSetting }}
+  {{ sendStartTimeSetting }}
   <VueFlow v-model="elements" :min-zoom="0.2" :max-zoom="4">
     <Background :gap="20" :height="100" :width="100" />
     <template #node-trigger-event="{ id, data, selected }">
@@ -77,6 +78,8 @@ const triggerEventSetting = ref<z.infer<typeof schemaTriggerEvent>>({
   frequency: "once",
 });
 
+const sendStartTimeSetting = ref<z.infer<typeof schemaSendStartTime>>();
+
 /**
  * 根據點擊的節點種類，打開對應的彈窗
  */
@@ -114,6 +117,26 @@ function getTriggerEventSettingFromTask(data) {
   triggerEventSetting.value = {
     event: data?.eventOption?.event,
     frequency: data?.schedule?.type,
+  };
+}
+
+/**
+ * 取出【經過多久之後寄出第一封信】or【條件開始的時間】 aaa
+ * @param task
+ */
+function getDelayUntilFirstDeliver(data) {
+  console.log("要取出【經過多久之後寄出第一封信】or【條件開始的時間】", data);
+  //定期投放
+  if (data?.eventOption?.event === "scheduled") {
+    sendStartTimeSetting.value = {
+      date: data?.eventOption?.delayUntilFirstDeliver?.date,
+    };
+    return;
+  }
+
+  sendStartTimeSetting.value = {
+    value: data?.eventOption?.delayUntilFirstDeliver?.value,
+    unit: data?.eventOption?.delayUntilFirstDeliver?.unit,
   };
 }
 
