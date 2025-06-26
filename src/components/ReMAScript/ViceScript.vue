@@ -35,7 +35,7 @@ import NodeAction from "./NodeAction.vue";
 import NodeEmailTemplate from "./NodeEmailTemplate.vue";
 
 import { TaskSchema } from "../../schemas/ReMaScript/scriptSchema";
-import { TriggerEventSchema } from "../../schemas/ReMaScript/schema.triggerEvent";
+import { schemaTriggerEvent } from "../../schemas/ReMaScript/schema.triggerEvent";
 import { emptyResponseTree } from "../../data/RemaScript/emptyTree";
 
 const {
@@ -69,7 +69,7 @@ const editingTaskId = ref<string>("");
 const tempTask = ref();
 
 // 提供給子元件：先前儲存的或預設的觸發事件設定
-const triggerEventSetting = ref<z.infer<typeof TriggerEventSchema>>({
+const triggerEventSetting = ref<z.infer<typeof schemaTriggerEvent>>({
   event: "sign",
   frequency: "once",
 });

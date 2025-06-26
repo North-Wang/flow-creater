@@ -1,5 +1,5 @@
 <template>
-  <div class="selector flex-wrap" v-if="event !== 'scheduled'">
+  <div class="flex-wrap" v-if="event !== 'scheduled'">
     <label for="" class="selector-title">經過多少時間寄第一封</label>
     <div class="w-full flex gap-x-2">
       <input
@@ -19,7 +19,7 @@
       />
     </div>
   </div>
-  <div class="selector" v-if="event === 'scheduled'">
+  <div class="" v-if="event === 'scheduled'">
     <label for="" class="selector-title">條件開始的時間</label>
     <VueDatePicker
       v-model="startDate"
@@ -34,8 +34,9 @@
 </template>
 
 <script setup lang="ts">
-import { ref, watch } from "vue";
+import { onMounted, ref, watch } from "vue";
 import Dropdown from "../../../Dropdown/Dropdown.vue";
+import dayjs from "dayjs";
 
 interface Props {
   event: string;
@@ -51,13 +52,9 @@ const startDate = ref(null);
 type Unit = typeof delayUntilFirstEmailUnit.value;
 
 interface Emits {
-  (
-    e: "update",
-    payload: {
-      value: number;
-      unit: Unit;
-    }
-  ): void;
+  (e: "updateDelayUnit", value: string): void;
+  (e: "updateDelayValue", value: number): void;
+  (e: "updateDelayDate", value: string): void;
 }
 const emits = defineEmits<Emits>();
 
@@ -68,6 +65,7 @@ function handleStartTimeValue(value: number) {
   if (!Number.isInteger(value) || value === 0) {
     delayUntilFirstEmailValue.value = Math.round(value);
   }
+  emits("updateDelayValue", delayUntilFirstEmailValue.value);
 }
 
 /**
@@ -76,29 +74,24 @@ function handleStartTimeValue(value: number) {
 function handleStartTimeUnit(unit: any) {
   if (!unit) return;
   delayUntilFirstEmailUnit.value = unit;
+  emits("updateDelayUnit", unit?.value);
 }
 
-watch(
-  [delayUntilFirstEmailValue, delayUntilFirstEmailUnit],
-  ([value, unit]) => {
-    emits("update", {
-      unit,
-      value,
-    });
-  }
-);
-
+//更新「條件開始的時間」
 watch(startDate, (date) => {
-  console.log("aaa date", date);
+  const newDate = dayjs(date).format("YYYY-MM-DD");
+  emits("updateDelayDate", newDate);
+});
+
+onMounted(() => {
+  if (props.event !== "scheduled") {
+    emits("updateDelayValue", delayUntilFirstEmailValue.value);
+    emits("updateDelayUnit", delayUntilFirstEmailUnit.value?.value);
+  }
 });
 </script>
 
 <style scoped lang="scss">
-.selector {
-  display: flex;
-  flex-direction: column;
-  margin-bottom: 25px;
-}
 .selector-title {
   font-size: 18px;
   font-weight: 400;

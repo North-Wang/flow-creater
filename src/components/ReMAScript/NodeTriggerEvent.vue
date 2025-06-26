@@ -14,11 +14,11 @@
 <script setup lang="ts">
 import { ref, watch, computed, defineExpose } from "vue";
 import { z } from "zod/v4";
-import { TriggerEventSchema } from "../../schemas/ReMaScript/schema.triggerEvent";
+import { schemaTriggerEvent } from "../../schemas/ReMaScript/schema.triggerEvent";
 import ModalTriggerEvent from "./Modal/ModalTriggerEvent/index.vue";
 
 interface Props {
-  triggerEventSetting?: z.infer<typeof TriggerEventSchema>;
+  triggerEventSetting?: z.infer<typeof schemaTriggerEvent>;
 }
 
 const props = withDefaults(defineProps<Props>(), {});

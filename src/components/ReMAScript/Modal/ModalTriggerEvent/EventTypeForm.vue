@@ -1,64 +1,63 @@
 <template>
-  <DrawerModal @closeModal="removeEvent()">
-    <div class="wrapper">
-      <div class="event-form font-18">
-        <p class="title">事件設定</p>
+  <div class="wrapper">
+    <div class="event-form font-18">
+      <p class="title">事件設定</p>
 
-        <div class="selector flex-wrap" :style="styleSpecialWrapper">
-          <label for="" class="selector-title">觸發事件 (Trigger)</label>
+      <div class="selector flex-wrap" :style="styleSpecialWrapper">
+        <label for="" class="selector-title">觸發事件 (Trigger)</label>
 
-          <Dropdown
-            :options="triggerEventOptions"
-            :width="'100%'"
-            :selectedValue="defaultTriggerEvent"
-            @select="selectTriggerEvent"
-          />
-        </div>
+        <Dropdown
+          :options="triggerEventOptions"
+          :width="'100%'"
+          :selectedValue="defaultTriggerEvent"
+          @select="selectTriggerEvent"
+        />
+      </div>
 
-        <div
-          class="position-relative w-full grid grid-cols-[auto_auto_1fr] gap-x-[25px] place-items-center mb-[25px]"
-          v-if="eventName === 'purchase'"
+      <div
+        class="position-relative w-full grid grid-cols-[auto_auto_1fr] gap-x-[25px] place-items-center mb-[25px]"
+        v-if="eventName === 'purchase'"
+      >
+        <label
+          for=""
+          class="selector-title"
+          style="white-space: nowrap; margin-bottom: 8px"
+          >購買項目</label
         >
-          <label
-            for=""
-            class="selector-title"
-            style="white-space: nowrap; margin-bottom: 8px"
-            >購買項目</label
+        <Dropdown
+          :options="purchaseTypeOptions"
+          :dropdownPlaceholder="'-'"
+          :width="'138px'"
+          :selectedValue="presetPurchasedType"
+          @select="selectPurchaseType"
+        />
+        <ul
+          class="wrapper-loading-input"
+          style="width: calc(100% * 2 / 3)"
+          v-if="showLoadingInput"
+        >
+          <li
+            class="flex-fill d-flex align-items-center justify-content-center"
           >
-          <Dropdown
-            :options="purchaseTypeOptions"
-            :dropdownPlaceholder="'-'"
-            :width="'138px'"
-            :selectedValue="presetPurchasedType"
-            @select="selectPurchaseType"
-          />
-          <ul
-            class="wrapper-loading-input"
-            style="width: calc(100% * 2 / 3)"
-            v-if="showLoadingInput"
-          >
-            <li
-              class="flex-fill d-flex align-items-center justify-content-center"
-            >
-              <div class="spinner-border" role="status"></div>
-            </li>
-          </ul>
-          <Dropdown
-            :width="'100%'"
-            :options="purchaseItemsOptions"
-            :dropdownPlaceholder="'-'"
-            :selectedValue="presetPurchasedItem"
-            class="w-full"
-            @select="selectPurchaseItem"
-            v-else
-          />
-          <div class="Red error-msg" v-if="showErrorMsg">{{ errorMsg }}</div>
-        </div>
-        <div class="selector flex-wrap" v-if="eventName === '定期投放'">
-          <label for="" class="selector-title">條件開始的時間</label>
-          <DatePicker v-model="recurringStartDate" />
-        </div>
-        <!-- <div class="selector">
+            <div class="spinner-border" role="status"></div>
+          </li>
+        </ul>
+        <Dropdown
+          :width="'100%'"
+          :options="purchaseItemsOptions"
+          :dropdownPlaceholder="'-'"
+          :selectedValue="presetPurchasedItem"
+          class="w-full"
+          @select="selectPurchaseItem"
+          v-else
+        />
+        <div class="Red error-msg" v-if="showErrorMsg">{{ errorMsg }}</div>
+      </div>
+      <div class="selector flex-wrap" v-if="eventName === '定期投放'">
+        <label for="" class="selector-title">條件開始的時間</label>
+        <DatePicker v-model="recurringStartDate" />
+      </div>
+      <!-- <div class="selector">
           <DelayUntilFirstDeliver
             :event="eventName"
             @updateDelayValue="(value) => setDelayUntilFirstDeliverValue(value)"
@@ -67,7 +66,7 @@
           />
         </div> -->
 
-        <!-- <div class="selector flex-wrap">
+      <!-- <div class="selector flex-wrap">
           <label for="" class="selector-title">發送方式</label>
           <div class="flex">
             <div
@@ -89,33 +88,31 @@
             </div>
           </div>
         </div> -->
-      </div>
+    </div>
 
-      <div class="introduction">
-        <EventInform :event="eventName" />
-        {{ formData }}
-        <div class="button-wrap">
-          <button class="button-basic-light btn-cancel" @click="closeModal">
-            移除
-          </button>
-          <button
-            type="submit"
-            class="button-basic btn-next"
-            @click="prepareSaveSetting()"
-          >
-            儲存
-          </button>
-        </div>
+    <div class="introduction">
+      <EventInform :event="eventName" />
+      {{ formData }}
+      <div class="button-wrap">
+        <button class="button-basic-light btn-cancel" @click="closeModal">
+          移除
+        </button>
+        <button
+          type="submit"
+          class="button-basic btn-next"
+          @click="prepareSaveSetting()"
+        >
+          儲存
+        </button>
       </div>
     </div>
-  </DrawerModal>
+  </div>
 </template>
 
 <script setup lang="ts">
 import { ref, defineEmits, watch, computed, inject } from "vue";
 import DrawerModal from "../../Modal/DrawerModal.vue";
 import EventInform from "./EventInform.vue";
-import EventTypeForm from "./EventTypeForm.vue";
 import DelayUntilFirstDeliver from "./DelayUntilFirstDeliver.vue";
 import ExplainTriggerEvent from ".././ExplainTriggerEvent.vue";
 import Dropdown from "../../../Dropdown/Dropdown.vue";
@@ -454,105 +451,3 @@ watch(
   { immediate: true }
 );
 </script>
-
-<style scoped lang="scss">
-.wrapper {
-  // max-height: 275px;
-  padding: 15px 80px 25px 80px;
-  display: grid;
-  grid-template-columns: repeat(2, 1fr);
-  color: black;
-  gap: 100px;
-  font-family: "Noto Sans TC";
-  .selector {
-    display: flex;
-    flex-direction: column;
-    margin-bottom: 25px;
-  }
-  .selector-title {
-    font-size: 18px;
-    font-weight: 400;
-    margin-bottom: 15px;
-    position: relative;
-    display: flex;
-  }
-  .selector:last-of-type {
-    margin-bottom: 0px;
-  }
-
-  .button-wrap {
-    align-self: self-end;
-    display: flex;
-    gap: 25px;
-    button {
-      min-width: 124px;
-      display: flex;
-      justify-content: center;
-      align-items: center;
-    }
-  }
-}
-input[type="text"] {
-  border: 1px solid #c4c4c4;
-  border-radius: 10px;
-  height: 40px;
-  padding: 0 14px;
-}
-input[type="text"]:disabled {
-  background-color: #fff;
-}
-.title {
-  color: #71afb6;
-  font-size: 18px;
-  font-weight: 400;
-  margin-right: 0px; //reset
-  margin-bottom: 20px;
-  text-align: left;
-}
-.btn-cancel::before {
-  content: url("../../../assets/remove.svg");
-  margin-right: 10px;
-}
-.btn-next::after {
-  // content: url("../../../assets/white-left-arrow.svg");
-  display: inline-block;
-  transform: rotate(180deg);
-  margin-top: 4px;
-  margin-left: 10px;
-}
-.question-mark {
-  // background-image: url("../../../assets/question-img.png");
-  background-repeat: no-repeat;
-  width: 20px;
-  height: 20px;
-  position: relative;
-  top: 5px;
-  left: 5px;
-  cursor: pointer;
-}
-.wrapper-loading-input {
-  border: 1px solid #c4c4c4;
-  border-radius: 10px;
-  height: 40px;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  .spinner-border {
-    width: 1.6rem;
-    height: 1.6rem;
-  }
-  img {
-    margin-right: 14px;
-  }
-}
-.error-msg {
-  position: absolute;
-  font-size: 12px;
-  top: 40px;
-}
-.introduction {
-  display: flex;
-  flex-direction: column;
-  justify-content: space-between;
-}
-</style>

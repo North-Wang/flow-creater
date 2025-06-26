@@ -2,44 +2,19 @@
 import { z } from "zod";
 
 //發送方式的選項
-export const TriggerEventFrequencyType = z.enum([
+export const typeTriggerEventFrequency = z.enum([
   "once",
   "recurrence",
   "regular",
 ]);
 
 //觸發事件傳遞給api的參數
-export const TriggerType = z.enum([
+export const typeTriggerEvent = z.enum([
   "sign", // 註冊
   "cart_abandonment", // 購物車未結
   "purchase", // 購買後促銷
   "scheduled", // 定期投放
 ]);
-
-/**
- * 【觸發事件】的彈窗 所有種類共有的資料格式
- * @description 觸發事件【購買後促銷】不適用此schema
- */
-export const TriggerEventBasicSchema = z.object({
-  event: z
-    .enum([
-      "sign", //註冊
-      "cart_abandonment",
-      "scheduled",
-    ])
-    .default("sign"),
-  frequency: TriggerEventFrequencyType.default("once"),
-});
-
-//【觸發事件】的特例：購買後促銷
-export const TriggerEventPurchaseAfterPromotionSchema = z.object({
-  event: z.literal("purchase"),
-  frequency: TriggerEventFrequencyType.default("once"),
-  purchaseTypes: z.string(),
-  purchaseItems: z.string().refine((val) => val !== "-", {
-    message: "請選擇購買項目",
-  }),
-});
 
 /**
  * 經過多久後開始
@@ -69,10 +44,71 @@ export const schemaSendStartTime = z.discriminatedUnion("triggerEvent", [
 ]);
 
 /**
+ * 經過多少時間寄第一封
+ * @description 適用於「註冊」「購物車未結」「購買後促銷」
+ */
+const schemaDelayUntilFirstMail = z.object({
+  value: z.number().describe("經過多久之後寄出第一封信的數值"),
+  unit: z.enum(["天後"]).describe("經過多久之後寄出第一封信的單位"),
+});
+
+/**
+ * 條件開始的時間
+ * @description 適用於「定期投放」
+ */
+const schemaStartDate = z.object({
+  date: z.string().datetime().describe("條件開始的日期"),
+});
+
+/**
+ * 【觸發事件】：註冊
+ */
+export const schemaTriggerEventSign = z.object({
+  event: z.literal("sign"),
+  // frequency: typeTriggerEventFrequency.default("once"),
+  // delayUntilFirstDeliver: schemaDelayUntilFirstMail,
+});
+
+/**
+ * 【觸發事件】：購物車未結
+ */
+export const schemaTriggerEventCartAbandonment = z.object({
+  event: z.literal("cart_abandonment"),
+  // frequency: typeTriggerEventFrequency.default("once"),
+  // delayUntilFirstDeliver: schemaDelayUntilFirstMail,
+});
+
+/**
+ * 【觸發事件】：購買後促銷
+ * @description 會有購買的種類與項目
+ */
+export const schemaTriggerEventPurchaseAfterPromotion = z.object({
+  event: z.literal("purchase"),
+  // frequency: typeTriggerEventFrequency.default("once"),
+  purchaseTypes: z.string(),
+  purchaseItems: z.string().refine((val) => val !== "-", {
+    message: "請選擇購買項目",
+  }),
+  // delayUntilFirstDeliver: schemaDelayUntilFirstMail,
+});
+
+/**
+ * 【觸發事件】：定期投放
+ * @description 發送方式固定式定期性投放
+ */
+export const schemaTriggerEventScheduled = z.object({
+  event: z.literal("scheduled"),
+  // frequency: z.literal("regular"),
+  // delayUntilFirstDeliver: schemaStartDate,
+});
+
+/**
  * 觸發事件的彈窗資料
  * @description click彈窗的儲存按鍵時要驗證
  */
-export const TriggerEventSchema = z.discriminatedUnion("event", [
-  TriggerEventPurchaseAfterPromotionSchema,
-  TriggerEventBasicSchema,
+export const schemaTriggerEvent = z.discriminatedUnion("event", [
+  schemaTriggerEventSign,
+  schemaTriggerEventCartAbandonment,
+  schemaTriggerEventPurchaseAfterPromotion,
+  schemaTriggerEventScheduled,
 ]);

@@ -1,6 +1,9 @@
 /** 定義自動化劇本中會使用的資料schema */
 import { z } from "zod";
-import { TriggerType, TriggerEventFrequencyType } from "./schema.triggerEvent";
+import {
+  typeTriggerEvent,
+  typeTriggerEventFrequency,
+} from "./schema.triggerEvent";
 
 /**
  * 定義目前顯示哪種樹狀圖
@@ -40,13 +43,13 @@ export const TaskSchema = z.object({
   targetId: z.array(z.string()).nullable(), //下一個task的id
   //事件的種類
   eventOption: z.object({
-    event: z.union([TriggerType, ResponseType]),
+    event: z.union([typeTriggerEvent, ResponseType]),
     purchaseTypes: z.string().optional(),
     purchaseItems: z.string().optional(),
   }),
   //發送時間
   schedule: z.object({
-    type: TriggerEventFrequencyType,
+    type: typeTriggerEventFrequency,
     time: z.union([
       z.object({ cron: z.string() }),
       z.object({ once: z.string() }),
