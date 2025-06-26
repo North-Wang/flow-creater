@@ -29,6 +29,7 @@
           :dropdownPlaceholder="'-'"
           :width="'138px'"
           :selectedValue="presetPurchasedType"
+          :direction="'bottom'"
           @select="selectPurchaseType"
         />
         <ul
@@ -57,44 +58,15 @@
         <label for="" class="selector-title">條件開始的時間</label>
         <DatePicker v-model="recurringStartDate" />
       </div>
-      <!-- <div class="selector">
-          <DelayUntilFirstDeliver
-            :event="eventName"
-            @updateDelayValue="(value) => setDelayUntilFirstDeliverValue(value)"
-            @updateDelayUnit="(unit) => setDelayUntilFirstDeliverUnit(unit)"
-            @updateDelayDate="(string) => setDelayUntilFirstDeliverDate(string)"
-          />
-        </div> -->
-
-      <!-- <div class="selector flex-wrap">
-          <label for="" class="selector-title">發送方式</label>
-          <div class="flex">
-            <div
-              class="d-flex align-items-center"
-              v-for="options in sendTimeTypeOptions"
-              :key="options?.value"
-            >
-              <input
-                type="radio"
-                :id="options?.value"
-                :value="options?.value"
-                style="margin-right: 16px"
-                v-model="frequency"
-              />
-
-              <label :for="options?.value" class="cursor-pointer">{{
-                options?.name
-              }}</label>
-            </div>
-          </div>
-        </div> -->
     </div>
 
     <div class="introduction">
       <EventInform :event="eventName" />
-      {{ formData }}
       <div class="button-wrap">
-        <button class="button-basic-light btn-cancel" @click="closeModal">
+        <button
+          class="button-basic-light btn-cancel"
+          @click="injectRemoveTriggerEvent"
+        >
           移除
         </button>
         <button
@@ -102,7 +74,7 @@
           class="button-basic btn-next"
           @click="prepareSaveSetting()"
         >
-          儲存
+          下一步
         </button>
       </div>
     </div>
@@ -111,9 +83,7 @@
 
 <script setup lang="ts">
 import { ref, defineEmits, watch, computed, inject } from "vue";
-import DrawerModal from "../../Modal/DrawerModal.vue";
 import EventInform from "./EventInform.vue";
-import DelayUntilFirstDeliver from "./DelayUntilFirstDeliver.vue";
 import ExplainTriggerEvent from ".././ExplainTriggerEvent.vue";
 import Dropdown from "../../../Dropdown/Dropdown.vue";
 import DatePicker from "primevue/datepicker";
@@ -124,6 +94,7 @@ import {
   schemaTriggerEventScheduled,
   schemaTriggerEvent,
   typeTriggerEventFrequency,
+  typeTriggerEvent,
 } from "../../../../schemas/ReMaScript/schema.triggerEvent";
 import { z } from "zod";
 import { useForm, useField } from "vee-validate";
@@ -136,6 +107,12 @@ let injectUpdateSubscriptTriggerEventSetting = inject(
   "updateSubscriptTriggerEventSetting",
   null
 );
+const injectRemoveTriggerEvent = inject("removeTriggerEvent");
+
+interface Emits {
+  (e: "nextStep", payload: { event: typeTriggerEvent }): void;
+}
+const emits = defineEmits<Emits>();
 
 //定義Form表單欄位、綁定資料
 const {
@@ -167,27 +144,6 @@ const {
   errorMessage: purchaseItemsError,
   setValue: setPurchaseItems,
 } = useField("purchaseItems");
-const {
-  value: delayUntilFirstDeliverUnit,
-  errorMessage: delayUntilFirstDeliverUnitError,
-  setValue: setDelayUntilFirstDeliverUnit,
-} = useField("delayUntilFirstDeliverUnit");
-const {
-  value: delayUntilFirstDeliverValue,
-  errorMessage: delayUntilFirstDeliverValueError,
-  setValue: setDelayUntilFirstDeliverValue,
-} = useField("delayUntilFirstDeliverValue");
-const {
-  value: delayUntilFirstDeliverDate,
-  errorMessage: delayUntilFirstDeliverDateError,
-  setValue: setDelayUntilFirstDeliverDate,
-} = useField("delayUntilFirstDeliverDate");
-const {
-  value: delayUntilFirstDeliver,
-  errorMessage: delayUntilFirstDeliverError,
-  setValue: setDelayUntilFirstDeliver,
-} = useField("delayUntilFirstDeliver");
-const emits = defineEmits(["closeModal", "removeEvent"]);
 
 //先前設定的【購買項目】的【種類】
 
@@ -255,11 +211,6 @@ function selectPurchaseItem(item) {
  * @param schema
  */
 function cleanFormDataBySchema() {
-  console.log("aaa eventName", eventName.value);
-  console.log(
-    "aaa delayUntilFirstDeliverDate",
-    delayUntilFirstDeliverDate.value
-  );
   switch (eventName.value) {
     case "sign":
     case "cart_abandonment":
@@ -297,12 +248,6 @@ function cleanFormDataBySchema() {
   }
 }
 
-function removeEvent() {
-  emits("removeEvent");
-}
-function closeModal() {
-  emits("closeModal");
-}
 //驗證資料是否填寫完整
 function validateFormData(schema) {
   const result = schema.safeParse(formData);
@@ -323,32 +268,24 @@ async function prepareSaveSetting() {
       if (!validateFormData(schemaTriggerEventSign)) return;
       data = {
         event: eventName.value,
-        frequency: frequency.value,
-        delayUntilFirstDeliver: "",
       };
+      break;
     case "cart_abandonment":
       if (!validateFormData(schemaTriggerEventCartAbandonment)) return;
       data = {
         event: eventName.value,
-        frequency: frequency.value,
-        delayUntilFirstDeliver: "",
       };
+      break;
     case "scheduled":
       if (!validateFormData(schemaTriggerEventScheduled)) return;
       data = {
         event: eventName.value,
-        frequency: frequency.value,
-        delayUntilFirstDeliver: "",
       };
       break;
     case "purchase":
       if (!validateFormData(schemaTriggerEventPurchaseAfterPromotion)) return;
       data = {
         event: eventName.value,
-        purchase_type: purchaseTypes.value,
-        purchase_item: purchaseItems.value,
-        frequency: frequency.value,
-        delayUntilFirstDeliver: "",
       };
       break;
     default:
@@ -356,7 +293,7 @@ async function prepareSaveSetting() {
       break;
   }
   injectUpdateSubscriptTriggerEventSetting(data);
-  closeModal();
+  emits("nextStep", data);
 }
 
 const styleSpecialWrapper = computed(() => {
@@ -451,3 +388,105 @@ watch(
   { immediate: true }
 );
 </script>
+
+<style scoped lang="scss">
+.wrapper {
+  // max-height: 275px;
+  padding: 15px 80px 25px 80px;
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  color: black;
+  gap: 100px;
+  font-family: "Noto Sans TC";
+  .selector {
+    display: flex;
+    flex-direction: column;
+    margin-bottom: 25px;
+  }
+  .selector-title {
+    font-size: 18px;
+    font-weight: 400;
+    margin-bottom: 15px;
+    position: relative;
+    display: flex;
+  }
+  .selector:last-of-type {
+    margin-bottom: 0px;
+  }
+
+  .button-wrap {
+    align-self: self-end;
+    display: flex;
+    gap: 25px;
+    button {
+      min-width: 124px;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+    }
+  }
+}
+input[type="text"] {
+  border: 1px solid #c4c4c4;
+  border-radius: 10px;
+  height: 40px;
+  padding: 0 14px;
+}
+input[type="text"]:disabled {
+  background-color: #fff;
+}
+.title {
+  color: #71afb6;
+  font-size: 18px;
+  font-weight: 400;
+  margin-right: 0px; //reset
+  margin-bottom: 20px;
+  text-align: left;
+}
+.btn-cancel::before {
+  content: url("../../../assets/remove.svg");
+  margin-right: 10px;
+}
+.btn-next::after {
+  // content: url("../../../assets/white-left-arrow.svg");
+  display: inline-block;
+  transform: rotate(180deg);
+  margin-top: 4px;
+  margin-left: 10px;
+}
+.question-mark {
+  // background-image: url("../../../assets/question-img.png");
+  background-repeat: no-repeat;
+  width: 20px;
+  height: 20px;
+  position: relative;
+  top: 5px;
+  left: 5px;
+  cursor: pointer;
+}
+.wrapper-loading-input {
+  border: 1px solid #c4c4c4;
+  border-radius: 10px;
+  height: 40px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  .spinner-border {
+    width: 1.6rem;
+    height: 1.6rem;
+  }
+  img {
+    margin-right: 14px;
+  }
+}
+.error-msg {
+  position: absolute;
+  font-size: 12px;
+  top: 40px;
+}
+.introduction {
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+}
+</style>

@@ -39,6 +39,7 @@
 
     <section
       class="wra-options"
+      :class="direction"
       :style="{
         ...$attrs.styleDropdownOptions,
         '--bg-default': `var(${bgColorDefault})`,
@@ -113,6 +114,7 @@ interface Props {
   textColorHover?: string;
   bgColorHover?: string;
   iconColor?: string;
+  direction?: "bottom" | "top";
 }
 /**
  * 顯示所選選項的文字
@@ -144,6 +146,7 @@ const props = withDefaults(defineProps<Props>(), {
   textColorHover: "--neutral-04",
   bgColorHover: "--color-brand-01",
   iconColor: "--color-brand-05",
+  direction: "bottom",
 });
 function clickOption(option, index) {
   selectedOption.value = option?.name;
@@ -243,7 +246,9 @@ watch(
   background: var(--bg-default);
   z-index: 50;
   cursor: pointer;
-
+  &.bottom {
+    bottom: 40px; //下拉選單改成往上顯示
+  }
   .option {
     display: flex;
     justify-content: start;

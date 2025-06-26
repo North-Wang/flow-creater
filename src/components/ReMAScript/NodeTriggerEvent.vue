@@ -4,15 +4,11 @@
     <div>{{ msgTriggerType }}</div>
     <div>{{ startTime }}{{ startTimeUnit }}</div>
   </section>
-  <ModalTriggerEvent
-    v-if="showModal"
-    @closeModal="showModal = false"
-    @removeEvent="showModal = false"
-  />
+  <ModalTriggerEvent v-if="showModal" @closeModal="showModal = false" />
 </template>
 
 <script setup lang="ts">
-import { ref, watch, computed, defineExpose } from "vue";
+import { ref, watch, computed, defineExpose, provide, inject } from "vue";
 import { z } from "zod/v4";
 import { schemaTriggerEvent } from "../../schemas/ReMaScript/schema.triggerEvent";
 import ModalTriggerEvent from "./Modal/ModalTriggerEvent/index.vue";
@@ -44,6 +40,12 @@ function openModalTriggerEventSetting() {
   showModal.value = true;
 }
 
+function removeTriggerEvent() {
+  console.warn("清空觸發事件");
+  showModal.value = false;
+}
+
+provide("removeTriggerEvent", removeTriggerEvent);
 defineExpose({ openModalTriggerEventSetting });
 </script>
 

@@ -65,8 +65,6 @@ const schemaStartDate = z.object({
  */
 export const schemaTriggerEventSign = z.object({
   event: z.literal("sign"),
-  // frequency: typeTriggerEventFrequency.default("once"),
-  // delayUntilFirstDeliver: schemaDelayUntilFirstMail,
 });
 
 /**
@@ -74,8 +72,6 @@ export const schemaTriggerEventSign = z.object({
  */
 export const schemaTriggerEventCartAbandonment = z.object({
   event: z.literal("cart_abandonment"),
-  // frequency: typeTriggerEventFrequency.default("once"),
-  // delayUntilFirstDeliver: schemaDelayUntilFirstMail,
 });
 
 /**
@@ -84,12 +80,10 @@ export const schemaTriggerEventCartAbandonment = z.object({
  */
 export const schemaTriggerEventPurchaseAfterPromotion = z.object({
   event: z.literal("purchase"),
-  // frequency: typeTriggerEventFrequency.default("once"),
   purchaseTypes: z.string(),
   purchaseItems: z.string().refine((val) => val !== "-", {
     message: "請選擇購買項目",
   }),
-  // delayUntilFirstDeliver: schemaDelayUntilFirstMail,
 });
 
 /**
@@ -98,8 +92,6 @@ export const schemaTriggerEventPurchaseAfterPromotion = z.object({
  */
 export const schemaTriggerEventScheduled = z.object({
   event: z.literal("scheduled"),
-  // frequency: z.literal("regular"),
-  // delayUntilFirstDeliver: schemaStartDate,
 });
 
 /**
