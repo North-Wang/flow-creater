@@ -239,6 +239,7 @@ watch(
 );
 
 provide("triggerEventSetting", triggerEventSetting);
+provide("sendStartTimeSetting", sendStartTimeSetting);
 provide("editingTaskId", editingTaskId);
 provide("updateTriggerEvent", updateTriggerEvent);
 provide("updateDelayUntilFirstDeliver", updateDelayUntilFirstDeliver);

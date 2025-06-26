@@ -7,14 +7,14 @@
           type="number"
           min="1"
           step="1"
-          v-model="delayUntilFirstEmailValue"
-          @change="handleStartTimeValue(delayUntilFirstEmailValue)"
+          v-model="delayUntilFirstDeliverValue"
+          @change="handleStartTimeValue(delayUntilFirstDeliverValue)"
           class="text-white"
         />
         <Dropdown
           :width="'100%'"
           :options="startTimeUnitOptions"
-          :selectedValue="delayUntilFirstEmailUnit"
+          :selectedValue="delayUntilFirstDeliverUnit"
           class="w-full"
           @select="handleStartTimeUnit"
         />
@@ -67,6 +67,7 @@ const injectRemoveTriggerEvent = inject("removeTriggerEvent");
 const injectCloseModal = inject("closeTriggerEventModal");
 let injectUpdateDelayUntilFirstDeliver = inject("updateDelayUntilFirstDeliver");
 let injectUpdateTriggerEvent = inject("updateTriggerEvent");
+let injectSendStartTimeSetting = inject("sendStartTimeSetting");
 
 //定義Form表單欄位、綁定資料
 const {
@@ -79,19 +80,19 @@ const {
 });
 
 const {
-  value: delayUntilFirstDeliverUnit,
+  value: unit,
   errorMessage: delayUntilFirstDeliverUnitError,
-  setValue: setDelayUntilFirstDeliverUnit,
+  setValue: setUnit,
 } = useField("unit");
 const {
-  value: value,
+  value: deliverValue,
   errorMessage: delayUntilFirstDeliverValueError,
-  setValue: setDelayUntilFirstDeliverValue,
+  setValue: setDeliverValue,
 } = useField("value");
 const {
-  value: date,
+  value: deliverDate,
   errorMessage: delayUntilFirstDeliverDateError,
-  setValue: setDelayUntilFirstDeliverDate,
+  setValue: setDeliverDate,
 } = useField("date");
 
 interface Props {
@@ -100,8 +101,8 @@ interface Props {
 const props = withDefaults(defineProps<Props>(), {});
 
 const startTimeUnitOptions = ref([{ name: "天後", value: "天後" }]);
-const delayUntilFirstEmailValue = ref<number>(2);
-const delayUntilFirstEmailUnit = ref({ name: "天後", value: "天後" });
+const delayUntilFirstDeliverValue = ref<number>(2);
+const delayUntilFirstDeliverUnit = ref({ name: "天後", value: "天後" });
 const startDate = ref(null);
 
 /**
@@ -109,9 +110,11 @@ const startDate = ref(null);
  */
 function handleStartTimeValue(value: number) {
   if (!Number.isInteger(value) || value === 0) {
-    delayUntilFirstEmailValue.value = Math.round(value);
+    const roundedValue = Math.round(value);
+    delayUntilFirstDeliverValue.value =
+      roundedValue === 0 ? 1 : Math.round(value);
   }
-  setDelayUntilFirstDeliverValue(delayUntilFirstEmailValue.value);
+  setDeliverValue(delayUntilFirstDeliverValue.value);
 }
 
 /**
@@ -119,8 +122,8 @@ function handleStartTimeValue(value: number) {
  */
 function handleStartTimeUnit(unit: any) {
   if (!unit) return;
-  delayUntilFirstEmailUnit.value = unit;
-  setDelayUntilFirstDeliverUnit(unit?.value);
+  delayUntilFirstDeliverUnit.value = unit;
+  setUnit(unit?.value);
 }
 
 function validateFormData(schema) {
@@ -142,14 +145,14 @@ async function prepareSaveSetting() {
     case "purchase":
       if (!validateFormData(schemaStartTimeRelative)) return;
       data = {
-        value: value,
-        unit: delayUntilFirstDeliverUnit,
+        value: deliverValue,
+        unit: delayUntilFirstDeliverUnit?.value,
       };
       break;
     case "scheduled":
       if (!validateFormData(schemaStartTimeAbsolute)) return;
       data = {
-        date: date,
+        date: deliverDate,
       };
       break;
     default:
@@ -163,18 +166,57 @@ async function prepareSaveSetting() {
   injectCloseModal();
 }
 
+/**
+ * 設定預設的formData設定
+ * @description 當沒有先前儲存的【條件開始的時間】的資料，才要設定預設值
+ */
+function initFormDataWhenEmpty() {
+  if (props.triggerEventSetting?.event !== "scheduled") {
+    setUnit(delayUntilFirstDeliverUnit.value?.value);
+    setDeliverValue(delayUntilFirstDeliverValue.value);
+  }
+}
+
 //更新「條件開始的時間」
 watch(startDate, (date) => {
   const newDate = dayjs(date).format("YYYY-MM-DD");
-  setDelayUntilFirstDeliverDate(newDate);
+  setDeliverDate(newDate);
 });
+
+function isAllKeysUndefined(obj: Record<string, unknown>): boolean {
+  return Object.keys(obj).every((key) => !obj[key]);
+}
+
+/**
+ * 還原先前已儲存設定的開始時間設定
+ */
+watch(
+  injectSendStartTimeSetting,
+  (setting) => {
+    console.log("先前儲存的時間", setting);
+    if (!setting || isAllKeysUndefined(setting)) {
+      initFormDataWhenEmpty();
+      return;
+    }
+
+    //還原先前儲存的設定
+    if (props.triggerEventSetting?.event === "regular") {
+      setDate(setting?.date);
+    } else {
+      setDeliverValue(setting?.value);
+      setUnit(setting?.unit);
+      delayUntilFirstDeliverValue.value = setting?.value;
+      delayUntilFirstDeliverUnit.value = {
+        name: setting?.unit,
+        value: setting?.unit,
+      };
+    }
+  },
+  { immediate: true }
+);
 
 onMounted(() => {
   console.warn("來自前一頁的設定", props.triggerEventSetting);
-  if (props.triggerEventSetting?.event !== "scheduled") {
-    setDelayUntilFirstDeliverUnit(delayUntilFirstEmailUnit.value?.value);
-    setDelayUntilFirstDeliverValue(delayUntilFirstEmailValue.value);
-  }
 });
 </script>
 
