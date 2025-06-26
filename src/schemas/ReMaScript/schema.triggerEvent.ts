@@ -21,7 +21,6 @@ export const typeTriggerEvent = z.enum([
  * @description 適用於【定期投放】以外的觸發事件
  */
 export const schemaStartTimeRelative = z.object({
-  triggerEvent: z.enum(["once", "recurrence"]),
   unit: z.string(),
   value: z.number().default(2),
 });
@@ -31,14 +30,17 @@ export const schemaStartTimeRelative = z.object({
  * @description 適用於【定期投放】的觸發事件
  */
 export const schemaStartTimeAbsolute = z.object({
-  triggerEvent: z.literal("regular"),
-  date: z.date(),
+  date: z
+    .string()
+    .regex(/^\d{4}-\d{2}-\d{2}$/, {
+      message: "日期格式錯誤，請使用 YYYY-MM-DD",
+    }),
 });
 
 /**
  * 「經過多少時間寄第一封」or「條件開始的時間」
  */
-export const schemaSendStartTime = z.discriminatedUnion("triggerEvent", [
+export const schemaSendStartTime = z.union([
   schemaStartTimeRelative,
   schemaStartTimeAbsolute,
 ]);

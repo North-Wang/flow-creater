@@ -35,7 +35,10 @@ import NodeAction from "./NodeAction.vue";
 import NodeEmailTemplate from "./NodeEmailTemplate.vue";
 
 import { TaskSchema } from "../../schemas/ReMaScript/scriptSchema";
-import { schemaTriggerEvent } from "../../schemas/ReMaScript/schema.triggerEvent";
+import {
+  schemaTriggerEvent,
+  schemaSendStartTime,
+} from "../../schemas/ReMaScript/schema.triggerEvent";
 import { emptyResponseTree } from "../../data/RemaScript/emptyTree";
 
 const {
@@ -139,6 +142,32 @@ function updateSubscriptTriggerEventSetting(newSetting) {
   tempTask.value.data.schedule.type = frequency;
   console.log("更新完【觸發事件設定】的子劇本", tempTask.value);
 }
+/**
+ * 更新【子劇本】的【經過多久之後寄出第一封信】or【條件開始的時間】
+ * @description 不會修改到主劇本對應的task資料，避免子劇本資料不完整下修改到劇本資料
+ */
+
+function updateDelayUntilFirstDeliver(newSetting: typeof schemaSendStartTime) {
+  if (!newSetting) return;
+  //定期投放
+  if (Object.keys(newSetting).includes("date")) {
+    tempTask.value.data.eventOption.delayUntilFirstDeliver = {
+      date: newSetting?.date.value,
+    };
+  }
+  //其餘的觸發事件
+  else if (
+    Object.keys(newSetting).includes("unit") &&
+    Object.keys(newSetting).includes("value")
+  ) {
+    tempTask.value.data.eventOption.delayUntilFirstDeliver = {
+      value: newSetting?.value.value,
+      unit: newSetting?.unit.value,
+    };
+  }
+
+  console.log("更新完【經過多久之後寄出第一封信】的子劇本", tempTask.value);
+}
 
 function goFrontPage() {
   emit("cancel");
@@ -181,6 +210,7 @@ provide(
   "updateSubscriptTriggerEventSetting",
   updateSubscriptTriggerEventSetting
 );
+provide("updateDelayUntilFirstDeliver", updateDelayUntilFirstDeliver);
 </script>
 
 <style lang="sass"></style>

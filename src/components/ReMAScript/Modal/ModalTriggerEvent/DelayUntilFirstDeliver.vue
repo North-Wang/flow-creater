@@ -33,6 +33,7 @@
       ></VueDatePicker>
     </div>
     <div class="button-wrap">
+      {{ formData }}
       <button
         class="button-basic-light btn-cancel"
         @click="injectRemoveTriggerEvent"
@@ -57,8 +58,15 @@ import dayjs from "dayjs";
 import { z } from "zod";
 import { useForm, useField } from "vee-validate";
 import { toTypedSchema } from "@vee-validate/zod";
-import { schemaTriggerEvent } from "../../../../schemas/ReMaScript/schema.triggerEvent";
+import {
+  schemaStartTimeRelative,
+  schemaStartTimeAbsolute,
+  schemaSendStartTime,
+} from "../../../../schemas/ReMaScript/schema.triggerEvent";
+
 const injectRemoveTriggerEvent = inject("removeTriggerEvent");
+let injectUpdateDelayUntilFirstDeliver = inject("updateDelayUntilFirstDeliver");
+
 //定義Form表單欄位、綁定資料
 const {
   values: formData,
@@ -66,29 +74,24 @@ const {
   setValues,
   resetForm,
 } = useForm({
-  validationSchema: toTypedSchema(schemaTriggerEvent),
+  validationSchema: toTypedSchema(schemaSendStartTime),
 });
 
 const {
   value: delayUntilFirstDeliverUnit,
   errorMessage: delayUntilFirstDeliverUnitError,
   setValue: setDelayUntilFirstDeliverUnit,
-} = useField("delayUntilFirstDeliverUnit");
+} = useField("unit");
 const {
-  value: delayUntilFirstDeliverValue,
+  value: value,
   errorMessage: delayUntilFirstDeliverValueError,
   setValue: setDelayUntilFirstDeliverValue,
-} = useField("delayUntilFirstDeliverValue");
+} = useField("value");
 const {
-  value: delayUntilFirstDeliverDate,
+  value: date,
   errorMessage: delayUntilFirstDeliverDateError,
   setValue: setDelayUntilFirstDeliverDate,
-} = useField("delayUntilFirstDeliverDate");
-const {
-  value: delayUntilFirstDeliver,
-  errorMessage: delayUntilFirstDeliverError,
-  setValue: setDelayUntilFirstDeliver,
-} = useField("delayUntilFirstDeliver");
+} = useField("date");
 
 interface Props {
   event: string;
@@ -101,13 +104,8 @@ const startTimeUnitOptions = ref([{ name: "天後", value: "天後" }]);
 const delayUntilFirstEmailValue = ref<number>(2);
 const delayUntilFirstEmailUnit = ref({ name: "天後", value: "天後" });
 const startDate = ref(null);
-type Unit = typeof delayUntilFirstEmailUnit.value;
 
-interface Emits {
-  (e: "updateDelayUnit", value: string): void;
-  (e: "updateDelayValue", value: number): void;
-  (e: "updateDelayDate", value: string): void;
-}
+interface Emits {}
 const emits = defineEmits<Emits>();
 
 /**
@@ -117,7 +115,7 @@ function handleStartTimeValue(value: number) {
   if (!Number.isInteger(value) || value === 0) {
     delayUntilFirstEmailValue.value = Math.round(value);
   }
-  emits("updateDelayValue", delayUntilFirstEmailValue.value);
+  setDelayUntilFirstDeliverValue(delayUntilFirstEmailValue.value);
 }
 
 /**
@@ -126,23 +124,55 @@ function handleStartTimeValue(value: number) {
 function handleStartTimeUnit(unit: any) {
   if (!unit) return;
   delayUntilFirstEmailUnit.value = unit;
-  emits("updateDelayUnit", unit?.value);
+  setDelayUntilFirstDeliverUnit(unit?.value);
 }
 
+function validateFormData(schema) {
+  const result = schema.safeParse(formData);
+
+  if (result.success) {
+    console.log("驗證過資料完整", result.data);
+    return true;
+  } else {
+    console.warn("欄位未填寫完成", result.error.format());
+    return false;
+  }
+}
 async function prepareSaveSetting() {
-  console.log("aaa 準備更新開始的時間");
+  let data = {};
+  switch (props.event) {
+    case "sign":
+    case "cart_abandonment":
+    case "purchase":
+      if (!validateFormData(schemaStartTimeRelative)) return;
+      data = {
+        value: value,
+        unit: delayUntilFirstDeliverUnit,
+      };
+      break;
+    case "scheduled":
+      if (!validateFormData(schemaStartTimeAbsolute)) return;
+      data = {
+        date: date,
+      };
+      break;
+    default:
+      console.warn("未定義的觸發事件種類", props.event);
+      break;
+  }
+  injectUpdateDelayUntilFirstDeliver(data);
 }
 
 //更新「條件開始的時間」
 watch(startDate, (date) => {
   const newDate = dayjs(date).format("YYYY-MM-DD");
-  emits("updateDelayDate", newDate);
+  setDelayUntilFirstDeliverDate(newDate);
 });
 
 onMounted(() => {
   if (props.event !== "scheduled") {
-    emits("updateDelayValue", delayUntilFirstEmailValue.value);
-    emits("updateDelayUnit", delayUntilFirstEmailUnit.value?.value);
+    setDelayUntilFirstDeliverUnit(delayUntilFirstEmailUnit.value?.value);
+    setDelayUntilFirstDeliverValue(delayUntilFirstEmailValue.value);
   }
 });
 </script>

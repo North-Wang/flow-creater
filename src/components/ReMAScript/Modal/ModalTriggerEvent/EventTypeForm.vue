@@ -72,7 +72,7 @@
         <button
           type="submit"
           class="button-basic btn-next"
-          @click="prepareSaveSetting()"
+          @click="prepareNextStep()"
         >
           下一步
         </button>
@@ -94,7 +94,6 @@ import {
   schemaTriggerEventScheduled,
   schemaTriggerEvent,
   typeTriggerEventFrequency,
-  typeTriggerEvent,
 } from "../../../../schemas/ReMaScript/schema.triggerEvent";
 import { z } from "zod";
 import { useForm, useField } from "vee-validate";
@@ -196,56 +195,12 @@ const recurringStartDate = ref(null); //定期投放的開始日期
 
 function selectTriggerEvent(opt) {
   setEventName(opt?.value);
-  cleanFormDataBySchema();
 }
 function selectPurchaseType(type) {
   setPurchaseTypes(type?.value);
 }
 function selectPurchaseItem(item) {
   setPurchaseItems(item?.value);
-}
-
-/**
- * 變更event的時候，清除不合schema的參數
- * @param formData
- * @param schema
- */
-function cleanFormDataBySchema() {
-  switch (eventName.value) {
-    case "sign":
-    case "cart_abandonment":
-    case "purchase":
-      resetForm({
-        values: {
-          event: eventName.value,
-          frequency: frequency.value,
-          delayUntilFirstDeliverUnit: delayUntilFirstDeliverUnit.value,
-          delayUntilFirstDeliverValue: delayUntilFirstDeliverValue.value,
-        },
-      });
-      break;
-    case "scheduled":
-      if (delayUntilFirstDeliverDate.value) {
-        resetForm({
-          values: {
-            event: eventName.value,
-            frequency: frequency.value,
-            delayUntilFirstDeliverDate: delayUntilFirstDeliverDate.value,
-          },
-        });
-      } else {
-        resetForm({
-          values: {
-            event: eventName.value,
-            frequency: frequency.value,
-          },
-        });
-      }
-      break;
-    default:
-      console.warn("未定義event name", eventName.value);
-      break;
-  }
 }
 
 //驗證資料是否填寫完整
@@ -261,7 +216,7 @@ function validateFormData(schema) {
   }
 }
 
-async function prepareSaveSetting() {
+async function prepareNextStep() {
   let data = {};
   switch (eventName.value) {
     case "sign":
