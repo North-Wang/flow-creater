@@ -4,8 +4,14 @@
       回到前一頁
     </button>
   </div>
-  暫存的觸發事件設定： {{ triggerEventSetting }}
-  {{ sendStartTimeSetting }}
+  <div class="grid grid-cols-1">
+    <span>暫存的觸發事件： {{ triggerEventSetting }}</span
+    ><span
+      >經過多久之後寄出第一封信 (未確定) or 條件開始的時間：
+      {{ sendStartTimeSetting }}
+    </span>
+  </div>
+
   <VueFlow v-model="elements" :min-zoom="0.2" :max-zoom="4">
     <Background :gap="20" :height="100" :width="100" />
     <template #node-trigger-event="{ id, data, selected }">
@@ -75,7 +81,6 @@ const tempTask = ref();
 // 提供給子元件：先前儲存的或預設的觸發事件設定
 const triggerEventSetting = ref<z.infer<typeof schemaTriggerEvent>>({
   event: "sign",
-  frequency: "once",
 });
 
 const sendStartTimeSetting = ref<z.infer<typeof schemaSendStartTime>>();
@@ -108,7 +113,6 @@ function getTriggerEventSettingFromTask(data) {
   if (data?.eventOption?.event === "purchase") {
     triggerEventSetting.value = {
       event: data?.eventOption?.event,
-      frequency: data?.schedule?.type,
       purchaseTypes: data?.eventOption?.purchaseTypes,
       purchaseItems: data?.eventOption?.purchaseItems,
     };
@@ -116,16 +120,19 @@ function getTriggerEventSettingFromTask(data) {
   }
   triggerEventSetting.value = {
     event: data?.eventOption?.event,
-    frequency: data?.schedule?.type,
   };
 }
 
 /**
- * 取出【經過多久之後寄出第一封信】or【條件開始的時間】 aaa
+ * 取出【經過多久之後寄出第一封信】or【條件開始的時間】
  * @param task
+ * @description 要考慮可能取不到對應資料的狀況
  */
 function getDelayUntilFirstDeliver(data) {
-  console.log("要取出【經過多久之後寄出第一封信】or【條件開始的時間】", data);
+  console.log(
+    "要取出【經過多久之後寄出第一封信】or【條件開始的時間】",
+    data?.eventOption?.delayUntilFirstDeliver
+  );
   //定期投放
   if (data?.eventOption?.event === "scheduled") {
     sendStartTimeSetting.value = {
@@ -133,36 +140,39 @@ function getDelayUntilFirstDeliver(data) {
     };
     return;
   }
-
-  sendStartTimeSetting.value = {
-    value: data?.eventOption?.delayUntilFirstDeliver?.value,
-    unit: data?.eventOption?.delayUntilFirstDeliver?.unit,
-  };
+  if (
+    data?.eventOption?.event === "sign" ||
+    data?.eventOption?.event === "cart_abandonment" ||
+    data?.eventOption?.event === "purchase"
+  ) {
+    sendStartTimeSetting.value = {
+      value: data?.eventOption?.delayUntilFirstDeliver?.value,
+      unit: data?.eventOption?.delayUntilFirstDeliver?.unit,
+    };
+  }
 }
 
 /**
  * 更新【子劇本】的【觸發事件設定】
  * @description 不會修改到主劇本對應的task資料，避免子劇本資料不完整下修改到劇本資料
  */
-function updateSubscriptTriggerEventSetting(newSetting) {
+function updateTriggerEvent(newSetting) {
+  console.log("更新【子劇本】的【觸發事件設定】", newSetting);
   if (!newSetting) return;
-  const { frequency, ...setting } = newSetting;
 
   //更新觸發事件
-  if (setting.event === "purchase") {
+  if (newSetting?.event === "purchase") {
     tempTask.value.data.eventOption = {
-      event: setting?.event,
-      purchaseItems: setting?.purchase_item,
-      purchaseTypes: setting?.purchase_type,
+      event: newSetting?.event,
+      purchaseItems: newSetting?.purchaseItems,
+      purchaseTypes: newSetting?.purchaseTypes,
     };
   } else {
     tempTask.value.data.eventOption = {
-      event: setting?.event,
+      event: newSetting?.event,
     };
   }
 
-  //更新發送方式
-  tempTask.value.data.schedule.type = frequency;
   console.log("更新完【觸發事件設定】的子劇本", tempTask.value);
 }
 /**
@@ -223,16 +233,14 @@ watch(
 
     editingTaskId.value = task?.id;
     getTriggerEventSettingFromTask(task?.data);
+    getDelayUntilFirstDeliver(task?.data);
   },
   { deep: true }
 );
 
 provide("triggerEventSetting", triggerEventSetting);
 provide("editingTaskId", editingTaskId);
-provide(
-  "updateSubscriptTriggerEventSetting",
-  updateSubscriptTriggerEventSetting
-);
+provide("updateTriggerEvent", updateTriggerEvent);
 provide("updateDelayUntilFirstDeliver", updateDelayUntilFirstDeliver);
 </script>
 

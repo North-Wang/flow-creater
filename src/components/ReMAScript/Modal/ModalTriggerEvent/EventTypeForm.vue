@@ -102,14 +102,11 @@ import { toTypedSchema } from "@vee-validate/zod";
 const injectTriggerEventSetting = inject<z.infer<typeof schemaTriggerEvent>>(
   "triggerEventSetting"
 );
-let injectUpdateSubscriptTriggerEventSetting = inject(
-  "updateSubscriptTriggerEventSetting",
-  null
-);
+
 const injectRemoveTriggerEvent = inject("removeTriggerEvent");
 
 interface Emits {
-  (e: "nextStep", payload: { event: typeTriggerEvent }): void;
+  (e: "nextStep", payload: z.infer<typeof schemaTriggerEvent>): void;
 }
 const emits = defineEmits<Emits>();
 
@@ -128,11 +125,6 @@ const {
   errorMessage: eventError,
   setValue: setEventName,
 } = useField<string>("event");
-const {
-  value: frequency,
-  errorMessage: frequencyError,
-  setValue: setFrequency,
-} = useField("frequency");
 const {
   value: purchaseTypes,
   errorMessage: purchaseTypesError,
@@ -241,13 +233,14 @@ async function prepareNextStep() {
       if (!validateFormData(schemaTriggerEventPurchaseAfterPromotion)) return;
       data = {
         event: eventName.value,
+        purchaseTypes: purchaseTypes.value,
+        purchaseItems: purchaseItems.value,
       };
       break;
     default:
       console.warn("未定義的觸發事件種類", eventName.value);
       break;
   }
-  injectUpdateSubscriptTriggerEventSetting(data);
   emits("nextStep", data);
 }
 

@@ -1,6 +1,6 @@
 <template>
   <div class="wrapper">
-    <div class="flex-wrap" v-if="event !== 'scheduled'">
+    <div class="flex-wrap" v-if="triggerEventSetting?.event !== 'scheduled'">
       <label for="" class="selector-title">經過多少時間寄第一封</label>
       <div class="w-full flex gap-x-2">
         <input
@@ -20,7 +20,7 @@
         />
       </div>
     </div>
-    <div class="" v-if="event === 'scheduled'">
+    <div class="" v-if="triggerEventSetting?.event === 'scheduled'">
       <label for="" class="selector-title">條件開始的時間</label>
       <VueDatePicker
         v-model="startDate"
@@ -44,7 +44,7 @@
         class="button-basic btn-next"
         @click="prepareSaveSetting()"
       >
-        下一步
+        儲存
       </button>
     </div>
   </div>
@@ -66,6 +66,7 @@ import {
 const injectRemoveTriggerEvent = inject("removeTriggerEvent");
 const injectCloseModal = inject("closeTriggerEventModal");
 let injectUpdateDelayUntilFirstDeliver = inject("updateDelayUntilFirstDeliver");
+let injectUpdateTriggerEvent = inject("updateTriggerEvent");
 
 //定義Form表單欄位、綁定資料
 const {
@@ -94,19 +95,14 @@ const {
 } = useField("date");
 
 interface Props {
-  event: string;
+  triggerEventSetting: object;
 }
-const props = withDefaults(defineProps<Props>(), {
-  event: "sign",
-});
+const props = withDefaults(defineProps<Props>(), {});
 
 const startTimeUnitOptions = ref([{ name: "天後", value: "天後" }]);
 const delayUntilFirstEmailValue = ref<number>(2);
 const delayUntilFirstEmailUnit = ref({ name: "天後", value: "天後" });
 const startDate = ref(null);
-
-interface Emits {}
-const emits = defineEmits<Emits>();
 
 /**
  * 輸入「經過多少時間寄第一封」的數值
@@ -140,7 +136,7 @@ function validateFormData(schema) {
 }
 async function prepareSaveSetting() {
   let data = {};
-  switch (props.event) {
+  switch (props.triggerEventSetting?.event) {
     case "sign":
     case "cart_abandonment":
     case "purchase":
@@ -157,10 +153,13 @@ async function prepareSaveSetting() {
       };
       break;
     default:
-      console.warn("未定義的觸發事件種類", props.event);
+      console.warn("未定義的觸發事件種類", props.triggerEventSetting?.event);
       break;
   }
-  injectUpdateDelayUntilFirstDeliver(data);
+
+  //依序更新資料
+  await injectUpdateTriggerEvent(props.triggerEventSetting);
+  await injectUpdateDelayUntilFirstDeliver(data);
   injectCloseModal();
 }
 
@@ -171,7 +170,8 @@ watch(startDate, (date) => {
 });
 
 onMounted(() => {
-  if (props.event !== "scheduled") {
+  console.warn("來自前一頁的設定", props.triggerEventSetting);
+  if (props.triggerEventSetting?.event !== "scheduled") {
     setDelayUntilFirstDeliverUnit(delayUntilFirstEmailUnit.value?.value);
     setDelayUntilFirstDeliverValue(delayUntilFirstEmailValue.value);
   }

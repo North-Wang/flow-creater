@@ -1,7 +1,10 @@
 <template>
   <DrawerModal @closeModal="injectRemoveTriggerEvent">
     <EventTypeForm @nextStep="handleNextStep" v-if="step === 1" />
-    <DelayUntilFirstDeliver :event="currentEvent" v-if="step === 2" />
+    <DelayUntilFirstDeliver
+      :triggerEventSetting="triggerEventSetting"
+      v-if="step === 2"
+    />
   </DrawerModal>
 </template>
 
@@ -17,9 +20,9 @@ import {
 
 const injectRemoveTriggerEvent = inject("removeTriggerEvent");
 const step = ref<number>(1);
-const currentEvent = ref<typeof typeTriggerEvent>("sign");
+const triggerEventSetting = ref<object>();
 function handleNextStep(data: typeof schemaTriggerEvent) {
   step.value = 2;
-  currentEvent.value = data?.event;
+  triggerEventSetting.value = data;
 }
 </script>

@@ -249,7 +249,6 @@ export const emptyResponseTree = [
  */
 export const defaultTriggerEventSetting = {
   event: "註冊",
-  frequency: "recurrence",
 };
 
 /**
