@@ -21,7 +21,7 @@
       />
     </template>
     <template #node-action="{ id, data, selected }">
-      <NodeAction />
+      <NodeAction ref="refActionNode" />
     </template>
     <template #node-template="{ id, data, selected }">
       <NodeEmailTemplate />
@@ -60,6 +60,7 @@ const {
 } = useVueFlow();
 
 const refTriggerNode = ref(null);
+const refActionNode = ref(null);
 
 interface Props {
   task?: z.infer<typeof TaskSchema>; //要顯示的兩個task
@@ -97,7 +98,10 @@ onNodeClick(({ node }) => {
         refTriggerNode.value?.openModalTriggerEventSetting();
       }
       break;
-
+    case "action":
+      if (refActionNode.value) {
+        refActionNode.value?.openModalActionSetting();
+      }
     default:
       break;
   }
