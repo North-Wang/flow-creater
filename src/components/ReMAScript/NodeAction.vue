@@ -11,19 +11,15 @@
 
 <script setup lang="ts">
 import { ref, watch, computed } from "vue";
-import { z } from "zod/v4";
-import { ActionType } from "../../schemas/ReMaScript/scriptSchema";
+import { z } from "zod";
 import ModalAction from "./Modal/ModalAction/index.vue";
 
 import IconEmail from "../../assets/icons/iconEmail.svg";
 import IconSMS from "../../assets/icons/iconSMS.svg";
 
 interface Props {
-  data?: {
-    label: string;
-  };
-  id?: string;
-  templateType?: ActionType;
+  setting?: z.object;
+  templateType?: z.string;
 }
 const props = withDefaults(defineProps<Props>(), {});
 const deliveryChannel = computed(() => {

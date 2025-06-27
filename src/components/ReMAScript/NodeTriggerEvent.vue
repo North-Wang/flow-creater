@@ -14,7 +14,7 @@ import { schemaTriggerEvent } from "../../schemas/ReMaScript/schema.triggerEvent
 import ModalTriggerEvent from "./Modal/ModalTriggerEvent/index.vue";
 
 interface Props {
-  triggerEventSetting?: z.infer<typeof schemaTriggerEvent>;
+  setting?: z.infer<typeof schemaTriggerEvent>;
 }
 
 const props = withDefaults(defineProps<Props>(), {});

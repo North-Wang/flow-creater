@@ -15,10 +15,7 @@
   <VueFlow v-model="elements" :min-zoom="0.2" :max-zoom="4">
     <Background :gap="20" :height="100" :width="100" />
     <template #node-trigger-event="{ id, data, selected }">
-      <NodeTriggerEvent
-        ref="refTriggerNode"
-        :triggerEventSetting="triggerEventSetting"
-      />
+      <NodeTriggerEvent ref="refTriggerNode" :setting="triggerEventSetting" />
     </template>
     <template #node-action="{ id, data, selected }">
       <NodeAction ref="refActionNode" />
@@ -135,12 +132,12 @@ function getTriggerEventSettingFromTask(data) {
 function getDelayUntilFirstDeliver(data) {
   console.log(
     "要取出【經過多久之後寄出第一封信】or【條件開始的時間】",
-    data?.eventOption?.delayUntilFirstDeliver
+    data?.eventOption?.delayUntilFirstSend
   );
   //定期投放
   if (data?.eventOption?.event === "scheduled") {
     sendStartTimeSetting.value = {
-      date: data?.eventOption?.delayUntilFirstDeliver?.date,
+      date: data?.eventOption?.delayUntilFirstSend?.date,
     };
     return;
   }
@@ -150,8 +147,8 @@ function getDelayUntilFirstDeliver(data) {
     data?.eventOption?.event === "purchase"
   ) {
     sendStartTimeSetting.value = {
-      value: data?.eventOption?.delayUntilFirstDeliver?.value,
-      unit: data?.eventOption?.delayUntilFirstDeliver?.unit,
+      value: data?.eventOption?.delayUntilFirstSend?.value,
+      unit: data?.eventOption?.delayUntilFirstSend?.unit,
     };
   }
 }
@@ -188,7 +185,7 @@ function updateDelayUntilFirstDeliver(newSetting: typeof schemaSendStartTime) {
   if (!newSetting) return;
   //定期投放
   if (Object.keys(newSetting).includes("date")) {
-    tempTask.value.data.eventOption.delayUntilFirstDeliver = {
+    tempTask.value.data.eventOption.delayUntilFirstSend = {
       date: newSetting?.date.value,
     };
   }
@@ -197,7 +194,7 @@ function updateDelayUntilFirstDeliver(newSetting: typeof schemaSendStartTime) {
     Object.keys(newSetting).includes("unit") &&
     Object.keys(newSetting).includes("value")
   ) {
-    tempTask.value.data.eventOption.delayUntilFirstDeliver = {
+    tempTask.value.data.eventOption.delayUntilFirstSend = {
       value: newSetting?.value.value,
       unit: newSetting?.unit.value,
     };

@@ -30,11 +30,9 @@ export const schemaStartTimeRelative = z.object({
  * @description 適用於【定期投放】的觸發事件
  */
 export const schemaStartTimeAbsolute = z.object({
-  date: z
-    .string()
-    .regex(/^\d{4}-\d{2}-\d{2}$/, {
-      message: "日期格式錯誤，請使用 YYYY-MM-DD",
-    }),
+  date: z.string().regex(/^\d{4}-\d{2}-\d{2}$/, {
+    message: "日期格式錯誤，請使用 YYYY-MM-DD",
+  }),
 });
 
 /**
@@ -46,34 +44,10 @@ export const schemaSendStartTime = z.union([
 ]);
 
 /**
- * 經過多少時間寄第一封
- * @description 適用於「註冊」「購物車未結」「購買後促銷」
+ * 【觸發事件】：註冊、購物車未結、購買後促銷
  */
-const schemaDelayUntilFirstMail = z.object({
-  value: z.number().describe("經過多久之後寄出第一封信的數值"),
-  unit: z.enum(["天後"]).describe("經過多久之後寄出第一封信的單位"),
-});
-
-/**
- * 條件開始的時間
- * @description 適用於「定期投放」
- */
-const schemaStartDate = z.object({
-  date: z.string().datetime().describe("條件開始的日期"),
-});
-
-/**
- * 【觸發事件】：註冊
- */
-export const schemaTriggerEventSign = z.object({
-  event: z.literal("sign"),
-});
-
-/**
- * 【觸發事件】：購物車未結
- */
-export const schemaTriggerEventCartAbandonment = z.object({
-  event: z.literal("cart_abandonment"),
+export const schemaTriggerEvenBasic = z.object({
+  event: z.enum(["sign", "cart_abandonment", "scheduled"]),
 });
 
 /**
@@ -89,20 +63,10 @@ export const schemaTriggerEventPurchaseAfterPromotion = z.object({
 });
 
 /**
- * 【觸發事件】：定期投放
- * @description 發送方式固定式定期性投放
- */
-export const schemaTriggerEventScheduled = z.object({
-  event: z.literal("scheduled"),
-});
-
-/**
  * 觸發事件的彈窗資料
  * @description click彈窗的儲存按鍵時要驗證
  */
 export const schemaTriggerEvent = z.discriminatedUnion("event", [
-  schemaTriggerEventSign,
-  schemaTriggerEventCartAbandonment,
+  schemaTriggerEvenBasic,
   schemaTriggerEventPurchaseAfterPromotion,
-  schemaTriggerEventScheduled,
 ]);

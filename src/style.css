@@ -156,6 +156,38 @@ textarea {
   border-style: dashed;
 }
 
-/* input {
-  background-color: #fff;
-} */
+input[type="radio"] {
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  appearance: none; /* 移除原生外觀 */
+  -webkit-appearance: none;
+  -moz-appearance: none;
+  background-color: white;
+  border: 1px solid #c4c4c4;
+  position: relative; /* 為偽元素定位準備 */
+
+  padding: 10px;
+  background-color: white;
+  border-radius: 50%;
+
+  cursor: pointer;
+  user-select: none;
+  vertical-align: bottom;
+}
+input[type="radio"]:checked::before {
+  content: "";
+  position: absolute;
+  top: 0px;
+  bottom: 0px;
+  left: 0px;
+  right: 0px;
+  margin: auto;
+  width: 14px;
+  height: 14px;
+  background-color: #71afb6; /* 被選中時的顏色 */
+  border-radius: 50%;
+}
+input[type="radio"]:hover {
+  cursor: pointer;
+}

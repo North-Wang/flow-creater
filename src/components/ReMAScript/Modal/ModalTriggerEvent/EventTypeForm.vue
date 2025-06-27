@@ -88,10 +88,8 @@ import ExplainTriggerEvent from ".././ExplainTriggerEvent.vue";
 import Dropdown from "../../../Dropdown/Dropdown.vue";
 import DatePicker from "primevue/datepicker";
 import {
-  schemaTriggerEventSign,
-  schemaTriggerEventCartAbandonment,
+  schemaTriggerEvenBasic,
   schemaTriggerEventPurchaseAfterPromotion,
-  schemaTriggerEventScheduled,
   schemaTriggerEvent,
   typeTriggerEventFrequency,
 } from "../../../../schemas/ReMaScript/schema.triggerEvent";
@@ -166,17 +164,6 @@ const purchaseItemsOptions = ref([]);
 type TriggerEventFrequency = z.infer<typeof typeTriggerEventFrequency>;
 const currentSendTimeType = ref<TriggerEventFrequency>("once"); //目前選擇的發送方式
 
-const sendTimeTypeOptions = ref([
-  {
-    value: "once",
-    name: "一次性投放",
-  },
-  {
-    value: "recurrence",
-    name: "週期性投放",
-  },
-]);
-
 // 推導型別
 const errorMsg = ref("需要選擇購買的項目");
 
@@ -212,19 +199,10 @@ async function prepareNextStep() {
   let data = {};
   switch (eventName.value) {
     case "sign":
-      if (!validateFormData(schemaTriggerEventSign)) return;
-      data = {
-        event: eventName.value,
-      };
-      break;
     case "cart_abandonment":
-      if (!validateFormData(schemaTriggerEventCartAbandonment)) return;
-      data = {
-        event: eventName.value,
-      };
-      break;
     case "scheduled":
-      if (!validateFormData(schemaTriggerEventScheduled)) return;
+      if (!validateFormData(schemaTriggerEvenBasic)) return;
+
       data = {
         event: eventName.value,
       };
