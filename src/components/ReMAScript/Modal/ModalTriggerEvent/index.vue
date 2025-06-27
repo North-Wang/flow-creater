@@ -1,7 +1,7 @@
 <template>
   <DrawerModal @closeModal="injectRemoveTriggerEvent">
     <EventTypeForm @nextStep="handleNextStep" v-if="step === 1" />
-    <DelayUntilFirstSend
+    <UntilFirstSend
       :triggerEventSetting="triggerEventSetting"
       v-if="step === 2"
     />
@@ -12,7 +12,7 @@
 import { ref, defineEmits, watch, computed, provide, inject } from "vue";
 import DrawerModal from "../../Modal/DrawerModal.vue";
 import EventTypeForm from "./EventTypeForm.vue";
-import DelayUntilFirstSend from "./DelayUntilFirstSend.vue";
+import UntilFirstSend from "./UntilFirstSend.vue";
 import { schemaTriggerEvent } from "../../../../schemas/ReMaScript/schema.triggerEvent";
 
 const injectRemoveTriggerEvent = inject("removeTriggerEvent");
