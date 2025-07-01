@@ -18,20 +18,20 @@
         <label class="form-label">事件類型</label>
         <select v-model="eventType" class="form-select">
           <option value="sign">註冊</option>
-          <option value="purchase">購買</option>
+          <option value="post_purchase_marketing">購買</option>
           <option value="cart_abandonment">購物車放棄</option>
           <option value="page_view">頁面瀏覽</option>
-          <option value="scheduled">定時</option>
+          <option value="recurring_scheduled">定時</option>
           <option value="open">開啟</option>
         </select>
       </div>
 
-      <div v-if="eventType === 'purchase'" class="form-group">
+      <div v-if="eventType === 'post_purchase_marketing'" class="form-group">
         <label class="form-label">購買類型</label>
         <input v-model="purchaseType" type="text" class="form-input" />
       </div>
 
-      <div v-if="eventType === 'purchase'" class="form-group">
+      <div v-if="eventType === 'post_purchase_marketing'" class="form-group">
         <label class="form-label">購買項目</label>
         <input v-model="purchaseItem" type="text" class="form-input" />
       </div>
@@ -174,7 +174,7 @@ const handleSave = () => {
   const updates = {
     eventOption: {
       type: eventType.value,
-      ...(eventType.value === "purchase" && {
+      ...(eventType.value === "post_purchase_marketing" && {
         purchaseTypes: purchaseType.value,
         purchaseItems: purchaseItem.value,
       }),

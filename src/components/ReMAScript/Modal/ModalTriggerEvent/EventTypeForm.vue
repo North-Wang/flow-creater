@@ -16,7 +16,7 @@
 
       <div
         class="position-relative w-full grid grid-cols-[auto_auto_1fr] gap-x-[25px] place-items-center mb-[25px]"
-        v-if="eventName === 'purchase'"
+        v-if="eventName === 'post_purchase_marketing'"
       >
         <label
           for=""
@@ -150,8 +150,8 @@ const presetPurchasedItem = ref({ name: "-", value: "-" });
 const triggerEventOptions = ref([
   { name: "註冊", value: "sign" },
   { name: "購物車未結", value: "cart_abandonment" },
-  { name: "購買後促銷", value: "purchase" },
-  { name: "定期投放", value: "scheduled" },
+  { name: "購買後促銷", value: "post_purchase_marketing" },
+  { name: "定期投放", value: "recurring_scheduled" },
 ]);
 const purchaseTypeOptions = ref([
   { name: "商品", value: "商品" },
@@ -200,14 +200,14 @@ async function prepareNextStep() {
   switch (eventName.value) {
     case "sign":
     case "cart_abandonment":
-    case "scheduled":
+    case "recurring_scheduled":
       if (!validateFormData(schemaTriggerEvenBasic)) return;
 
       data = {
         event: eventName.value,
       };
       break;
-    case "purchase":
+    case "post_purchase_marketing":
       if (!validateFormData(schemaTriggerEventPurchaseAfterPromotion)) return;
       data = {
         event: eventName.value,

@@ -36,18 +36,18 @@ const defaultNodeTypes = [
     },
   },
   {
-    id: "trigger-purchase",
+    id: "trigger-post_purchase_marketing",
     name: "購買觸發",
     description: "用戶購買商品時觸發",
     category: "trigger",
     color: "#10B981",
-    icon: "purchase",
+    icon: "post_purchase_marketing",
     component: "trigger-event",
     canConnectTo: ["response", "action", "condition"],
     defaultData: {
       reaction: "trigger",
       eventOption: {
-        type: "purchase",
+        type: "post_purchase_marketing",
         purchaseTypes: "",
         purchaseItems: "",
         fields: {},

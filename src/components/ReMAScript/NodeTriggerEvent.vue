@@ -25,7 +25,7 @@ const msgTriggerType = computed(() => {
   const triggerEventNameMap = {
     sign: "註冊",
     cart_abandonment: "購物車未結",
-    purchase: "購買後促銷",
+    post_purchase_marketing: "購買後促銷",
   };
   return (
     triggerEventNameMap[props.triggerEventSetting?.event] || "點擊設定事件"

@@ -155,7 +155,7 @@ export class ScriptValidator {
 
     // 验证特定事件类型的字段
     switch (eventOption.type) {
-      case "purchase":
+      case "post_purchase_marketing":
         if (
           !eventOption.purchaseTypes ||
           eventOption.purchaseTypes.trim() === ""
@@ -169,7 +169,7 @@ export class ScriptValidator {
           this.errors.push(`任务 ${taskId}: 购买项目不能为空`);
         }
         break;
-      case "scheduled":
+      case "recurring_scheduled":
         if (
           !eventOption.cronExpression ||
           eventOption.cronExpression.trim() === ""

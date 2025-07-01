@@ -30,7 +30,7 @@ export const sampleScript = ScriptSchema.parse({
       sourceId: null,
       targetId: ["task-3"],
       eventOption: {
-        event: "purchase",
+        event: "post_purchase_marketing",
         purchaseTypes: "商品",
         purchaseItems: "棉花糖",
       },
@@ -52,7 +52,7 @@ export const sampleScript = ScriptSchema.parse({
       sourceId: null,
       targetId: ["task-3"],
       eventOption: {
-        event: "purchase",
+        event: "post_purchase_marketing",
         purchaseTypes: "商品",
         purchaseItems: "棉花糖",
       },

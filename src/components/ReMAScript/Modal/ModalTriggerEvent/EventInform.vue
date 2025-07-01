@@ -17,14 +17,17 @@
         >功能做下一步設定。此事件目前僅供API進行觸發來判斷，建議要有技術人員來協助串接。</span
       >
     </p>
-    <p class="text-left font-18" v-if="props.event === 'purchase'">
+    <p
+      class="text-left font-18"
+      v-if="props.event === 'post_purchase_marketing'"
+    >
       <span>設定當</span>
       <span class="Cyan">顧客購買後過多久</span>
       <span>，系統即會觸發，您可以選擇購買的項目。完成後請到</span>
       <span class="Cyan">時間</span>
       <span>功能做下一步設定。</span>
     </p>
-    <p class="text-left font-18" v-if="props.event === 'scheduled'">
+    <p class="text-left font-18" v-if="props.event === 'recurring_scheduled'">
       <span>根據</span>
       <span class="Cyan">指定的時間範圍與頻率</span>
       <span>，系統即會觸發。請到</span>

@@ -2,6 +2,7 @@ import { z } from "zod";
 
 //發送方式的種類
 export const typeSendType = z.enum(["once", "recurrence", "regular"]);
+export const typeCycleUnit = z.enum(["年", "月", "週", "日"]);
 
 //【發送方式】：一次性投放
 export const schemaSendTimeOnce = z.object({

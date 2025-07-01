@@ -37,7 +37,7 @@ function updateTriggerEventSetting(taskId: string, newSetting) {
   if (!target || !newSetting) return;
   const { frequency, ...setting } = newSetting;
 
-  if (setting.event === "purchase") {
+  if (setting.event === "post_purchase_marketing") {
     target.eventOption = {
       event: setting?.event,
       purchaseItems: setting?.purchase_item,

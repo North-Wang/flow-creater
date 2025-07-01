@@ -5,11 +5,8 @@
     </button>
   </div>
   <div class="grid grid-cols-1">
-    <span>暫存的觸發事件： {{ triggerEventSetting }}</span
-    ><span
-      >經過多久之後寄出第一封信 (未確定) or 條件開始的時間：
-      {{ sendStartTimeSetting }}
-    </span>
+    <span>劇本</span>
+    {{ task }}
   </div>
 
   <VueFlow v-model="elements" :min-zoom="0.2" :max-zoom="4">
@@ -32,6 +29,7 @@ import { VueFlow, useVueFlow, Panel, Position } from "@vue-flow/core";
 import { Background } from "@vue-flow/background";
 import { ControlButton, Controls } from "@vue-flow/controls";
 import { z } from "zod";
+import { useForm, useField } from "vee-validate";
 
 //節點
 import NodeTriggerEvent from "./NodeTriggerEvent.vue";
@@ -43,7 +41,12 @@ import {
   schemaTriggerEvent,
   schemaSendStartTime,
 } from "../../schemas/ReMaScript/schema.triggerEvent";
+import {
+  typeSendType,
+  typeCycleUnit,
+} from "../../schemas/ReMaScript/schema.sendTime";
 import { emptyResponseTree } from "../../data/RemaScript/emptyTree";
+import { toTypedSchema } from "@vee-validate/zod";
 
 const {
   onInit,
@@ -55,6 +58,26 @@ const {
   fitBounds,
   onPaneReady,
 } = useVueFlow();
+
+//定義Form表單欄位、綁定資料
+const { values, errors, handleSubmit, setValues, resetForm, validateField } =
+  useForm();
+
+const { value: send_type } = useField<typeof typeSendType>("send_type");
+const { value: cycle_unit, setValue: setCycleUnit } =
+  useField<typeof typeCycleUnit>("cycle_unit");
+const { value: cycle_frequency, setValue: setCycleFrequency } =
+  useField<number>(
+    "cycle_frequency",
+    toTypedSchema(
+      z
+        .number()
+        .int({ message: "必須是整數" })
+        .positive({ message: "必須是正整數" })
+    )
+  );
+const { value: cycle_time } = useField("cycle_time");
+const { value: max_run_times } = useField<number | null>("max_run_times");
 
 const refTriggerNode = ref(null);
 const refActionNode = ref(null);
@@ -111,7 +134,7 @@ onNodeClick(({ node }) => {
 function getTriggerEventSettingFromTask(data) {
   console.log("要取出觸發事件設定的資料", data);
   //如果是購買後促銷，則會有purchaseTypes、purchaseItems這兩個參數
-  if (data?.eventOption?.event === "purchase") {
+  if (data?.eventOption?.event === "post_purchase_marketing") {
     triggerEventSetting.value = {
       event: data?.eventOption?.event,
       purchaseTypes: data?.eventOption?.purchaseTypes,
@@ -135,7 +158,7 @@ function getDelayUntilFirstDeliver(data) {
     data?.eventOption?.delayUntilFirstSend
   );
   //定期投放
-  if (data?.eventOption?.event === "scheduled") {
+  if (data?.eventOption?.event === "recurring_scheduled") {
     sendStartTimeSetting.value = {
       date: data?.eventOption?.delayUntilFirstSend?.date,
     };
@@ -144,7 +167,7 @@ function getDelayUntilFirstDeliver(data) {
   if (
     data?.eventOption?.event === "sign" ||
     data?.eventOption?.event === "cart_abandonment" ||
-    data?.eventOption?.event === "purchase"
+    data?.eventOption?.event === "post_purchase_marketing"
   ) {
     sendStartTimeSetting.value = {
       value: data?.eventOption?.delayUntilFirstSend?.value,
@@ -162,7 +185,7 @@ function updateTriggerEvent(newSetting) {
   if (!newSetting) return;
 
   //更新觸發事件
-  if (newSetting?.event === "purchase") {
+  if (newSetting?.event === "post_purchase_marketing") {
     tempTask.value.data.eventOption = {
       event: newSetting?.event,
       purchaseItems: newSetting?.purchaseItems,
@@ -239,11 +262,16 @@ watch(
   { deep: true }
 );
 
+onMounted(() => {});
+
+provide("resetForm", resetForm);
 provide("triggerEventSetting", triggerEventSetting);
 provide("sendStartTimeSetting", sendStartTimeSetting);
 provide("editingTaskId", editingTaskId);
 provide("updateTriggerEvent", updateTriggerEvent);
 provide("updateDelayUntilFirstDeliver", updateDelayUntilFirstDeliver);
+provide("setCycleUnit", setCycleUnit);
+provide("setCycleFrequency", setCycleFrequency);
 </script>
 
 <style lang="sass"></style>

@@ -2,7 +2,6 @@
   <div class="">
     <div class="selector flex-wrap">
       <label for="" class="selector-title">發送方式</label>
-
       <div class="flex gap-6">
         <div v-for="opt in sendTypeOptions" :key="opt?.value" class="flex">
           <input
@@ -10,7 +9,7 @@
             :id="opt?.value"
             :value="opt?.value"
             class="mr-4"
-            v-model="currentSendType"
+            v-model="send_type"
           />
           <label :for="opt?.value" class="cursor-pointer whitespace-nowrap">{{
             opt?.name
@@ -18,11 +17,20 @@
         </div>
       </div>
     </div>
+
+    <div v-if="errorMessage" class="text-red-500 mt-2">發送方式選擇錯誤</div>
   </div>
 </template>
 
 <script setup lang="ts">
-import { ref, watch } from "vue";
+import { ref, watch, onMounted, inject } from "vue";
+import { useField } from "vee-validate";
+import { typeSendType } from "../../../../schemas/ReMaScript/schema.sendTime";
+// let injectValidateField = inject("validateField") as (
+//   field: string
+// ) => Promise<void> | void;
+
+const { value: send_type, errorMessage, validate } = useField("send_type");
 
 const sendTypeOptions = ref([
   {
@@ -33,8 +41,16 @@ const sendTypeOptions = ref([
     value: "recurrence",
     name: "週期性投放",
   },
+  // {
+  //   value: "wrong",
+  //   name: "錯誤",
+  // },
 ]);
-const currentSendType = ref("");
+
+// 監聽 send_type 變更，手動驗證
+watch(send_type, async (newVal) => {
+  // console.log("aaa 是否通過?", await injectValidateField("send_type"));
+});
 </script>
 
 <style scoped lang="scss">

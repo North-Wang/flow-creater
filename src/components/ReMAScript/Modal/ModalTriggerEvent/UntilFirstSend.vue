@@ -1,6 +1,9 @@
 <template>
   <div class="wrapper">
-    <div class="flex-wrap" v-if="triggerEventSetting?.event !== 'scheduled'">
+    <div
+      class="flex-wrap"
+      v-if="triggerEventSetting?.event !== 'recurring_scheduled'"
+    >
       <label for="" class="selector-title">經過多少時間寄第一封</label>
       <div class="w-full flex gap-x-2">
         <input
@@ -20,7 +23,7 @@
         />
       </div>
     </div>
-    <div class="" v-if="triggerEventSetting?.event === 'scheduled'">
+    <div class="" v-if="triggerEventSetting?.event === 'recurring_scheduled'">
       <label for="" class="selector-title">條件開始的時間</label>
       <VueDatePicker
         v-model="startDate"
@@ -142,14 +145,14 @@ async function prepareSaveSetting() {
   switch (props.triggerEventSetting?.event) {
     case "sign":
     case "cart_abandonment":
-    case "purchase":
+    case "post_purchase_marketing":
       if (!validateFormData(schemaStartTimeRelative)) return;
       data = {
         value: deliverValue,
         unit: delayUntilFirstDeliverUnit?.value,
       };
       break;
-    case "scheduled":
+    case "recurring_scheduled":
       if (!validateFormData(schemaStartTimeAbsolute)) return;
       data = {
         date: deliverDate,
@@ -171,7 +174,7 @@ async function prepareSaveSetting() {
  * @description 當沒有先前儲存的【條件開始的時間】的資料，才要設定預設值
  */
 function initFormDataWhenEmpty() {
-  if (props.triggerEventSetting?.event !== "scheduled") {
+  if (props.triggerEventSetting?.event !== "recurring_scheduled") {
     setUnit(delayUntilFirstDeliverUnit.value?.value);
     setDeliverValue(delayUntilFirstDeliverValue.value);
   }

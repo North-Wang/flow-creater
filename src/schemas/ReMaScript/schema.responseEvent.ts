@@ -2,9 +2,9 @@ import { z } from "zod";
 
 //回應事件的種類
 export const typeResponseEvent = z.enum([
-  "openMail",
-  "clickLink",
-  "conversion",
+  "open_mail",
+  "click_url",
+  "purchase_conversion",
 ]);
 
 export const schemaResponseEvent = z.object({

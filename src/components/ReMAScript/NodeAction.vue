@@ -10,7 +10,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, watch, computed } from "vue";
+import { ref, watch, computed, provide, inject } from "vue";
 import { z } from "zod";
 import ModalAction from "./Modal/ModalAction/index.vue";
 
@@ -36,7 +36,18 @@ const showModal = ref<boolean>(false);
 function openModalActionSetting() {
   showModal.value = true;
 }
+
+function closeActionModal() {
+  showModal.value = false;
+}
+
+/**
+ * 清空
+ */
+function remove(params: type) {}
+
 defineExpose({ openModalActionSetting });
+provide("closeActionModal", closeActionModal);
 </script>
 
 <style scoped></style>

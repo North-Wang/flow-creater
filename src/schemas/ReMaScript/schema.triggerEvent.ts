@@ -12,8 +12,8 @@ export const typeTriggerEventFrequency = z.enum([
 export const typeTriggerEvent = z.enum([
   "sign", // 註冊
   "cart_abandonment", // 購物車未結
-  "purchase", // 購買後促銷
-  "scheduled", // 定期投放
+  "post_purchase_marketing", // 購買後促銷
+  "recurring_scheduled", // 定期投放
 ]);
 
 /**
@@ -47,7 +47,7 @@ export const schemaSendStartTime = z.union([
  * 【觸發事件】：註冊、購物車未結、購買後促銷
  */
 export const schemaTriggerEvenBasic = z.object({
-  event: z.enum(["sign", "cart_abandonment", "scheduled"]),
+  event: z.enum(["sign", "cart_abandonment", "recurring_scheduled"]),
 });
 
 /**
@@ -55,7 +55,7 @@ export const schemaTriggerEvenBasic = z.object({
  * @description 會有購買的種類與項目
  */
 export const schemaTriggerEventPurchaseAfterPromotion = z.object({
-  event: z.literal("purchase"),
+  event: z.literal("post_purchase_marketing"),
   purchaseTypes: z.string(),
   purchaseItems: z.string().refine((val) => val !== "-", {
     message: "請選擇購買項目",

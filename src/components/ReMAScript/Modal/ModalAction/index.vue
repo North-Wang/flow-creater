@@ -1,22 +1,56 @@
 <template>
-  <DrawerModal @closeModal="removeAction">
+  <DrawerModal @closeModal="injectCloseActionModal">
     <div class="wrapper">
       <Frequency />
-      <SendTime />
-      <div>123</div>
+      <AfterFirstSend />
+      <!-- <ExplainSend /> -->
     </div>
   </DrawerModal>
 </template>
 
 <script setup lang="ts">
-import { ref, defineEmits, watch, computed, provide, inject } from "vue";
+import {
+  ref,
+  defineEmits,
+  watch,
+  computed,
+  provide,
+  inject,
+  onMounted,
+} from "vue";
 import DrawerModal from "../../Modal/DrawerModal.vue";
 import Frequency from "./Frequency.vue";
-import SendTime from "./SendTime.vue";
+import AfterFirstSend from "./AfterFirstSend.vue";
+import ExplainSend from "./ExplainSend.vue";
+import { z } from "zod";
+import { useForm, useField } from "vee-validate";
+import { toTypedSchema } from "@vee-validate/zod";
+import { schemaSendStartTime } from "../../../../schemas/ReMaScript/schema.triggerEvent";
+import { typeSendType } from "../../../../schemas/ReMaScript/schema.sendTime";
 
-function removeAction() {
-  console.warn("清空action");
-}
+let injectCloseActionModal = inject("closeActionModal");
+let injectResetForm = inject("resetForm");
+
+const formSchema = z.object({
+  send_type: z.enum(["once", "recurrence"]),
+});
+//定義Form表單欄位、綁定資料
+// const { values, errors, handleSubmit, setValues, resetForm, validateField } =
+//   useForm({
+//     validationSchema: toTypedSchema(formSchema),
+//   });
+
+onMounted(() => {
+  injectResetForm({
+    values: {
+      cycle_unit: "month",
+      cycle_frequency: 1,
+      cycle_time: "",
+      send_type: "once",
+    },
+  });
+});
+// provide("validateField", validateField);
 </script>
 
 <style scoped>

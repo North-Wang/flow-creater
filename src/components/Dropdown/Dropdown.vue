@@ -201,7 +201,7 @@ watch(
   (val) => {
     if (!val || val?.trim() === "") return;
 
-    if (!props.selectedValue || props.selectedValue?.value?.trim() === "") {
+    if (!props.selectedValue) {
       selectedOption.value = val;
     }
   },
