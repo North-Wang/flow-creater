@@ -58,27 +58,40 @@ const {
   onPaneReady,
 } = useVueFlow();
 
-//定義Form表單欄位、綁定資料
-const { values, errors, handleSubmit, setValues, validateField } = useForm();
+const interfaceForm = z.object({
+  trigger_event: z.string(),
+});
 
-const {
-  value: trigger_event,
-  resetField: resetTriggerEvent,
-  setValue: setEventName,
-} = useField<typeof typeSendType>("trigger_event");
-const { value: send_type } = useField<typeof typeSendType>("send_type");
-const { value: cycle_unit, setValue: setCycleUnit } =
-  useField<typeof typeCycleUnit>("cycle_unit");
-const { value: cycle_frequency, setValue: setCycleFrequency } =
-  useField<number>(
-    "cycle_frequency",
-    toTypedSchema(
-      z
-        .number()
-        .int({ message: "必須是整數" })
-        .positive({ message: "必須是正整數" })
-    )
-  );
+//定義Form表單欄位、綁定資料
+const { values, handleSubmit, setValues, resetField, validateField } = useForm({
+  validationSchema: toTypedSchema(interfaceForm),
+  initialValues: {
+    trigger_event: "sign",
+  },
+});
+
+//觸發事件設定
+const {} = useField<typeof typeSendType>("trigger_event");
+const {} = useField<typeof typeSendType>("purchase_item_type");
+const {} = useField<typeof typeSendType>("purchase_item");
+
+const {} = useField<typeof typeSendType>("send_type");
+const { setValue: setCycleUnit } = useField<typeof typeCycleUnit>("cycle_unit");
+const { setValue: setCycleFrequency } = useField<number>(
+  "cycle_frequency",
+  toTypedSchema(
+    z
+      .number()
+      .int({ message: "必須是整數" })
+      .positive({ message: "必須是正整數" })
+  )
+);
+const {} = useField<typeof typeCycleUnit>("first_send_unit");
+const {} = useField<number>("first_send_value");
+const {} = useField<string>("first_send_date");
+
+//發送時間設定
+
 const { value: cycle_time } = useField("cycle_time");
 const { value: max_run_times } = useField<number | null>("max_run_times");
 
@@ -266,6 +279,10 @@ watch(
 );
 
 onMounted(() => {});
+
+provide("values", values);
+provide("setValues", setValues);
+provide("resetField", resetField);
 
 provide("triggerEventSetting", triggerEventSetting);
 provide("sendStartTimeSetting", sendStartTimeSetting);

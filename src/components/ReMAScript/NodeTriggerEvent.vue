@@ -3,8 +3,8 @@
     <div class="empty"></div>
     <div>{{ msgTriggerType }}</div>
     <div>{{ startTime }}{{ startTimeUnit }}</div>
-    {{ showTriggerEventModal }}
   </section>
+
   <ModalTriggerEvent v-if="showTriggerEventModal" />
 </template>
 

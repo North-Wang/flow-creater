@@ -1,14 +1,17 @@
 <template>
   <div class="wrapper">
-    <div class="flex-wrap">
+    <div
+      class="flex-wrap"
+      v-if="values?.trigger_event !== 'recurring_scheduled'"
+    >
       <label for="" class="selector-title">經過多少時間寄第一封</label>
       <div class="w-full flex gap-x-2">
         <input
           type="number"
           min="1"
           step="1"
-          v-model="delayUntilFirstDeliverValue"
-          @change="handleStartTimeValue(delayUntilFirstDeliverValue)"
+          v-model="firstSendValue"
+          @change="handleStartTimeValue(firstSendValue)"
           class="text-white"
         />
         <Dropdown
@@ -21,10 +24,10 @@
       </div>
     </div>
 
-    <div v-if="trigger_event === 'recurring_scheduled'">
+    <div v-if="values?.trigger_event === 'recurring_scheduled'">
       <label for="" class="selector-title">條件開始的時間</label>
       <VueDatePicker
-        v-model="startDate"
+        v-model="sendDate"
         :minDate="new Date()"
         :start-date="new Date()"
         :format="'MM/dd/yyy'"
@@ -58,39 +61,22 @@ import dayjs from "dayjs";
 import { z } from "zod";
 import { useField } from "vee-validate";
 import { toTypedSchema } from "@vee-validate/zod";
-import {
-  schemaStartTimeRelative,
-  schemaStartTimeAbsolute,
-  schemaSendStartTime,
-} from "../../../../schemas/ReMaScript/schema.triggerEvent";
 
 const injectRemoveTriggerEvent = inject("removeTriggerEvent");
-const injectCloseModal = inject("closeTriggerEventModal");
+const values = inject("values");
+const setValues = inject("setValues");
+
+const closeTriggerEventModal = inject("closeTriggerEventModal");
 const injectUpdateDelayUntilFirstDeliver = inject(
   "updateDelayUntilFirstDeliver"
 );
-const injectUpdateTriggerEvent = inject("updateTriggerEvent");
 
+const sendDate = ref(null);
 const {
-  value: trigger_event,
-  resetField: resetTriggerEvent,
-  setValue: setEventName,
-} = useField("trigger_event");
-const {
-  value: unit,
-  errorMessage: delayUntilFirstDeliverUnitError,
-  setValue: setUnit,
-} = useField("unit");
-const {
-  value: deliverValue,
-  errorMessage: delayUntilFirstDeliverValueError,
-  setValue: setDeliverValue,
-} = useField("value");
-const {
-  value: deliverDate,
+  value: firstSendDate,
   errorMessage: delayUntilFirstDeliverDateError,
-  setValue: setDeliverDate,
-} = useField("date");
+  setValue: setFirstSendDate,
+} = useField("first_send_date");
 
 interface Props {
   triggerEventSetting?: object;
@@ -98,7 +84,7 @@ interface Props {
 const props = withDefaults(defineProps<Props>(), {});
 
 const startTimeUnitOptions = ref([{ name: "天後", value: "天後" }]);
-const delayUntilFirstDeliverValue = ref<number>(2);
+const firstSendValue = ref<number>(2);
 const delayUntilFirstDeliverUnit = ref({ name: "天後", value: "天後" });
 const startDate = ref(null);
 
@@ -108,10 +94,9 @@ const startDate = ref(null);
 function handleStartTimeValue(value: number) {
   if (!Number.isInteger(value) || value === 0) {
     const roundedValue = Math.round(value);
-    delayUntilFirstDeliverValue.value =
-      roundedValue === 0 ? 1 : Math.round(value);
+    firstSendValue.value = roundedValue === 0 ? 1 : Math.round(value);
   }
-  setDeliverValue(delayUntilFirstDeliverValue.value);
+  setValues({ first_send_value: firstSendValue.value });
 }
 
 /**
@@ -120,7 +105,7 @@ function handleStartTimeValue(value: number) {
 function handleStartTimeUnit(unit: any) {
   if (!unit) return;
   delayUntilFirstDeliverUnit.value = unit;
-  setUnit(unit?.value);
+  setValues({ first_send_unit: unit?.value });
 }
 
 function validateFormData(schema) {
@@ -134,32 +119,24 @@ function validateFormData(schema) {
   // }
 }
 async function prepareSaveSetting() {
-  console.log("aaa 準備儲存彈窗設定");
-  injectCloseModal;
+  closeTriggerEventModal();
 }
 
-/**
- * 設定預設的formData設定
- * @description 當沒有先前儲存的【條件開始的時間】的資料，才要設定預設值
- */
-function initFormDataWhenEmpty() {
-  if (props.triggerEventSetting?.event !== "recurring_scheduled") {
-    setUnit(delayUntilFirstDeliverUnit.value?.value);
-    setDeliverValue(delayUntilFirstDeliverValue.value);
+function setDefaultValue() {
+  if (values?.trigger_event !== "recurring_scheduled") {
+    setValues({ first_send_value: 2, unit: "天後" });
   }
 }
 
 //更新「條件開始的時間」
 watch(startDate, (date) => {
   const newDate = dayjs(date).format("YYYY-MM-DD");
-  setDeliverDate(newDate);
+  setValues({ first_send_date: newDate });
 });
 
-function isAllKeysUndefined(obj: Record<string, unknown>): boolean {
-  return Object.keys(obj).every((key) => !obj[key]);
-}
-
-onMounted(() => {});
+onMounted(() => {
+  setDefaultValue();
+});
 </script>
 
 <style scoped lang="scss">

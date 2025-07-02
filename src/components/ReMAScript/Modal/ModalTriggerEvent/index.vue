@@ -1,11 +1,10 @@
 <template>
-  <DrawerModal @closeModal="injectCloseTriggerEventModal">
-    <EventTypeForm @nextStep="handleNextStep" v-show="step === 1" />
-    <UntilFirstSend
-      :triggerEventSetting="triggerEventSetting"
-      v-show="step === 2"
-    />
-  </DrawerModal>
+  <KeepAlive>
+    <DrawerModal @closeModal="injectCloseTriggerEventModal">
+      <EventTypeForm @nextStep="handleNextStep" v-if="step === 1" />
+      <UntilFirstSend v-if="step === 2" />
+    </DrawerModal>
+  </KeepAlive>
 </template>
 
 <script setup lang="ts">
@@ -17,9 +16,7 @@ import { schemaTriggerEvent } from "../../../../schemas/ReMaScript/schema.trigge
 
 const injectCloseTriggerEventModal = inject("closeTriggerEventModal");
 const step = ref<number>(1);
-const triggerEventSetting = ref<object>();
-function handleNextStep(data: typeof schemaTriggerEvent) {
+function handleNextStep() {
   step.value = 2;
-  triggerEventSetting.value = data;
 }
 </script>

@@ -16,7 +16,7 @@
 
       <div
         class="position-relative w-full grid grid-cols-[auto_auto_1fr] gap-x-[25px] place-items-center mb-[25px]"
-        v-if="trigger_event === 'post_purchase_marketing'"
+        v-if="values?.trigger_event === 'post_purchase_marketing'"
       >
         <label
           for=""
@@ -54,14 +54,17 @@
         />
         <div class="Red error-msg" v-if="showErrorMsg">{{ errorMsg }}</div>
       </div>
-      <div class="selector flex-wrap" v-if="trigger_event === '定期投放'">
+      <div
+        class="selector flex-wrap"
+        v-if="values?.trigger_event === '定期投放'"
+      >
         <label for="" class="selector-title">條件開始的時間</label>
         <DatePicker v-model="recurringStartDate" />
       </div>
     </div>
 
     <div class="introduction">
-      <EventInform :event="trigger_event" />
+      <EventInform :event="values?.trigger_event" />
       <div class="button-wrap">
         <button
           class="button-basic-light btn-cancel"
@@ -94,30 +97,21 @@ import {
   typeTriggerEventFrequency,
 } from "../../../../schemas/ReMaScript/schema.triggerEvent";
 import { z } from "zod";
-import { useField } from "vee-validate";
 
 const injectRemoveTriggerEvent = inject("removeTriggerEvent");
+
+const interfaceForm = z.object({
+  trigger_event: z.string(),
+});
+
+const values = inject<typeof interfaceForm>("values");
+const setValues = inject("setValues");
+const resetField = inject("resetField");
 
 interface Emits {
   (e: "nextStep", payload: z.infer<typeof schemaTriggerEvent>): void;
 }
 const emits = defineEmits<Emits>();
-
-const {
-  value: trigger_event,
-  errorMessage: eventError,
-  setValue: setEventName,
-} = useField<string>("trigger_event");
-const {
-  value: purchaseTypes,
-  errorMessage: purchaseTypesError,
-  setValue: setPurchaseTypes,
-} = useField("purchaseTypes");
-const {
-  value: purchaseItems,
-  errorMessage: purchaseItemsError,
-  setValue: setPurchaseItems,
-} = useField("purchaseItems");
 
 //先前設定的【購買項目】的【種類】
 
@@ -142,9 +136,6 @@ const purchaseTypeOptions = ref([
 //購買項目的類別
 const purchaseItemsOptions = ref([]);
 
-type TriggerEventFrequency = z.infer<typeof typeTriggerEventFrequency>;
-const currentSendTimeType = ref<TriggerEventFrequency>("once"); //目前選擇的發送方式
-
 // 推導型別
 const errorMsg = ref("需要選擇購買的項目");
 
@@ -152,9 +143,9 @@ const showLoadingInput = ref(false);
 const showErrorMsg = ref(false);
 //預設的觸發事件
 const defaultTriggerEvent = computed(() => {
-  if (!trigger_event.value) return { name: "", value: "" };
+  if (!values?.trigger_event) return { name: "", value: "" };
   const target = triggerEventOptions.value?.find((opt) => {
-    return opt?.value === trigger_event.value;
+    return opt?.value === values?.trigger_event;
   });
   return {
     name: target?.name,
@@ -164,41 +155,28 @@ const defaultTriggerEvent = computed(() => {
 const recurringStartDate = ref(null); //定期投放的開始日期
 
 function selectTriggerEvent(opt) {
-  setEventName(opt?.value);
+  setValues({ trigger_event: opt?.value });
+  if (opt?.value !== "post_purchase_marketing") {
+    //清除「購買後促銷」的欄位資料
+    resetField("purchase_item");
+    resetField("purchase_item_type");
+  }
 }
 function selectPurchaseType(type) {
-  setPurchaseTypes(type?.value);
+  setValues({ purchase_item_type: type?.value });
 }
 function selectPurchaseItem(item) {
-  setPurchaseItems(item?.value);
+  setValues({ purchase_item: item?.value });
 }
 
 async function prepareNextStep() {
   let data = {};
-  switch (trigger_event.value) {
-    case "sign":
-    case "cart_abandonment":
-    case "recurring_scheduled":
-      data = {
-        event: trigger_event.value,
-      };
-      break;
-    case "post_purchase_marketing":
-      data = {
-        event: trigger_event.value,
-        purchaseTypes: purchaseTypes.value,
-        purchaseItems: purchaseItems.value,
-      };
-      break;
-    default:
-      console.warn("未定義的觸發事件種類", trigger_event.value);
-      break;
-  }
+
   emits("nextStep", data);
 }
 
 const styleSpecialWrapper = computed(() => {
-  if (trigger_event.value === "購買後促銷") {
+  if (values?.trigger_event === "購買後促銷") {
     return {
       flexDirection: "row",
       alignItems: "center",
@@ -210,12 +188,6 @@ const styleSpecialWrapper = computed(() => {
   }
 });
 
-/**
- * 變更「發送方式」
- * */
-watch(currentSendTimeType, (val) => {
-  // setFrequency(val);
-});
 //還原先前設定的觸發事件
 // watch(
 //   trigger_event,
@@ -233,54 +205,42 @@ watch(currentSendTimeType, (val) => {
 /**
  * 當「購買項目」 的「種類」變更時，重新取得「項目」
  * */
-watch(purchaseTypes, (type) => {
-  //根據「購買項目」的種類，給後端對應的參數
-  switch (type) {
-    case "商品":
-      purchaseItemsOptions.value = [
-        { name: "桂冠食品", value: "桂冠食品" },
-        { name: "冰淇淋", value: "冰淇淋" },
-      ];
-      setPurchaseItems(null);
-      break;
-    case "類別":
-      purchaseItemsOptions.value = [
-        { name: "冷藏食品", value: "冷藏食品" },
-        { name: "飲料類", value: "飲料類" },
-      ];
-      break;
-    case "品牌":
-      purchaseItemsOptions.value = [
-        { name: "可口可樂", value: "可口可樂" },
-        { name: "桂冠", value: "桂冠" },
-      ];
-      break;
-
-    default:
-      console.warn("未定義的購買項目種類", type);
-      break;
-  }
-  //清空已經選擇的購買商品的品項
-  setPurchaseItems("-");
-});
-
-// 當表單的資料有變更，要讓【購買商品品項】的下拉選單也更新已選的選項
 watch(
-  purchaseItems,
-  (item) => {
-    if (!item) {
-      //預設選項
-      presetPurchasedItem.value = { name: "-", value: "-" };
-      return;
+  () => values.purchase_item_type,
+  (type) => {
+    if (!type) return;
+    //根據「購買項目」的種類，給後端對應的參數
+    switch (type) {
+      case "商品":
+        purchaseItemsOptions.value = [
+          { name: "桂冠食品", value: "桂冠食品" },
+          { name: "冰淇淋", value: "冰淇淋" },
+        ];
+        setValues({ purchase_item: null });
+        break;
+      case "類別":
+        purchaseItemsOptions.value = [
+          { name: "冷藏食品", value: "冷藏食品" },
+          { name: "飲料類", value: "飲料類" },
+        ];
+        break;
+      case "品牌":
+        purchaseItemsOptions.value = [
+          { name: "可口可樂", value: "可口可樂" },
+          { name: "桂冠", value: "桂冠" },
+        ];
+        break;
+
+      default:
+        console.warn("未定義的購買項目種類", type);
+        break;
     }
-    presetPurchasedItem.value = { name: item, value: item };
-  },
-  { immediate: true }
+    //清空已經選擇的購買商品的品項
+    resetField("purchase_item");
+  }
 );
 
-onMounted(() => {
-  setEventName("sign");
-});
+onMounted(() => {});
 </script>
 
 <style scoped lang="scss">
