@@ -25,7 +25,7 @@
 
 <script setup lang="ts">
 import { ref, watch, onMounted, inject } from "vue";
-import { useField, useForm } from "vee-validate";
+import { useField } from "vee-validate";
 import { typeSendType } from "../../../../schemas/ReMaScript/schema.sendTime";
 // let injectValidateField = inject("validateField") as (
 //   field: string

@@ -20,7 +20,8 @@
         />
       </div>
     </div>
-    <div class="">
+
+    <div v-if="trigger_event === 'recurring_scheduled'">
       <label for="" class="selector-title">條件開始的時間</label>
       <VueDatePicker
         v-model="startDate"
@@ -55,7 +56,7 @@ import { onMounted, ref, watch, inject } from "vue";
 import Dropdown from "../../../Dropdown/Dropdown.vue";
 import dayjs from "dayjs";
 import { z } from "zod";
-import { useForm, useField } from "vee-validate";
+import { useField } from "vee-validate";
 import { toTypedSchema } from "@vee-validate/zod";
 import {
   schemaStartTimeRelative,
@@ -65,19 +66,16 @@ import {
 
 const injectRemoveTriggerEvent = inject("removeTriggerEvent");
 const injectCloseModal = inject("closeTriggerEventModal");
-let injectUpdateDelayUntilFirstDeliver = inject("updateDelayUntilFirstDeliver");
-let injectUpdateTriggerEvent = inject("updateTriggerEvent");
+const injectUpdateDelayUntilFirstDeliver = inject(
+  "updateDelayUntilFirstDeliver"
+);
+const injectUpdateTriggerEvent = inject("updateTriggerEvent");
 
-//定義Form表單欄位、綁定資料
 const {
-  values: formData,
-  handleSubmit,
-  setValues,
-  resetForm,
-} = useForm({
-  validationSchema: toTypedSchema(schemaSendStartTime),
-});
-
+  value: trigger_event,
+  resetField: resetTriggerEvent,
+  setValue: setEventName,
+} = useField("trigger_event");
 const {
   value: unit,
   errorMessage: delayUntilFirstDeliverUnitError,
@@ -126,44 +124,18 @@ function handleStartTimeUnit(unit: any) {
 }
 
 function validateFormData(schema) {
-  const result = schema.safeParse(formData);
-
-  if (result.success) {
-    console.log("驗證過資料完整", result.data);
-    return true;
-  } else {
-    console.warn("欄位未填寫完成", result.error.format());
-    return false;
-  }
+  // const result = schema.safeParse();
+  // if (result.success) {
+  //   console.log("驗證過資料完整", result.data);
+  //   return true;
+  // } else {
+  //   console.warn("欄位未填寫完成", result.error.format());
+  //   return false;
+  // }
 }
 async function prepareSaveSetting() {
   console.log("aaa 準備儲存彈窗設定");
-  let data = {};
-  // switch (props.triggerEventSetting?.event) {
-  //   case "sign":
-  //   case "cart_abandonment":
-  //   case "post_purchase_marketing":
-  //     if (!validateFormData(schemaStartTimeRelative)) return;
-  //     data = {
-  //       value: deliverValue,
-  //       unit: delayUntilFirstDeliverUnit?.value,
-  //     };
-  //     break;
-  //   case "recurring_scheduled":
-  //     if (!validateFormData(schemaStartTimeAbsolute)) return;
-  //     data = {
-  //       date: deliverDate,
-  //     };
-  //     break;
-  //   default:
-  //     console.warn("未定義的觸發事件種類", props.triggerEventSetting?.event);
-  //     break;
-  // }
-
-  //依序更新資料
-  // await injectUpdateTriggerEvent(props.triggerEventSetting);
-  // await injectUpdateDelayUntilFirstDeliver(data);
-  injectCloseModal();
+  injectCloseModal;
 }
 
 /**

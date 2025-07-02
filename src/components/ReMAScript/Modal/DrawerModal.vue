@@ -2,21 +2,20 @@
   <teleport to="#app">
     <div class="modal-container">
       <div class="back-drop" @click="closeModal"></div>
-      <teleport to="#app">
-        <transition>
-          <div class="content">
-            <div class="header">
-              <span
-                class="close-arrow-btn cursor-pointer"
-                @click="closeModal"
-              ></span>
-            </div>
-            <slot>
-              <p></p>
-            </slot>
+
+      <transition>
+        <div class="content">
+          <div class="header">
+            <span
+              class="close-arrow-btn cursor-pointer"
+              @click="closeModal"
+            ></span>
           </div>
-        </transition>
-      </teleport>
+          <slot>
+            <p></p>
+          </slot>
+        </div>
+      </transition>
     </div>
   </teleport>
 </template>

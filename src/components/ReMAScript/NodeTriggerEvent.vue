@@ -3,10 +3,9 @@
     <div class="empty"></div>
     <div>{{ msgTriggerType }}</div>
     <div>{{ startTime }}{{ startTimeUnit }}</div>
+    {{ showTriggerEventModal }}
   </section>
-  <div v-show="showTriggerEventModal">
-    <ModalTriggerEvent />
-  </div>
+  <ModalTriggerEvent v-if="showTriggerEventModal" />
 </template>
 
 <script setup lang="ts">

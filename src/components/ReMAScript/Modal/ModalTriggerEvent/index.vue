@@ -1,5 +1,5 @@
 <template>
-  <DrawerModal @closeModal="injectRemoveTriggerEvent">
+  <DrawerModal @closeModal="injectCloseTriggerEventModal">
     <EventTypeForm @nextStep="handleNextStep" v-show="step === 1" />
     <UntilFirstSend
       :triggerEventSetting="triggerEventSetting"
@@ -15,7 +15,7 @@ import EventTypeForm from "./EventTypeForm.vue";
 import UntilFirstSend from "./UntilFirstSend.vue";
 import { schemaTriggerEvent } from "../../../../schemas/ReMaScript/schema.triggerEvent";
 
-const injectRemoveTriggerEvent = inject("removeTriggerEvent");
+const injectCloseTriggerEventModal = inject("closeTriggerEventModal");
 const step = ref<number>(1);
 const triggerEventSetting = ref<object>();
 function handleNextStep(data: typeof schemaTriggerEvent) {

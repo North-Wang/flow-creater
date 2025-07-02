@@ -23,7 +23,7 @@ import Frequency from "./Frequency.vue";
 import AfterFirstSend from "./AfterFirstSend.vue";
 import ExplainSend from "./ExplainSend.vue";
 import { z } from "zod";
-import { useForm, useField } from "vee-validate";
+import { useField } from "vee-validate";
 import { toTypedSchema } from "@vee-validate/zod";
 import { schemaSendStartTime } from "../../../../schemas/ReMaScript/schema.triggerEvent";
 import { typeSendType } from "../../../../schemas/ReMaScript/schema.sendTime";
@@ -33,11 +33,6 @@ let injectCloseActionModal = inject("closeActionModal");
 const formSchema = z.object({
   send_type: z.enum(["once", "recurrence"]),
 });
-//定義Form表單欄位、綁定資料
-// const { values, errors, handleSubmit, setValues, resetForm, validateField } =
-//   useForm({
-//     validationSchema: toTypedSchema(formSchema),
-//   });
 
 onMounted(() => {});
 // provide("validateField", validateField);

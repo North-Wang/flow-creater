@@ -8,7 +8,6 @@
     <span>劇本</span>
     {{ values }}
   </div>
-
   <VueFlow v-model="elements" :min-zoom="0.2" :max-zoom="4">
     <Background :gap="20" :height="100" :width="100" />
     <template #node-trigger-event="{ id, data, selected }">
@@ -60,8 +59,7 @@ const {
 } = useVueFlow();
 
 //定義Form表單欄位、綁定資料
-const { values, errors, handleSubmit, setValues, resetForm, validateField } =
-  useForm();
+const { values, errors, handleSubmit, setValues, validateField } = useForm();
 
 const {
   value: trigger_event,
@@ -269,7 +267,6 @@ watch(
 
 onMounted(() => {});
 
-provide("resetForm", resetForm);
 provide("triggerEventSetting", triggerEventSetting);
 provide("sendStartTimeSetting", sendStartTimeSetting);
 provide("editingTaskId", editingTaskId);
