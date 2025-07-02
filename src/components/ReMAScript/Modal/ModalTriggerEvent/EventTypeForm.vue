@@ -16,7 +16,7 @@
 
       <div
         class="position-relative w-full grid grid-cols-[auto_auto_1fr] gap-x-[25px] place-items-center mb-[25px]"
-        v-if="eventName === 'post_purchase_marketing'"
+        v-if="trigger_event === 'post_purchase_marketing'"
       >
         <label
           for=""
@@ -54,14 +54,14 @@
         />
         <div class="Red error-msg" v-if="showErrorMsg">{{ errorMsg }}</div>
       </div>
-      <div class="selector flex-wrap" v-if="eventName === '定期投放'">
+      <div class="selector flex-wrap" v-if="trigger_event === '定期投放'">
         <label for="" class="selector-title">條件開始的時間</label>
         <DatePicker v-model="recurringStartDate" />
       </div>
     </div>
 
     <div class="introduction">
-      <EventInform :event="eventName" />
+      <EventInform :event="trigger_event" />
       <div class="button-wrap">
         <button
           class="button-basic-light btn-cancel"
@@ -82,7 +82,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, defineEmits, watch, computed, inject } from "vue";
+import { ref, defineEmits, watch, computed, inject, onMounted } from "vue";
 import EventInform from "./EventInform.vue";
 import ExplainTriggerEvent from ".././ExplainTriggerEvent.vue";
 import Dropdown from "../../../Dropdown/Dropdown.vue";
@@ -94,12 +94,7 @@ import {
   typeTriggerEventFrequency,
 } from "../../../../schemas/ReMaScript/schema.triggerEvent";
 import { z } from "zod";
-import { useForm, useField } from "vee-validate";
-import { toTypedSchema } from "@vee-validate/zod";
-
-const injectTriggerEventSetting = inject<z.infer<typeof schemaTriggerEvent>>(
-  "triggerEventSetting"
-);
+import { useField } from "vee-validate";
 
 const injectRemoveTriggerEvent = inject("removeTriggerEvent");
 
@@ -108,21 +103,11 @@ interface Emits {
 }
 const emits = defineEmits<Emits>();
 
-//定義Form表單欄位、綁定資料
 const {
-  values: formData,
-  handleSubmit,
-  setValues,
-  resetForm,
-} = useForm({
-  validationSchema: toTypedSchema(schemaTriggerEvent),
-});
-
-const {
-  value: eventName,
+  value: trigger_event,
   errorMessage: eventError,
   setValue: setEventName,
-} = useField<string>("event");
+} = useField<string>("trigger_event");
 const {
   value: purchaseTypes,
   errorMessage: purchaseTypesError,
@@ -137,11 +122,7 @@ const {
 //先前設定的【購買項目】的【種類】
 
 const presetPurchasedType = computed(() => {
-  if (!injectTriggerEventSetting.value?.purchaseTypes) return null;
-  return {
-    name: injectTriggerEventSetting.value?.purchaseTypes,
-    value: injectTriggerEventSetting.value?.purchaseTypes,
-  };
+  return { name: "-", value: "-" };
 });
 
 //先前設定的【購買項目】的【品項】
@@ -169,7 +150,17 @@ const errorMsg = ref("需要選擇購買的項目");
 
 const showLoadingInput = ref(false);
 const showErrorMsg = ref(false);
-const defaultTriggerEvent = ref({ name: "註冊", value: "sign" }); //預設的觸發事件
+//預設的觸發事件
+const defaultTriggerEvent = computed(() => {
+  if (!trigger_event.value) return { name: "", value: "" };
+  const target = triggerEventOptions.value?.find((opt) => {
+    return opt?.value === trigger_event.value;
+  });
+  return {
+    name: target?.name,
+    value: target?.value,
+  };
+});
 const recurringStartDate = ref(null); //定期投放的開始日期
 
 function selectTriggerEvent(opt) {
@@ -182,48 +173,32 @@ function selectPurchaseItem(item) {
   setPurchaseItems(item?.value);
 }
 
-//驗證資料是否填寫完整
-function validateFormData(schema) {
-  const result = schema.safeParse(formData);
-
-  if (result.success) {
-    console.log("驗證過資料完整", result.data);
-    return true;
-  } else {
-    console.warn("欄位未填寫完成", result.error.format());
-    return false;
-  }
-}
-
 async function prepareNextStep() {
   let data = {};
-  switch (eventName.value) {
+  switch (trigger_event.value) {
     case "sign":
     case "cart_abandonment":
     case "recurring_scheduled":
-      if (!validateFormData(schemaTriggerEvenBasic)) return;
-
       data = {
-        event: eventName.value,
+        event: trigger_event.value,
       };
       break;
     case "post_purchase_marketing":
-      if (!validateFormData(schemaTriggerEventPurchaseAfterPromotion)) return;
       data = {
-        event: eventName.value,
+        event: trigger_event.value,
         purchaseTypes: purchaseTypes.value,
         purchaseItems: purchaseItems.value,
       };
       break;
     default:
-      console.warn("未定義的觸發事件種類", eventName.value);
+      console.warn("未定義的觸發事件種類", trigger_event.value);
       break;
   }
   emits("nextStep", data);
 }
 
 const styleSpecialWrapper = computed(() => {
-  if (eventName.value === "購買後促銷") {
+  if (trigger_event.value === "購買後促銷") {
     return {
       flexDirection: "row",
       alignItems: "center",
@@ -236,35 +211,24 @@ const styleSpecialWrapper = computed(() => {
 });
 
 /**
- * 還原先前設定的彈窗內容
- */
-watch(
-  injectTriggerEventSetting,
-  (setting) => {
-    resetForm({ values: setting ? JSON.parse(JSON.stringify(setting)) : {} });
-  },
-  { immediate: true }
-);
-
-/**
  * 變更「發送方式」
  * */
 watch(currentSendTimeType, (val) => {
-  setFrequency(val);
+  // setFrequency(val);
 });
 //還原先前設定的觸發事件
-watch(
-  eventName,
-  (event) => {
-    const target = triggerEventOptions.value?.find(
-      (opt) => opt.value === event
-    );
-    if (target) {
-      defaultTriggerEvent.value = target;
-    }
-  },
-  { immediate: true, once: true }
-);
+// watch(
+//   trigger_event,
+//   (event) => {
+//     const target = triggerEventOptions.value?.find(
+//       (opt) => opt.value === event
+//     );
+//     if (target) {
+//       defaultTriggerEvent.value = target;
+//     }
+//   },
+//   { immediate: true, once: true }
+// );
 
 /**
  * 當「購買項目」 的「種類」變更時，重新取得「項目」
@@ -313,6 +277,10 @@ watch(
   },
   { immediate: true }
 );
+
+onMounted(() => {
+  setEventName("sign");
+});
 </script>
 
 <style scoped lang="scss">

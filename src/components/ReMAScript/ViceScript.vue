@@ -6,7 +6,7 @@
   </div>
   <div class="grid grid-cols-1">
     <span>劇本</span>
-    {{ task }}
+    {{ values }}
   </div>
 
   <VueFlow v-model="elements" :min-zoom="0.2" :max-zoom="4">
@@ -63,6 +63,11 @@ const {
 const { values, errors, handleSubmit, setValues, resetForm, validateField } =
   useForm();
 
+const {
+  value: trigger_event,
+  resetField: resetTriggerEvent,
+  setValue: setEventName,
+} = useField<typeof typeSendType>("trigger_event");
 const { value: send_type } = useField<typeof typeSendType>("send_type");
 const { value: cycle_unit, setValue: setCycleUnit } =
   useField<typeof typeCycleUnit>("cycle_unit");

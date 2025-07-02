@@ -2,6 +2,7 @@
   <div class="">
     <div class="selector flex-wrap">
       <label for="" class="selector-title">發送方式</label>
+
       <div class="flex gap-6">
         <div v-for="opt in sendTypeOptions" :key="opt?.value" class="flex">
           <input
@@ -24,7 +25,7 @@
 
 <script setup lang="ts">
 import { ref, watch, onMounted, inject } from "vue";
-import { useField } from "vee-validate";
+import { useField, useForm } from "vee-validate";
 import { typeSendType } from "../../../../schemas/ReMaScript/schema.sendTime";
 // let injectValidateField = inject("validateField") as (
 //   field: string

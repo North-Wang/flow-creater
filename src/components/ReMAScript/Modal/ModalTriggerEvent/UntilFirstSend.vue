@@ -1,9 +1,6 @@
 <template>
   <div class="wrapper">
-    <div
-      class="flex-wrap"
-      v-if="triggerEventSetting?.event !== 'recurring_scheduled'"
-    >
+    <div class="flex-wrap">
       <label for="" class="selector-title">經過多少時間寄第一封</label>
       <div class="w-full flex gap-x-2">
         <input
@@ -23,7 +20,7 @@
         />
       </div>
     </div>
-    <div class="" v-if="triggerEventSetting?.event === 'recurring_scheduled'">
+    <div class="">
       <label for="" class="selector-title">條件開始的時間</label>
       <VueDatePicker
         v-model="startDate"
@@ -70,7 +67,6 @@ const injectRemoveTriggerEvent = inject("removeTriggerEvent");
 const injectCloseModal = inject("closeTriggerEventModal");
 let injectUpdateDelayUntilFirstDeliver = inject("updateDelayUntilFirstDeliver");
 let injectUpdateTriggerEvent = inject("updateTriggerEvent");
-let injectSendStartTimeSetting = inject("sendStartTimeSetting");
 
 //定義Form表單欄位、綁定資料
 const {
@@ -99,7 +95,7 @@ const {
 } = useField("date");
 
 interface Props {
-  triggerEventSetting: object;
+  triggerEventSetting?: object;
 }
 const props = withDefaults(defineProps<Props>(), {});
 
@@ -141,31 +137,32 @@ function validateFormData(schema) {
   }
 }
 async function prepareSaveSetting() {
+  console.log("aaa 準備儲存彈窗設定");
   let data = {};
-  switch (props.triggerEventSetting?.event) {
-    case "sign":
-    case "cart_abandonment":
-    case "post_purchase_marketing":
-      if (!validateFormData(schemaStartTimeRelative)) return;
-      data = {
-        value: deliverValue,
-        unit: delayUntilFirstDeliverUnit?.value,
-      };
-      break;
-    case "recurring_scheduled":
-      if (!validateFormData(schemaStartTimeAbsolute)) return;
-      data = {
-        date: deliverDate,
-      };
-      break;
-    default:
-      console.warn("未定義的觸發事件種類", props.triggerEventSetting?.event);
-      break;
-  }
+  // switch (props.triggerEventSetting?.event) {
+  //   case "sign":
+  //   case "cart_abandonment":
+  //   case "post_purchase_marketing":
+  //     if (!validateFormData(schemaStartTimeRelative)) return;
+  //     data = {
+  //       value: deliverValue,
+  //       unit: delayUntilFirstDeliverUnit?.value,
+  //     };
+  //     break;
+  //   case "recurring_scheduled":
+  //     if (!validateFormData(schemaStartTimeAbsolute)) return;
+  //     data = {
+  //       date: deliverDate,
+  //     };
+  //     break;
+  //   default:
+  //     console.warn("未定義的觸發事件種類", props.triggerEventSetting?.event);
+  //     break;
+  // }
 
   //依序更新資料
-  await injectUpdateTriggerEvent(props.triggerEventSetting);
-  await injectUpdateDelayUntilFirstDeliver(data);
+  // await injectUpdateTriggerEvent(props.triggerEventSetting);
+  // await injectUpdateDelayUntilFirstDeliver(data);
   injectCloseModal();
 }
 
@@ -190,37 +187,7 @@ function isAllKeysUndefined(obj: Record<string, unknown>): boolean {
   return Object.keys(obj).every((key) => !obj[key]);
 }
 
-/**
- * 還原先前已儲存設定的開始時間設定
- */
-watch(
-  injectSendStartTimeSetting,
-  (setting) => {
-    console.log("先前儲存的時間", setting);
-    if (!setting || isAllKeysUndefined(setting)) {
-      initFormDataWhenEmpty();
-      return;
-    }
-
-    //還原先前儲存的設定
-    if (props.triggerEventSetting?.event === "regular") {
-      setDate(setting?.date);
-    } else {
-      setDeliverValue(setting?.value);
-      setUnit(setting?.unit);
-      delayUntilFirstDeliverValue.value = setting?.value;
-      delayUntilFirstDeliverUnit.value = {
-        name: setting?.unit,
-        value: setting?.unit,
-      };
-    }
-  },
-  { immediate: true }
-);
-
-onMounted(() => {
-  console.warn("來自前一頁的設定", props.triggerEventSetting);
-});
+onMounted(() => {});
 </script>
 
 <style scoped lang="scss">

@@ -4,7 +4,9 @@
     <div>{{ msgTriggerType }}</div>
     <div>{{ startTime }}{{ startTimeUnit }}</div>
   </section>
-  <ModalTriggerEvent v-if="showModal" />
+  <div v-show="showTriggerEventModal">
+    <ModalTriggerEvent />
+  </div>
 </template>
 
 <script setup lang="ts">
@@ -21,31 +23,32 @@ const props = withDefaults(defineProps<Props>(), {});
 
 //節點顯示的文字
 const msgTriggerType = computed(() => {
-  if (!props.triggerEventSetting?.event) return "點擊設定事件";
-  const triggerEventNameMap = {
-    sign: "註冊",
-    cart_abandonment: "購物車未結",
-    post_purchase_marketing: "購買後促銷",
-  };
-  return (
-    triggerEventNameMap[props.triggerEventSetting?.event] || "點擊設定事件"
-  );
+  return "點擊設定事件";
+  // if (!props.triggerEventSetting?.event) return "點擊設定事件";
+  // const triggerEventNameMap = {
+  //   sign: "註冊",
+  //   cart_abandonment: "購物車未結",
+  //   post_purchase_marketing: "購買後促銷",
+  // };
+  // return (
+  //   triggerEventNameMap[props.triggerEventSetting?.event] || "點擊設定事件"
+  // );
 });
 const startTime = ref("");
 const startTimeUnit = ref("");
-const showModal = ref(false);
+const showTriggerEventModal = ref(false);
 
 //讓外部元件可以打開【設定觸發事件】的彈窗
 function openModalTriggerEventSetting() {
-  showModal.value = true;
+  showTriggerEventModal.value = true;
 }
 
 function removeTriggerEvent() {
   console.warn("清空觸發事件");
-  showModal.value = false;
+  showTriggerEventModal.value = false;
 }
 function closeTriggerEventModal() {
-  showModal.value = false;
+  showTriggerEventModal.value = false;
 }
 
 provide("removeTriggerEvent", removeTriggerEvent);

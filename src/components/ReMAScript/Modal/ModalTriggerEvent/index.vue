@@ -1,9 +1,9 @@
 <template>
   <DrawerModal @closeModal="injectRemoveTriggerEvent">
-    <EventTypeForm @nextStep="handleNextStep" v-if="step === 1" />
+    <EventTypeForm @nextStep="handleNextStep" v-show="step === 1" />
     <UntilFirstSend
       :triggerEventSetting="triggerEventSetting"
-      v-if="step === 2"
+      v-show="step === 2"
     />
   </DrawerModal>
 </template>

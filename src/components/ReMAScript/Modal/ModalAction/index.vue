@@ -29,7 +29,6 @@ import { schemaSendStartTime } from "../../../../schemas/ReMaScript/schema.trigg
 import { typeSendType } from "../../../../schemas/ReMaScript/schema.sendTime";
 
 let injectCloseActionModal = inject("closeActionModal");
-let injectResetForm = inject("resetForm");
 
 const formSchema = z.object({
   send_type: z.enum(["once", "recurrence"]),
@@ -40,16 +39,7 @@ const formSchema = z.object({
 //     validationSchema: toTypedSchema(formSchema),
 //   });
 
-onMounted(() => {
-  injectResetForm({
-    values: {
-      cycle_unit: "month",
-      cycle_frequency: 1,
-      cycle_time: "",
-      send_type: "once",
-    },
-  });
-});
+onMounted(() => {});
 // provide("validateField", validateField);
 </script>
 

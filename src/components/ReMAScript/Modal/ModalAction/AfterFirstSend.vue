@@ -52,7 +52,6 @@
     </section>
     <section class="grid grid-cols-[auto+1fr_auto]">
       <div class="mr-[25px]">結束次數</div>
-
       <input type="number" v-model="max_run_times" class="mr-2 bg-blue-200" />
       <div>次</div>
     </section>
