@@ -107,6 +107,7 @@ const interfaceForm = z.object({
 const values = inject<typeof interfaceForm>("values");
 const setValues = inject("setValues");
 const resetField = inject("resetField");
+const validateField = inject("validateField");
 
 interface Emits {
   (e: "nextStep", payload: z.infer<typeof schemaTriggerEvent>): void;
@@ -170,9 +171,21 @@ function selectPurchaseItem(item) {
 }
 
 async function prepareNextStep() {
-  let data = {};
-
-  emits("nextStep", data);
+  //驗證資料
+  let field = [];
+  if (values?.trigger_event === "post_purchase_marketing") {
+    field = ["trigger_event", "purchase_item_type", "purchase_item_item"];
+  } else {
+    field = ["trigger_event"];
+  }
+  const res = await Promise.all(field.map((f) => validateField(f)));
+  const allValid = res.every((valid) => valid === true);
+  console.log("trigger_event", values?.trigger_event);
+  console.log("res", res);
+  console.log("驗證的結果", allValid);
+  // if (isPassed) {
+  //   emits("nextStep");
+  // }
 }
 
 const styleSpecialWrapper = computed(() => {

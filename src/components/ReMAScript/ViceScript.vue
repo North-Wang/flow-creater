@@ -67,12 +67,13 @@ const { values, handleSubmit, setValues, resetField, validateField } = useForm({
   validationSchema: toTypedSchema(interfaceForm),
   initialValues: {
     trigger_event: "sign",
+    send_type: "once",
   },
 });
 
 //觸發事件設定
-const {} = useField<typeof typeSendType>("trigger_event");
-const {} = useField<typeof typeSendType>("purchase_item_type");
+const {} = useField<typeof schemaTriggerEvent>("trigger_event");
+const {} = useField<string>("purchase_item_type");
 const {} = useField<typeof typeSendType>("purchase_item");
 
 const {} = useField<typeof typeSendType>("send_type");
@@ -283,6 +284,7 @@ onMounted(() => {});
 provide("values", values);
 provide("setValues", setValues);
 provide("resetField", resetField);
+provide("validateField", validateField);
 
 provide("triggerEventSetting", triggerEventSetting);
 provide("sendStartTimeSetting", sendStartTimeSetting);
