@@ -13,7 +13,6 @@
               ? 'bg-[#71AFB6] text-white'
               : 'bg-[#EAF3F4]'
           "
-          @click="() => injectSetCycleUnit(opt?.value)"
         >
           {{ opt?.name }}
         </button>
@@ -64,9 +63,6 @@ import { useField } from "vee-validate";
 import Dropdown from "../../../Dropdown/Dropdown.vue";
 import VueDatePicker from "@vuepic/vue-datepicker";
 import { format } from "@storybook/blocks";
-
-let injectSetCycleUnit = inject("setCycleUnit");
-let injectSetCycleFrequency = inject("setCycleFrequency");
 
 const { value: cycle_unit } = useField("cycle_unit");
 const { value: cycle_frequency } = useField("cycle_frequency");

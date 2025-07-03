@@ -16,6 +16,8 @@ export const typeTriggerEvent = z.enum([
   "recurring_scheduled", // 定期投放
 ]);
 
+export const schemaPurchaseItemType = z.enum(["product", "category", "brand	"]);
+
 /**
  * 經過多久後開始
  * @description 適用於【定期投放】以外的觸發事件

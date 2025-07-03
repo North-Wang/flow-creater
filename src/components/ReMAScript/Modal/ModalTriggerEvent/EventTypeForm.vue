@@ -15,7 +15,7 @@
       </div>
 
       <div
-        class="position-relative w-full grid grid-cols-[auto_auto_1fr] gap-x-[25px] place-items-center mb-[25px]"
+        class="relative w-full grid grid-cols-[auto_auto_1fr] gap-x-[25px] place-items-center mb-[25px]"
         v-if="values?.trigger_event === 'post_purchase_marketing'"
       >
         <label
@@ -24,14 +24,23 @@
           style="white-space: nowrap; margin-bottom: 8px"
           >購買項目</label
         >
-        <Dropdown
-          :options="purchaseTypeOptions"
-          :dropdownPlaceholder="'-'"
-          :width="'138px'"
-          :selectedValue="presetPurchasedType"
-          :direction="'bottom'"
-          @select="selectPurchaseType"
-        />
+        <div class="w-full relative">
+          <Dropdown
+            :options="purchaseTypeOptions"
+            :dropdownPlaceholder="'-'"
+            :width="'138px'"
+            :selectedValue="presetPurchasedType"
+            :direction="'bottom'"
+            @select="selectPurchaseType"
+          />
+          <div
+            class="error-msg top-0 right-0 left-0"
+            v-if="purchaseItemTypeError"
+          >
+            {{ purchaseItemTypeError }}
+          </div>
+        </div>
+
         <ul
           class="wrapper-loading-input"
           style="width: calc(100% * 2 / 3)"
@@ -43,16 +52,19 @@
             <div class="spinner-border" role="status"></div>
           </li>
         </ul>
-        <Dropdown
-          :width="'100%'"
-          :options="purchaseItemsOptions"
-          :dropdownPlaceholder="'-'"
-          :selectedValue="presetPurchasedItem"
-          class="w-full"
-          @select="selectPurchaseItem"
-          v-else
-        />
-        <div class="Red error-msg" v-if="showErrorMsg">{{ errorMsg }}</div>
+        <div class="w-full relative" v-else>
+          <Dropdown
+            :width="'100%'"
+            :options="purchaseItemsOptions"
+            :dropdownPlaceholder="'-'"
+            :selectedValue="presetPurchasedItem"
+            class="w-full"
+            @select="selectPurchaseItem"
+          />
+          <div class="error-msg top-0 right-0 left-0" v-if="purchaseItemError">
+            {{ purchaseItemError }}
+          </div>
+        </div>
       </div>
       <div
         class="selector flex-wrap"
@@ -90,13 +102,11 @@ import EventInform from "./EventInform.vue";
 import ExplainTriggerEvent from ".././ExplainTriggerEvent.vue";
 import Dropdown from "../../../Dropdown/Dropdown.vue";
 import DatePicker from "primevue/datepicker";
-import {
-  schemaTriggerEvenBasic,
-  schemaTriggerEventPurchaseAfterPromotion,
-  schemaTriggerEvent,
-  typeTriggerEventFrequency,
-} from "../../../../schemas/ReMaScript/schema.triggerEvent";
+import { schemaTriggerEvent } from "../../../../schemas/ReMaScript/schema.triggerEvent";
 import { z } from "zod";
+import { useFieldError } from "vee-validate";
+const purchaseItemTypeError = useFieldError("purchase_item_type");
+const purchaseItemError = useFieldError("purchase_item");
 
 const injectRemoveTriggerEvent = inject("removeTriggerEvent");
 
@@ -137,11 +147,7 @@ const purchaseTypeOptions = ref([
 //購買項目的類別
 const purchaseItemsOptions = ref([]);
 
-// 推導型別
-const errorMsg = ref("需要選擇購買的項目");
-
 const showLoadingInput = ref(false);
-const showErrorMsg = ref(false);
 //預設的觸發事件
 const defaultTriggerEvent = computed(() => {
   if (!values?.trigger_event) return { name: "", value: "" };
@@ -174,18 +180,19 @@ async function prepareNextStep() {
   //驗證資料
   let field = [];
   if (values?.trigger_event === "post_purchase_marketing") {
-    field = ["trigger_event", "purchase_item_type", "purchase_item_item"];
+    field = ["trigger_event", "purchase_item_type", "purchase_item"];
   } else {
     field = ["trigger_event"];
   }
   const res = await Promise.all(field.map((f) => validateField(f)));
-  const allValid = res.every((valid) => valid === true);
-  console.log("trigger_event", values?.trigger_event);
-  console.log("res", res);
-  console.log("驗證的結果", allValid);
-  // if (isPassed) {
-  //   emits("nextStep");
-  // }
+  const allValid = res.every((r) => {
+    return r?.valid === true;
+  });
+  if (allValid) {
+    emits("nextStep");
+  } else {
+    console.warn("未通過驗證");
+  }
 }
 
 const styleSpecialWrapper = computed(() => {
@@ -200,20 +207,6 @@ const styleSpecialWrapper = computed(() => {
     };
   }
 });
-
-//還原先前設定的觸發事件
-// watch(
-//   trigger_event,
-//   (event) => {
-//     const target = triggerEventOptions.value?.find(
-//       (opt) => opt.value === event
-//     );
-//     if (target) {
-//       defaultTriggerEvent.value = target;
-//     }
-//   },
-//   { immediate: true, once: true }
-// );
 
 /**
  * 當「購買項目」 的「種類」變更時，重新取得「項目」
@@ -249,7 +242,7 @@ watch(
         break;
     }
     //清空已經選擇的購買商品的品項
-    resetField("purchase_item");
+    presetPurchasedItem.value = { name: "-", value: "-" };
   }
 );
 
@@ -350,6 +343,7 @@ input[type="text"]:disabled {
   position: absolute;
   font-size: 12px;
   top: 40px;
+  color: red;
 }
 .introduction {
   display: flex;

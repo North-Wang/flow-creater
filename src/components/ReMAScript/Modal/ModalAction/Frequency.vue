@@ -47,11 +47,6 @@ const sendTypeOptions = ref([
   //   name: "錯誤",
   // },
 ]);
-
-// 監聽 send_type 變更，手動驗證
-watch(send_type, async (newVal) => {
-  // console.log("aaa 是否通過?", await injectValidateField("send_type"));
-});
 </script>
 
 <style scoped lang="scss">

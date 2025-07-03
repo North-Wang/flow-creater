@@ -27,14 +27,18 @@
     <div v-if="values?.trigger_event === 'recurring_scheduled'">
       <label for="" class="selector-title">條件開始的時間</label>
       <VueDatePicker
-        v-model="sendDate"
+        v-model="startDate"
         :minDate="new Date()"
         :start-date="new Date()"
         :format="'MM/dd/yyy'"
         :enable-time-picker="false"
+        :clearable="false"
         is-expanded
         autoApply
       ></VueDatePicker>
+      <div class="error-msg" v-if="firstSendDateError">
+        {{ firstSendDateError }}
+      </div>
     </div>
     <div class="button-wrap">
       <button
@@ -59,28 +63,17 @@ import { onMounted, ref, watch, inject } from "vue";
 import Dropdown from "../../../Dropdown/Dropdown.vue";
 import dayjs from "dayjs";
 import { z } from "zod";
-import { useField } from "vee-validate";
-import { toTypedSchema } from "@vee-validate/zod";
+import { useFieldError } from "vee-validate";
+const firstSendDateError = useFieldError("first_send_date");
 
 const injectRemoveTriggerEvent = inject("removeTriggerEvent");
 const values = inject("values");
 const setValues = inject("setValues");
+const validateField = inject("validateField");
 
 const closeTriggerEventModal = inject("closeTriggerEventModal");
-const injectUpdateDelayUntilFirstDeliver = inject(
-  "updateDelayUntilFirstDeliver"
-);
 
-const sendDate = ref(null);
-const {
-  value: firstSendDate,
-  errorMessage: delayUntilFirstDeliverDateError,
-  setValue: setFirstSendDate,
-} = useField("first_send_date");
-
-interface Props {
-  triggerEventSetting?: object;
-}
+interface Props {}
 const props = withDefaults(defineProps<Props>(), {});
 
 const startTimeUnitOptions = ref([{ name: "天後", value: "天後" }]);
@@ -108,18 +101,20 @@ function handleStartTimeUnit(unit: any) {
   setValues({ first_send_unit: unit?.value });
 }
 
-function validateFormData(schema) {
-  // const result = schema.safeParse();
-  // if (result.success) {
-  //   console.log("驗證過資料完整", result.data);
-  //   return true;
-  // } else {
-  //   console.warn("欄位未填寫完成", result.error.format());
-  //   return false;
-  // }
-}
 async function prepareSaveSetting() {
-  closeTriggerEventModal();
+  const field =
+    values.trigger_event === "recurring_scheduled"
+      ? ["first_send_date"]
+      : ["first_send_value", "first_send_unit"];
+  const res = await Promise.all(field.map((f) => validateField(f)));
+  const allValid = res.every((r) => {
+    return r?.valid === true;
+  });
+  if (allValid) {
+    closeTriggerEventModal();
+  } else {
+    console.warn("未通過驗證");
+  }
 }
 
 function setDefaultValue() {
@@ -176,5 +171,12 @@ onMounted(() => {
       align-items: center;
     }
   }
+}
+
+.error-msg {
+  // position: absolute;
+  font-size: 12px;
+  top: 40px;
+  color: red;
 }
 </style>

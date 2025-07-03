@@ -23,15 +23,6 @@ const props = withDefaults(defineProps<Props>(), {});
 //節點顯示的文字
 const msgTriggerType = computed(() => {
   return "點擊設定事件";
-  // if (!props.triggerEventSetting?.event) return "點擊設定事件";
-  // const triggerEventNameMap = {
-  //   sign: "註冊",
-  //   cart_abandonment: "購物車未結",
-  //   post_purchase_marketing: "購買後促銷",
-  // };
-  // return (
-  //   triggerEventNameMap[props.triggerEventSetting?.event] || "點擊設定事件"
-  // );
 });
 const startTime = ref("");
 const startTimeUnit = ref("");
