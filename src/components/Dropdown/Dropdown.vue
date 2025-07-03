@@ -34,6 +34,7 @@
         >
           {{ selectedOption }}
         </div>
+        <img :src="iconTriangle" alt="" />
       </slot>
     </div>
 
@@ -88,7 +89,7 @@
 <script setup lang="ts">
 import { ref, defineProps, defineEmits, computed, useAttrs, watch } from "vue";
 import { onClickOutside } from "@vueuse/core";
-import { z } from "zod";
+import iconTriangle from "../../assets/green-down-triangle.svg";
 
 const $attrs = useAttrs();
 const refDropdown = ref(null);
@@ -201,7 +202,7 @@ watch(
   (val) => {
     if (!val || val?.trim() === "") return;
 
-    if (!props.selectedValue) {
+    if (!props.selectedValue || props.selectedValue?.value?.trim() === "") {
       selectedOption.value = val;
     }
   },
@@ -246,6 +247,7 @@ watch(
   background: var(--bg-default);
   z-index: 50;
   cursor: pointer;
+  overflow: hidden;
   &.bottom {
     bottom: 40px; //下拉選單改成往上顯示
   }

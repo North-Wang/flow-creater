@@ -48,6 +48,7 @@ import {
 } from "../../schemas/ReMaScript/schema.sendTime";
 import { emptyResponseTree } from "../../data/RemaScript/emptyTree";
 import { toTypedSchema } from "@vee-validate/zod";
+import { formSchema } from "../../schemas/ReMaScript/schema.task";
 
 const {
   onInit,
@@ -59,45 +60,6 @@ const {
   fitBounds,
   onPaneReady,
 } = useVueFlow();
-
-const formSchema = z
-  .object({
-    trigger_event: z.string(),
-    purchase_item_type: z.string().optional(),
-    purchase_item: z.string().optional(),
-    first_send_date: z.string().nonempty("請選擇開始的日期").optional(),
-  })
-  .superRefine((data, ctx) => {
-    switch (data.trigger_event) {
-      case "post_purchase_marketing":
-        if (!data.purchase_item_type || data.purchase_item_type === "-") {
-          ctx.addIssue({
-            path: ["purchase_item_type"],
-            code: z.ZodIssueCode.custom,
-            message: "請選擇有效的商品類型",
-          });
-        }
-        if (!data.purchase_item || data.purchase_item === "-") {
-          ctx.addIssue({
-            path: ["purchase_item"],
-            code: z.ZodIssueCode.custom,
-            message: "請選擇有效的商品",
-          });
-        }
-        break;
-      case "recurring_scheduled":
-        if (!data.first_send_date) {
-          ctx.addIssue({
-            path: ["first_send_date"],
-            code: z.ZodIssueCode.custom,
-            message: "請選擇開始的日期",
-          });
-        }
-        break;
-      default:
-        break;
-    }
-  });
 
 //定義Form表單欄位、綁定資料 aaa
 const {
