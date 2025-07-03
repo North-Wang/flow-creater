@@ -20,7 +20,7 @@
       >
         <label
           for=""
-          class="selector-title"
+          class="selector-title whitespace-nowrap mb-2"
           style="white-space: nowrap; margin-bottom: 8px"
           >購買項目</label
         >

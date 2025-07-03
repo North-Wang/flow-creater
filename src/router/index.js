@@ -24,7 +24,7 @@ const router = createRouter({
     {
       path: "/",
       name: "Homepage",
-      component: Homepage,
+      component: ScriptEditor,
     },
     {
       path: "/demo",

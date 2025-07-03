@@ -3,10 +3,9 @@ import { ref, onMounted, provide } from "vue";
 import { useRouter, useRoute, RouterLink } from "vue-router";
 
 const buttonList = ref([
-  { name: "首頁", path: "/" },
-  { name: "demo", path: "/demo" },
+  // { name: "首頁", path: "/" },
+  // { name: "demo", path: "/demo" },
   { name: "自動化劇本測試", path: "/vueFlow" },
-  { name: "cursor自動產生", path: "/script-editor" },
 ]);
 </script>
 

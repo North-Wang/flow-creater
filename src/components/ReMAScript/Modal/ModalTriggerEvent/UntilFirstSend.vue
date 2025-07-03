@@ -70,6 +70,7 @@ const injectRemoveTriggerEvent = inject("removeTriggerEvent");
 const values = inject("values");
 const setValues = inject("setValues");
 const validateField = inject("validateField");
+const resetField = inject("resetField");
 
 const closeTriggerEventModal = inject("closeTriggerEventModal");
 
@@ -120,6 +121,10 @@ async function prepareSaveSetting() {
 function setDefaultValue() {
   if (values?.trigger_event !== "recurring_scheduled") {
     setValues({ first_send_value: 2, unit: "天後" });
+    resetField("first_send_date");
+  } else {
+    resetField("value");
+    resetField("first_send_unit");
   }
 }
 

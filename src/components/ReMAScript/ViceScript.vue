@@ -6,7 +6,6 @@
   </div>
   <div class="grid grid-cols-1">
     <span>劇本</span>
-    {{ errors }}
     {{ values }}
   </div>
   <VueFlow v-model="elements" :min-zoom="0.2" :max-zoom="4">
@@ -76,6 +75,7 @@ const {
   initialValues: {
     trigger_event: "sign",
     send_type: "once",
+    // template['type']:"sms"
   },
 });
 
